@@ -75,7 +75,7 @@ export const solutionCards = [
   {
     title: "기업 교육·자문",
     subtitle: "Consulting & Education",
-    image: "https://cdn.imweb.me/thumbnail/20260514/62a8d580774dc.png",
+    image: "/images/education.png",
     imageAlt: "기업 교육 및 자문 이미지",
     description: "EMI/SI 설계·분석 AX 전환을 위한 자문 및 교육",
     points: [
