@@ -56,4 +56,35 @@ export const siteRoutes: SiteRoute[] = [
   },
 ];
 
-export const secondaryRoutes = siteRoutes.filter((route) => route.href !== "/");
+export const secondaryRoutes: SiteRoute[] = [
+  {
+    title: "About",
+    href: "/about",
+    label: "About",
+    description: "Company story, mission, people, and operating principles.",
+  },
+  {
+    title: "Education",
+    href: "/education",
+    label: "Education",
+    description: "Training programs, learning tracks, and workshops.",
+  },
+  {
+    title: "Solutions",
+    href: "/solution",
+    label: "Solutions",
+    description: "AI and engineering solutions for customers and partners.",
+  },
+  {
+    title: "News/Events/Knowledge",
+    href: "/news-event",
+    label: "News/Events/Knowledge",
+    description: "Company updates, events, technical insights, and curated knowledge.",
+  },
+  {
+    title: "Contact",
+    href: "/contact",
+    label: "Contact",
+    description: "Inquiry channels for projects, training, and partnerships.",
+  },
+];

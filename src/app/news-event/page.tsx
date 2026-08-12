@@ -1,6 +1,9 @@
-import { PageShell } from "@/components/page-shell";
-import { siteRoutes } from "@/lib/site-map";
+import { HomeUpdates } from "@/components/home/home-updates";
 
 export default function NewsEventPage() {
-  return <PageShell route={siteRoutes.find((route) => route.href === "/news-event")!} />;
+  return (
+    <main className="flex-1 bg-white">
+      <HomeUpdates />
+    </main>
+  );
 }

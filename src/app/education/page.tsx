@@ -1,6 +1,9 @@
-import { PageShell } from "@/components/page-shell";
-import { siteRoutes } from "@/lib/site-map";
+import { EducationSamples } from "@/components/education/education-samples";
 
 export default function EducationPage() {
-  return <PageShell route={siteRoutes.find((route) => route.href === "/education")!} />;
+  return (
+    <main className="flex-1 bg-white">
+      <EducationSamples />
+    </main>
+  );
 }
