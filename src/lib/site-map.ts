@@ -58,6 +58,12 @@ export const siteRoutes: SiteRoute[] = [
 
 export const secondaryRoutes: SiteRoute[] = [
   {
+    title: "Main",
+    href: "/",
+    label: "Main",
+    description: "EMxAI homepage overview and key messages.",
+  },
+  {
     title: "About",
     href: "/about",
     label: "About",
