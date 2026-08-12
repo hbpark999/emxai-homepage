@@ -4,6 +4,7 @@ import {
   postsAndTools,
   updateActivities,
 } from "@/data/updates-content";
+import Image from "next/image";
 
 function ColumnTitle({ label, title }: { label: string; title: string }) {
   return (
@@ -39,6 +40,38 @@ function HistoryTrack() {
         ))}
       </div>
     </div>
+  );
+}
+
+function CooperationNetwork() {
+  return (
+    <section className="mt-16 border-t border-slate-100 pt-12">
+      <div className="grid items-center gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#00a9e8]">
+            Collaboration Network
+          </p>
+          <h3 className="mt-4 text-2xl font-medium tracking-normal text-slate-950 sm:text-3xl">
+            협력 및 네트워크
+          </h3>
+          <p className="mt-5 max-w-xl text-sm font-normal leading-7 text-slate-600">
+            대학, 연구기관, 산업계와의 협력 기반을 통해 전자파 설계·분석 기술의
+            AI 전환과 교육·자문 활동을 확장합니다.
+          </p>
+        </div>
+
+        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <Image
+            src="/images/collaboration-network.png"
+            alt="EMxAI 협력 및 네트워크"
+            width={1200}
+            height={680}
+            className="h-auto w-full object-contain"
+            priority={false}
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -129,6 +162,8 @@ export function HomeUpdates() {
             </div>
           </section>
         </div>
+
+        <CooperationNetwork />
 
         <div className="mt-16 border-t border-slate-100 pt-12">
           <div className="text-center">
