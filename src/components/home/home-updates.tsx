@@ -85,7 +85,7 @@ function CooperationAndHistory() {
 export function HomeUpdates() {
   return (
     <section className="border-t border-slate-100 bg-[#f5f8fb]">
-      <div className="mx-auto w-full max-w-[94vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
+      <div className="mx-auto w-full max-w-[94vw] px-6 pb-24 pt-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
         <div className="text-center">
           <p className="text-sm font-black uppercase tracking-[0.28em] text-[#2d95ff]">
             EMxAI Updates
