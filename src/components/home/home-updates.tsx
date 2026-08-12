@@ -21,19 +21,19 @@ function HistoryTrack() {
 
   return (
     <div className="relative mt-12 overflow-hidden">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent" />
-      <div className="flex w-max animate-[history-slide_45s_linear_infinite] gap-12 hover:[animation-play-state:paused]">
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#f5f8fb] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#f5f8fb] to-transparent" />
+      <div className="flex w-max animate-[history-slide_45s_linear_infinite] gap-10 hover:[animation-play-state:paused]">
         {loopItems.map((item, index) => (
           <article
             key={`${item.date}-${item.title}-${index}`}
-            className="relative w-44 shrink-0 pt-10"
+            className="relative w-40 shrink-0 pt-10"
           >
             <span className="absolute left-0 top-0 size-3 rounded-full border-4 border-lime-300 bg-white" />
-            <h4 className="text-sm font-black text-[#102947]">{item.date}</h4>
-            <p className="mt-5 text-sm font-semibold leading-6 text-[#536985]">{item.title}</p>
+            <h4 className="text-xs font-black text-[#102947]">{item.date}</h4>
+            <p className="mt-4 text-xs font-semibold leading-5 text-[#536985]">{item.title}</p>
             {item.body ? (
-              <p className="mt-1 text-sm font-semibold leading-6 text-[#536985]">{item.body}</p>
+              <p className="mt-1 text-xs font-semibold leading-5 text-[#536985]">{item.body}</p>
             ) : null}
           </article>
         ))}
@@ -44,28 +44,28 @@ function HistoryTrack() {
 
 export function HomeUpdates() {
   return (
-    <section className="border-t border-slate-100 bg-white">
+    <section className="border-t border-slate-100 bg-[#f5f8fb]">
       <style>{`
         @keyframes history-slide {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
         }
       `}</style>
-      <div className="mx-auto max-w-[1180px] px-6 py-20 sm:px-8">
+      <div className="mx-auto w-full max-w-[92vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
         <div className="text-center">
           <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2d95ff]">
             EMxAI Updates
           </p>
-          <h2 className="mt-4 text-3xl font-medium tracking-normal text-slate-950 sm:text-4xl">
+          <h2 className="mt-4 text-2xl font-medium tracking-normal text-slate-950 sm:text-3xl">
             Education · Posts · Activities
           </h2>
           <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-lime-300" />
         </div>
 
-        <div className="mt-16 grid gap-12 lg:grid-cols-3">
-          <section className="rounded-lg border border-slate-200 bg-slate-50 p-6 shadow-sm">
+        <div className="mt-12 grid gap-6 lg:grid-cols-3">
+          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <ColumnTitle label="EDU" title="외부 기관 교육" />
-            <div className="mt-7 space-y-7">
+            <div className="mt-6 space-y-6">
               {educationSchedule.map((group) => (
                 <div key={group.month} className="relative pl-6">
                   <span className="absolute left-0 top-2 size-2 rounded-full border-2 border-cyan-300" />
@@ -80,9 +80,9 @@ export function HomeUpdates() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-slate-50 p-6 shadow-sm">
+          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <ColumnTitle label="NEW" title="최신 게시물 & 도구" />
-            <div className="mt-7 space-y-7">
+            <div className="mt-6 space-y-6">
               {postsAndTools.map((post) => (
                 <article key={post.title}>
                   <h4 className="text-sm font-normal leading-6 text-slate-950">
@@ -101,9 +101,9 @@ export function HomeUpdates() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-slate-50 p-6 shadow-sm">
+          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <ColumnTitle label="ACT" title="주요활동" />
-            <div className="mt-7 space-y-7">
+            <div className="mt-6 space-y-6">
               {updateActivities.map((activity) => (
                 <article key={activity.title}>
                   <h4 className="text-sm font-normal leading-6 text-slate-950">
@@ -130,9 +130,9 @@ export function HomeUpdates() {
           </section>
         </div>
 
-        <div className="mt-20 border-t border-slate-100 pt-14">
+        <div className="mt-16 border-t border-slate-100 pt-12">
           <div className="text-center">
-            <h3 className="text-3xl font-medium uppercase text-[#102947]">History</h3>
+            <h3 className="text-2xl font-medium uppercase text-[#102947]">History</h3>
             <div className="mx-auto mt-4 h-1 w-14 rounded-full bg-lime-300" />
           </div>
           <HistoryTrack />

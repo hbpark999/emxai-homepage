@@ -33,7 +33,7 @@ export const postsAndTools = [
   {
     title: "주파수 별 Dk를 고려한 Z0 계산",
     action: "계산기 실행하기",
-    href: "https://www.emxai.net/#w20260218a63ecbf1bb083",
+    href: "/news-event",
   },
   {
     title: "Gemini를 이용한 S-parameter + PCB 형상 분석",
@@ -43,11 +43,50 @@ export const postsAndTools = [
   {
     title: "Trace Width, Dk Z0 영향 표시 Microstrip Z0 계산기",
     action: "계산기 바로가기",
-    href: "https://www.emxai.net/1solution#w202411269b6e224e5616d",
+    href: "/solution",
+  },
+];
+
+export const knowledgeItems = [
+  {
+    title: "Z0 Design → HFSS Simulation → TDR Plot Automation",
+    body: "Z0 설계, HFSS 시뮬레이션, TDR Plot 자동화 흐름을 보여주는 교육 영상",
+    action: "영상 보기",
+    href: "https://www.youtube.com/watch?v=-RSqOqZr3uU",
+  },
+  {
+    title: "Gemini 기반 S-parameter + PCB 형상 분석",
+    body: "PCB 형상과 S-parameter 데이터를 함께 해석하는 생성형 AI 활용 예시",
+    action: "영상 보기",
+    href: "https://www.youtube.com/watch?v=V-Iv6-RgEwo",
+  },
+  {
+    title: "Microstrip Z0 Calculator",
+    body: "Trace Width, Dk, 두께 조건 변화에 따른 Microstrip 특성 임피던스 계산",
+    action: "계산기 보기",
+    href: "/solution",
+  },
+  {
+    title: "S-Parameter Plot Viewer",
+    body: "S2P 데이터를 불러와 S11, S21 Magnitude와 Phase를 분석하는 시각화 도구",
+    action: "도구 보기",
+    href: "/news-event",
+  },
+  {
+    title: "PDN Impedance Optimizer",
+    body: "주파수 범위, 캐패시터, 목표 임피던스를 기반으로 PDN 구성을 검토하는 교육용 도구",
+    action: "자료 보기",
+    href: "/news-event",
   },
 ];
 
 export const updateActivities = [
+  {
+    title: "아주대 전자파·기계공학과 협력센터 구성('26.7)",
+    body: "전자파 및 기계공학 분야 산학 협력센터 구성",
+    note: "",
+    href: "",
+  },
   {
     title: "한국전자파학회 전자파AI연구반 구성 참여('26.7)",
     body: "전자파 분야 AI 활용 연구반 구성 참여",
@@ -75,6 +114,7 @@ export const updateActivities = [
 ];
 
 export const historyItems = [
+  { date: "2026. 07", title: "아주대 전자파·기계공학과", body: "협력센터 구성" },
   { date: "2026. 04", title: "경상국립대학교", body: "ICT융합센터 MOU" },
   { date: "2026. 03", title: "서울시립대학교", body: "AI Boot Camp 참여기업" },
   { date: "2026. 03", title: "RAPA AI 특화", body: "공동훈련센터 산업계 전문가 참여" },

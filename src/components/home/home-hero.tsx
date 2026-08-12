@@ -2,20 +2,20 @@ import Image from "next/image";
 
 export function HomeHero() {
   return (
-    <section className="overflow-hidden border-b border-slate-200 bg-white">
-      <div className="mx-auto flex min-h-[calc(100vh-77px)] max-w-[105rem] items-center px-4 py-8 sm:px-6 lg:px-8">
-        <div className="w-full">
-          <h1 className="mx-auto mb-8 max-w-6xl text-center text-2xl font-black leading-tight tracking-normal text-[#6f35b8] sm:text-3xl lg:text-4xl">
+    <section className="overflow-hidden border-b border-slate-200 bg-[#f6f9fc]">
+      <div className="mx-auto px-6 py-6 sm:px-8 lg:py-8">
+        <div className="mx-auto w-full max-w-[92vw] lg:max-w-[76vw] xl:max-w-[70vw]">
+          <h1 className="mx-auto mb-3 max-w-5xl text-center text-xl font-black leading-tight tracking-normal text-[#6f35b8] sm:text-2xl lg:text-3xl">
             전자파 설계·분석기술 AI 전환을 위한 Solution 개발, 자문 및 교육
           </h1>
           <Image
             src="/images/emxai-business-summary-revised.png"
-            alt="전자파 설계/분석기술 AI 전환을 위한 Solution 개발, 자문 및 교육"
+            alt="전자파 설계·분석기술 AI 전환을 위한 Solution 개발, 자문 및 교육"
             width={3260}
             height={1023}
-            className="h-auto w-full"
+            className="mx-auto h-auto w-full"
             priority
-            sizes="100vw"
+            sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 92vw"
           />
         </div>
       </div>
