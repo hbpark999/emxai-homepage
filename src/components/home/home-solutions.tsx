@@ -12,10 +12,10 @@ export function HomeSolutions() {
     <section className="border-b border-slate-200 bg-white">
       <div className="mx-auto w-full max-w-[92vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-black tracking-normal text-sky-500 sm:text-4xl">
+          <h2 className="text-4xl font-black tracking-normal text-sky-500 sm:text-5xl">
             <span>EMxAI</span> <span className="text-slate-950">Solutions</span>
           </h2>
-          <p className="mt-4 text-base font-semibold text-slate-500">
+          <p className="mt-4 text-lg font-semibold text-slate-500">
             생성형 AI를 이용한 전자파 설계·분석 혁신
           </p>
         </div>
@@ -28,15 +28,15 @@ export function HomeSolutions() {
             return (
               <article
                 key={card.title}
-                className="flex min-h-[41rem] overflow-hidden rounded-lg border border-sky-100 bg-white shadow-[0_0_0_1px_rgba(14,165,233,0.04)]"
+                className="flex min-h-[45rem] overflow-hidden rounded-lg border border-sky-100 bg-white shadow-[0_0_0_1px_rgba(14,165,233,0.04)]"
               >
                 <div className="flex w-full flex-col">
                   <div className="h-1 bg-gradient-to-r from-sky-400 via-cyan-300 to-lime-300" />
                   <div className="px-6 pt-7 text-center">
-                    <p className="text-2xl font-black tracking-normal text-sky-400">
+                    <p className="text-3xl font-black tracking-normal text-sky-400">
                       {card.title}
                     </p>
-                    <p className="mt-3 text-xs font-bold text-sky-200">{card.subtitle}</p>
+                    <p className="mt-3 text-sm font-bold text-sky-200">{card.subtitle}</p>
                   </div>
 
                   <div className="relative mx-5 mt-6 h-52 bg-white sm:h-56">
@@ -50,13 +50,13 @@ export function HomeSolutions() {
                   </div>
 
                   <div className="flex flex-1 flex-col px-7 pb-7 pt-7">
-                    <h3 className="text-center text-lg font-black text-slate-950 [word-break:keep-all]">
+                    <h3 className="text-center text-2xl font-black leading-snug text-slate-950 [word-break:keep-all]">
                       {card.description}
                     </h3>
-                    <ul className="mt-8 space-y-3 text-xs leading-6 text-slate-700 [word-break:keep-all]">
+                    <ul className="mt-8 space-y-4 text-base leading-7 text-slate-700 [word-break:keep-all]">
                       {card.points.map((point) => (
                         <li key={point} className="flex gap-3">
-                          <span className="mt-1 grid size-4 shrink-0 place-items-center rounded-full bg-sky-400 text-[10px] font-black text-white">
+                          <span className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-sky-400 text-xs font-black text-white">
                             ✓
                           </span>
                           <span>{point}</span>
@@ -69,7 +69,7 @@ export function HomeSolutions() {
                         <button
                           type="button"
                           aria-expanded={isOpen}
-                          className="rounded-md border border-sky-400 px-6 py-2 text-xs font-bold text-sky-500 transition hover:bg-sky-50"
+                          className="rounded-md border border-sky-400 px-7 py-2.5 text-sm font-bold text-sky-500 transition hover:bg-sky-50"
                           onClick={() => setOpenIndex(isOpen ? null : index)}
                         >
                           예시 보기
@@ -78,13 +78,13 @@ export function HomeSolutions() {
                           href={card.inquiryHref}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-md bg-sky-400 px-6 py-2 text-xs font-bold text-white transition hover:bg-sky-500"
+                          className="rounded-md bg-sky-400 px-7 py-2.5 text-sm font-bold text-white transition hover:bg-sky-500"
                         >
                           문의 하기
                         </a>
                       </div>
                       {isEducationCard ? (
-                        <p className="text-xs font-normal text-slate-950">
+                        <p className="text-sm font-normal text-slate-950">
                           교육샘플을 볼 수 있습니다.
                         </p>
                       ) : null}
