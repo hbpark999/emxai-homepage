@@ -10,7 +10,7 @@ export function HomeSolutions() {
 
   return (
     <section className="border-b border-slate-200 bg-white">
-      <div className="mx-auto w-full max-w-[94vw] px-6 py-16 sm:px-8 lg:max-w-[88vw] xl:max-w-[86vw]">
+      <div className="mx-auto w-full max-w-[94vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-4xl font-black tracking-normal text-sky-500 sm:text-5xl">
             <span>EMxAI</span> <span className="text-slate-950">Solutions</span>
@@ -28,18 +28,18 @@ export function HomeSolutions() {
             return (
               <article
                 key={card.title}
-                className="flex min-h-[52rem] overflow-hidden rounded-lg border border-sky-100 bg-white shadow-[0_0_0_1px_rgba(14,165,233,0.04)]"
+                className="flex min-h-[48rem] overflow-hidden rounded-lg border border-sky-100 bg-white shadow-[0_0_0_1px_rgba(14,165,233,0.04)]"
               >
                 <div className="flex w-full flex-col">
                   <div className="h-1 bg-gradient-to-r from-sky-400 via-cyan-300 to-lime-300" />
                   <div className="px-6 pt-7 text-center">
-                    <p className="text-4xl font-black tracking-normal text-sky-400">
+                    <p className="text-3xl font-black tracking-normal text-sky-400">
                       {card.title}
                     </p>
                     <p className="mt-3 text-base font-bold text-sky-200">{card.subtitle}</p>
                   </div>
 
-                  <div className="relative mx-5 mt-7 h-72 bg-white sm:h-80">
+                  <div className="relative mx-5 mt-5 h-72 bg-white">
                     <Image
                       src={card.image}
                       alt={card.imageAlt}
@@ -49,14 +49,14 @@ export function HomeSolutions() {
                     />
                   </div>
 
-                  <div className="flex flex-1 flex-col px-7 pb-7 pt-7">
-                    <h3 className="text-center text-3xl font-black leading-snug text-slate-950 [word-break:keep-all]">
+                  <div className="flex flex-1 flex-col px-7 pb-7 pt-4">
+                    <h3 className="text-center text-2xl font-semibold leading-snug text-slate-950 [word-break:keep-all]">
                       {card.description}
                     </h3>
-                    <ul className="mt-8 space-y-5 text-xl leading-9 text-slate-700 [word-break:keep-all]">
+                    <ul className="mt-6 space-y-4 text-lg leading-8 text-slate-700 [word-break:keep-all] xl:text-xl">
                       {card.points.map((point) => (
                         <li key={point} className="flex gap-3">
-                          <span className="mt-1.5 grid size-7 shrink-0 place-items-center rounded-full bg-sky-400 text-base font-black text-white">
+                          <span className="mt-1 grid size-7 shrink-0 place-items-center rounded-full bg-sky-400 text-base font-black text-white">
                             ✓
                           </span>
                           <span>{point}</span>
