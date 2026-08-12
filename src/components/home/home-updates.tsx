@@ -66,13 +66,13 @@ function CooperationAndHistory() {
 
         <div>
           <SectionHeading eyebrow="Collaboration Network" title="협력 및 네트워크" />
-          <div className="flex h-[28rem] items-center overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
+          <div className="flex h-[28rem] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <Image
               src="/images/collaboration-network.png"
               alt="EMxAI 협력 및 네트워크"
               width={1200}
               height={680}
-              className="h-auto w-full object-contain"
+              className="h-full w-full object-contain"
               priority={false}
             />
           </div>
@@ -85,7 +85,7 @@ function CooperationAndHistory() {
 export function HomeUpdates() {
   return (
     <section className="border-t border-slate-100 bg-[#f5f8fb]">
-      <div className="mx-auto w-full max-w-[94vw] px-6 pb-24 pt-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
+      <div className="mx-auto w-full max-w-[94vw] px-6 pb-40 pt-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
         <div className="text-center">
           <p className="text-sm font-black uppercase tracking-[0.28em] text-[#2d95ff]">
             EMxAI Updates
