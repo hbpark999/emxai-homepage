@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# local analytics
+/.analytics/
+
 # production
 /build
 

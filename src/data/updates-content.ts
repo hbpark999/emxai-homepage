@@ -33,7 +33,7 @@ export const postsAndTools = [
   {
     title: "주파수 별 Dk를 고려한 Z0 계산",
     action: "계산기 실행하기",
-    href: "/news-event",
+    href: "/web-tools",
   },
   {
     title: "Gemini를 이용한 S-parameter + PCB 형상 분석",
@@ -43,7 +43,7 @@ export const postsAndTools = [
   {
     title: "Trace Width, Dk Z0 영향 표시 Microstrip Z0 계산기",
     action: "계산기 바로가기",
-    href: "/solution",
+    href: "/web-tools",
   },
 ];
 
@@ -64,13 +64,13 @@ export const knowledgeItems = [
     title: "Microstrip Z0 Calculator",
     body: "Trace Width, Dk, 두께 조건 변화에 따른 Microstrip 특성 임피던스 계산",
     action: "계산기 보기",
-    href: "/solution",
+    href: "/web-tools",
   },
   {
     title: "S-Parameter Plot Viewer",
     body: "S2P 데이터를 불러와 S11, S21 Magnitude와 Phase를 분석하는 시각화 도구",
     action: "도구 보기",
-    href: "/news-event",
+    href: "/web-tools",
   },
   {
     title: "PDN Impedance Optimizer",

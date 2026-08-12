@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { VisitorTracker } from "@/components/analytics/visitor-tracker";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
@@ -16,6 +18,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <SiteHeader />
           {children}
           <SiteFooter />
+          <Suspense fallback={null}>
+            <VisitorTracker />
+          </Suspense>
         </div>
       </body>
     </html>
