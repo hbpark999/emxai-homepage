@@ -17,8 +17,8 @@ export default function ContactPage() {
                 문의하기
               </h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-600">
-                EMI/SI/RF 설계·분석, 생성형 AI 기반 솔루션 개발, 기업 교육 및 자문이
-                필요하시면 아래 문의 폼으로 내용을 남겨주세요.
+                전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환 솔루션 개발, 기업 교육
+                및 자문이 필요하시면 아래 문의 폼으로 내용을 남겨주세요.
               </p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
@@ -58,7 +58,7 @@ export default function ContactPage() {
             </p>
             <ul className="mt-5 space-y-4 text-sm leading-6 text-slate-600">
               <li className="border-l-2 border-sky-400 pl-4">
-                전자파 설계·분석 AI 솔루션 개발
+                전자파 설계·분석 업무의 AI 전환 솔루션 개발
               </li>
               <li className="border-l-2 border-sky-400 pl-4">
                 Simulation workflow 자동화

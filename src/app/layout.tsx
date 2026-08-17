@@ -7,7 +7,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "EMxAI - EM powered by AI",
-  description: "생성형 AI를 이용한 전자파(EMI/SI/RF) 설계, 분석 솔루션 개발과 역량강화교육 및 자문",
+  description: "전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 위한 솔루션 개발, 자문 및 교육",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

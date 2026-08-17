@@ -6,11 +6,11 @@ export function HomeHero() {
       <div className="mx-auto px-6 py-6 sm:px-8 lg:py-8">
         <div className="mx-auto w-full max-w-[94vw] lg:max-w-[76vw] xl:max-w-[70vw]">
           <h1 className="mx-auto mb-4 max-w-6xl text-center text-2xl font-black leading-tight tracking-normal text-[#6f35b8] sm:text-3xl lg:text-4xl">
-            전자파 설계·분석기술 AI 전환을 위한 Solution 개발, 자문 및 교육
+            전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 위한 솔루션 개발, 자문 및 교육
           </h1>
           <Image
             src="/images/emxai-business-summary-revised.png"
-            alt="전자파 설계·분석기술 AI 전환을 위한 Solution 개발, 자문 및 교육"
+            alt="전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 위한 솔루션 개발, 자문 및 교육"
             width={3260}
             height={1023}
             className="mx-auto h-auto w-full"

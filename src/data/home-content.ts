@@ -4,11 +4,11 @@ export const homeHero = {
   aiCaption: "기반 전자파 Solution",
   message: "EMI/SI Simulation · DRC · 측정/분석에 생성형 AI를 도입하면 개발은 더 정확하고, 빨라집니다.",
   description:
-    "생성형 AI를 이용한 전자파(EMI/SI/RF) 설계·분석 솔루션 개발, 역량강화교육, 자문을 제공합니다.",
+    "전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 위한 솔루션 개발, 자문 및 교육을 제공합니다.",
 };
 
 export const dxAxDiagram = {
-  title: "전자파 설계/분석기술 AI 전환을 위한 Solution 개발, 자문 및 교육",
+  title: "전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 위한 솔루션 개발, 자문 및 교육",
   engineeringSteps: [
     { title: "Design Guide", note: "" },
     { title: "Simulation(Tools)", note: "출처: Ansys, CST" },
@@ -29,16 +29,16 @@ export const solutionCards = [
     subtitle: "Consulting & Education",
     image: "/images/education.png",
     imageAlt: "기업 교육 및 자문 이미지",
-    description: "EMI/SI 설계·분석 AX 전환을 위한 자문 및 교육",
+    description: "전자파 설계·분석 업무의 AI 전환을 위한 자문 및 교육",
     points: [
-      "EMI/SI 설계·분석에 AI를 적용하기 위한 환경분석과 자문",
+      "전자파 설계·분석에 AI를 적용하기 위한 환경분석과 자문",
       "전자파 기술 분야 생성형 AI 활용 주문형 교육과 특강",
     ],
     href: "/solution#consulting-education",
     exampleTitle: "기업 맞춤형 교육·자문 프로그램",
     exampleLead: "전자파 기술 조직의 AX 전환 수준에 맞춰 교육과 자문을 구성합니다.",
     exampleSteps: [
-      "EMI/SI 설계·분석 업무의 AI 적용 가능성 진단",
+      "전자파 설계·분석 업무의 AI 적용 가능성 진단",
       "실습 중심 생성형 AI 활용 교육과 특강",
       "조직 내부 활용을 위한 환경 구축 및 운영 자문",
     ],

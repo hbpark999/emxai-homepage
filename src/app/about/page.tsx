@@ -96,10 +96,10 @@ export default function AboutPage() {
             ABOUT EMXAI
           </p>
           <h1 className="mt-6 text-xl font-medium leading-tight tracking-normal text-[#1f7fe5] sm:text-2xl">
-            EMI/SI 설계·분석 업무의 AI 전환을 지원하는 전문 기술기업
+            전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 지원하는 전문 기술기업
           </h1>
           <p className="mt-6 max-w-[56rem] text-base font-black leading-[1.7] tracking-normal text-[#102947] sm:text-lg">
-            EMxAI는 30년 이상의 EMC/SI 실무 경험을 바탕으로, EMI/SI 설계·분석 업무의
+            EMxAI는 30년 이상의 EMC/SI 실무 경험을 바탕으로, 전자파 설계·분석 업무의
             AI 전환과 엔지니어 교육을 지원하는 전문 기술기업입니다.
           </p>
         </section>
