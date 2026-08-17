@@ -81,7 +81,7 @@ export function EducationProposalRequest() {
             <ul className="mt-4 grid gap-2 text-sm font-bold leading-6 text-slate-600">
               <li>· 귀사 요구사항에 맞춘 커리큘럼(일자별)</li>
               <li>· 실습 환경 및 준비사항</li>
-              <li>· 강사 이력 및 진행 실적</li>
+              <li>· 강사 이력</li>
               <li>· 견적</li>
             </ul>
           </div>
