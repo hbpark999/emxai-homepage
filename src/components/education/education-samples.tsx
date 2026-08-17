@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { educationOverview } from "@/data/education-content";
 import { studentCourses } from "@/data/student-courses";
 import { getEducationCatalog } from "@/lib/education-catalog";
+import { EducationPreviewTabs } from "./education-preview-tabs";
 
 export function EducationSamples() {
   const catalog = getEducationCatalog();
@@ -104,75 +104,9 @@ export function EducationSamples() {
               <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">
                 공개 가능한 교육 개요와 샘플 슬라이드를 목차별로 확인할 수 있습니다.
               </p>
-              <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
-                {catalog.map((section) => (
-                  <a
-                    key={section.id}
-                    href={`#${section.id}`}
-                    className="shrink-0 rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-600 transition hover:border-sky-400 hover:bg-sky-50 hover:text-sky-600"
-                  >
-                    {section.title}
-                  </a>
-                ))}
-              </div>
             </div>
 
-            <div className="mt-8 space-y-10">
-              {catalog.map((section) => (
-                <section
-                  key={section.id}
-                  id={section.id}
-                  className="scroll-mt-40 rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
-                >
-                  <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-5">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-sky-400">
-                        {section.folder}
-                      </p>
-                      <h3 className="mt-2 text-3xl font-black text-slate-950">
-                        {section.title}
-                      </h3>
-                    </div>
-                    <p className="text-sm font-semibold text-slate-400">
-                      {section.slides.length > 0
-                        ? `${section.slides.length}개 자료`
-                        : "Markdown 자료"}
-                    </p>
-                  </div>
-
-                  {section.slides.length > 0 ? (
-                    <div className="mt-6 grid gap-5 md:grid-cols-2">
-                      {section.slides.map((slide) => (
-                        <article
-                          key={slide.src}
-                          className="overflow-hidden rounded-lg border border-slate-200 bg-white"
-                        >
-                          <div className="relative aspect-[16/9] bg-slate-50">
-                            <Image
-                              src={slide.src}
-                              alt={`${slide.title} 교육자료`}
-                              fill
-                              className="object-contain p-2"
-                              sizes="(min-width: 1024px) 42vw, 100vw"
-                            />
-                          </div>
-                          <div className="border-t border-slate-100 p-4">
-                            <h4 className="line-clamp-2 text-sm font-bold leading-6 text-slate-800">
-                              {slide.title}
-                            </h4>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-6 rounded-lg bg-slate-50 p-6 text-base leading-7 text-slate-600">
-                      이 섹션은 Markdown 문서 중심으로 구성되어 있습니다. 필요하면 PNG 또는
-                      PDF로 export해 같은 폴더에 넣으면 자동으로 상세 자료에 표시됩니다.
-                    </div>
-                  )}
-                </section>
-              ))}
-            </div>
+            <EducationPreviewTabs catalog={catalog} />
           </section>
         </div>
       </div>
