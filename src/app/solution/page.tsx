@@ -1,56 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import { solutionCards } from "@/data/home-content";
+import { knowledgeItems } from "@/data/updates-content";
 
-const solutionIds = ["aifem-a", "aifem-d", "consulting-education"];
-
-const processItems = [
-  "현행 설계·측정·시뮬레이션 Workflow 진단",
-  "반복 분석 구간과 병목 업무를 AI 적용 후보로 정의",
-  "데이터 구조화, 자동화 스크립트, 모델 연동 방식 설계",
-  "실무 적용 교육과 운영 환경 구축까지 연결",
-];
+const primarySolutions = solutionCards.filter((card) =>
+  ["AIfEM-A", "AIfEM-D"].includes(card.title),
+);
 
 export default function SolutionPage() {
   return (
-    <main className="flex-1 bg-white">
-      <section className="border-b border-slate-200 bg-slate-50">
-        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-teal-700">
-            EMxAI Solutions
-          </p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight text-slate-950 sm:text-5xl">
-            전자파 설계·분석 업무를 AI 기반 Workflow로 전환합니다.
-          </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
-            측정/분석 자동화, 시뮬레이션 설계 자동화, 기업 교육·자문을 하나의
-            실행 가능한 AX 전환 로드맵으로 제공합니다.
-          </p>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-        <div className="grid gap-4 md:grid-cols-4">
-          {processItems.map((item, index) => (
-            <div key={item} className="rounded-lg border border-slate-200 bg-white p-5">
-              <p className="text-sm font-semibold text-teal-700">
-                {String(index + 1).padStart(2, "0")}
-              </p>
-              <p className="mt-3 text-sm leading-6 text-slate-700">{item}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-y border-slate-200 bg-slate-50">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+    <main className="flex-1 bg-[#f6f9fc]">
+      <section className="bg-white">
+        <div className="mx-auto w-full max-w-[92vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
           <div className="grid gap-8">
-            {solutionCards.map((card, index) => (
+            {primarySolutions.map((card) => (
               <article
                 key={card.title}
-                id={solutionIds[index]}
+                id={card.title === "AIfEM-A" ? "aifem-a" : "aifem-d"}
                 className="scroll-mt-28 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
               >
+                <div className="border-b border-slate-200 bg-slate-50 p-5">
+                  <h2 className="text-4xl font-black text-sky-500">{card.title}</h2>
+                </div>
                 <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr]">
                   <div className="relative min-h-[18rem] border-b border-slate-100 bg-white p-5 lg:border-b-0 lg:border-r">
                     <Image
@@ -63,7 +34,6 @@ export default function SolutionPage() {
                   </div>
                   <div className="p-7 sm:p-9">
                     <p className="text-sm font-semibold text-teal-700">{card.subtitle}</p>
-                    <h2 className="mt-3 text-3xl font-semibold text-slate-950">{card.title}</h2>
                     <p className="mt-4 text-lg leading-8 text-slate-600">{card.description}</p>
                     <ul className="mt-7 grid gap-4 text-base leading-7 text-slate-700">
                       {card.points.map((point) => (
@@ -90,6 +60,46 @@ export default function SolutionPage() {
                 </div>
               </article>
             ))}
+
+            <section
+              id="public-tools"
+              className="scroll-mt-28 rounded-lg border border-slate-200 bg-slate-50 p-5"
+            >
+              <h2 className="text-4xl font-black text-sky-500">간단한 공개 Tools</h2>
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                {knowledgeItems.map((tool) => {
+                  const isExternal = tool.href.startsWith("http");
+
+                  return isExternal ? (
+                    <a
+                      key={tool.title}
+                      href={tool.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+                    >
+                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
+                      <span className="mt-3 inline-flex text-xs text-slate-500">
+                        {tool.action}
+                      </span>
+                    </a>
+                  ) : (
+                    <Link
+                      key={tool.title}
+                      href={tool.href}
+                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+                    >
+                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
+                      <span className="mt-3 inline-flex text-xs text-slate-500">
+                        {tool.action}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
           </div>
         </div>
       </section>
