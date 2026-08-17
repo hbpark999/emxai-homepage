@@ -35,6 +35,12 @@ export function EducationSamples() {
             >
               교육 둘러보기
             </a>
+            <a
+              href="#education-proposal"
+              className="rounded-md border border-slate-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:border-sky-500 hover:text-sky-600"
+            >
+              운영 안내/제안서 요청
+            </a>
             <Link
               href="/contact"
               className="rounded-md border border-slate-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:border-sky-500 hover:text-sky-600"
@@ -105,6 +111,14 @@ export function EducationSamples() {
               <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">
                 공개 가능한 교육 개요와 샘플 슬라이드를 목차별로 확인할 수 있습니다.
               </p>
+              <div className="mt-5">
+                <a
+                  href="#education-proposal"
+                  className="inline-flex rounded-md bg-[#08a99d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#22c7ba]"
+                >
+                  운영 안내/제안서 요청
+                </a>
+              </div>
             </div>
 
             <EducationPreviewTabs catalog={catalog} />
