@@ -1,7 +1,4 @@
-const tallyFormUrl =
-  "https://tally.so/embed/xX0e5G?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1&inquiry_type=General";
-
-const tallyDirectUrl = "https://tally.so/r/xX0e5G?inquiry_type=General";
+import { ContactForm } from "@/components/contact/contact-form";
 
 export default function ContactPage() {
   return (
@@ -41,15 +38,10 @@ export default function ContactPage() {
             <div className="border-b border-slate-200 px-6 py-5">
               <h2 className="text-xl font-semibold text-slate-950">프로젝트·교육 문의</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                제출된 내용은 Tally 알림 설정을 통해 contact@emxai.net으로 전달됩니다.
+                제출된 내용은 홈페이지 접수함에 비공개로 저장됩니다.
               </p>
             </div>
-            <iframe
-              title="EMxAI inquiry form"
-              src={tallyFormUrl}
-              className="h-[48rem] w-full border-0 bg-white"
-              loading="lazy"
-            />
+            <ContactForm />
           </div>
 
           <aside className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
@@ -67,14 +59,6 @@ export default function ContactPage() {
                 기업 맞춤형 교육 및 자문
               </li>
             </ul>
-            <a
-              href={tallyDirectUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-7 inline-flex w-full justify-center rounded-md bg-sky-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-600"
-            >
-              새 창에서 문의하기
-            </a>
           </aside>
         </div>
       </section>

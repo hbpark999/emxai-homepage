@@ -2,36 +2,51 @@
 
 import Link from "next/link";
 import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 export function EducationProposalRequest() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [summary, setSummary] = useState("");
+  const [pending, setPending] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const mailtoHref = useMemo(() => {
-    const subject = "교육 제안서 요청";
-    const body = [
-      `성함: ${name}`,
-      `연락처(e-mail): ${email}`,
-      `회사: ${company}`,
-      "",
-      "요청 교육 요약(교육 내용, 참석자):",
-      summary,
-    ].join("\n");
-
-    return `mailto:contact@emxai.net?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }, [company, email, name, summary]);
-
-  function submitRequest(event: FormEvent<HTMLFormElement>) {
+  async function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!event.currentTarget.reportValidity()) {
       return;
     }
 
-    window.location.href = mailtoHref;
+    setPending(true);
+    setMessage(null);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/education/proposal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, company, summary }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; error?: string };
+
+      if (!payload.ok) {
+        setError(payload.error ?? "접수하지 못했습니다.");
+        return;
+      }
+
+      setMessage("제안서 요청이 접수되었습니다. 확인 후 연락드리겠습니다.");
+      setName("");
+      setEmail("");
+      setCompany("");
+      setSummary("");
+    } catch {
+      setError("연결을 확인해 주세요.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -112,9 +127,10 @@ export function EducationProposalRequest() {
             <div className="flex flex-wrap gap-3 pt-1">
               <button
                 type="submit"
+                disabled={pending}
                 className="inline-flex items-center justify-center rounded-md bg-[#08a99d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#22c7ba]"
               >
-                메일로 제안서 요청
+                {pending ? "접수 중..." : "제안서 요청하기"}
               </button>
               <Link
                 href="/contact"
@@ -123,6 +139,16 @@ export function EducationProposalRequest() {
                 교육 문의하기
               </Link>
             </div>
+            {message ? (
+              <p className="rounded-md bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
+                {message}
+              </p>
+            ) : null}
+            {error ? (
+              <p className="rounded-md bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+                {error}
+              </p>
+            ) : null}
           </form>
         </div>
       </div>

@@ -52,7 +52,7 @@ export const solutionCards = [
       "https://cdn.imweb.me/thumbnail/20260515/87fee542609a3.png",
       "https://cdn.imweb.me/thumbnail/20260515/fcfd80c52cda9.png",
     ],
-    inquiryHref: "https://tally.so/r/xX0e5G?inquiry_type=Education",
+    inquiryHref: "/contact",
   },
   {
     title: "AIfEM-A",
@@ -79,7 +79,7 @@ export const solutionCards = [
       "https://cdn.imweb.me/thumbnail/20260515/3f55a45b94bdb.png",
       "https://cdn.imweb.me/thumbnail/20260515/d8bd3eb4fd46d.png",
     ],
-    inquiryHref: "https://tally.so/r/xX0e5G?inquiry_type=AIfEM-A",
+    inquiryHref: "/contact",
   },
   {
     title: "AIfEM-D",
@@ -100,7 +100,7 @@ export const solutionCards = [
       "E-field, S-parameter, Trace Slice 결과 비교",
     ],
     exampleVideo: "https://www.youtube.com/embed/jReysWD-znk",
-    inquiryHref: "https://tally.so/r/xX0e5G?inquiry_type=AIfEM-D",
+    inquiryHref: "/contact",
   },
 ];
 

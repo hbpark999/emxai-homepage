@@ -23,7 +23,8 @@ export function HomeSolutions() {
         <div className="mt-10 grid items-stretch gap-6 lg:grid-cols-3">
           {solutionCards.map((card, index) => {
             const isOpen = openIndex === index;
-            const isEducationCard = card.inquiryHref.includes("Education");
+            const isEducationCard = card.title === "기업 교육·자문";
+            const isExternalInquiry = card.inquiryHref.startsWith("http");
 
             return (
               <article
@@ -85,8 +86,8 @@ export function HomeSolutions() {
                         )}
                         <a
                           href={card.inquiryHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          target={isExternalInquiry ? "_blank" : undefined}
+                          rel={isExternalInquiry ? "noopener noreferrer" : undefined}
                           className="rounded-md bg-sky-400 px-8 py-3 text-base font-bold text-white transition hover:bg-sky-500"
                         >
                           문의 하기
@@ -167,8 +168,8 @@ export function HomeSolutions() {
                 </ul>
                 <a
                   href={openCard.inquiryHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target={openCard.inquiryHref.startsWith("http") ? "_blank" : undefined}
+                  rel={openCard.inquiryHref.startsWith("http") ? "noopener noreferrer" : undefined}
                   className="inline-flex justify-center rounded-md bg-sky-400 px-6 py-3 text-sm font-bold text-white transition hover:bg-sky-500"
                 >
                   문의 하기
