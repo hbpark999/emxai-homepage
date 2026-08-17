@@ -173,7 +173,11 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
             </div>
 
             <div className="mt-12 border-t border-slate-200 pt-4">
-              <ClassBoard initialCourse={course.title} lockedCourse />
+              <ClassBoard
+                initialCourse={course.title}
+                courseAliases={course.boardCourseNames}
+                lockedCourse
+              />
             </div>
           </div>
         )}

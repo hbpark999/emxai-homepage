@@ -52,10 +52,15 @@ function formatTime(iso: string) {
 
 type ClassBoardProps = {
   initialCourse?: string;
+  courseAliases?: string[];
   lockedCourse?: boolean;
 };
 
-export function ClassBoard({ initialCourse = "전체", lockedCourse = false }: ClassBoardProps) {
+export function ClassBoard({
+  initialCourse = "전체",
+  courseAliases = [],
+  lockedCourse = false,
+}: ClassBoardProps) {
   const [posts, setPosts] = useState<BoardPost[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -113,11 +118,12 @@ export function ClassBoard({ initialCourse = "전체", lockedCourse = false }: C
 
   const visiblePosts = useMemo(() => {
     if (lockedCourse) {
-      return posts.filter((post) => post.course === initialCourse);
+      const allowedCourses = new Set([initialCourse, ...courseAliases]);
+      return posts.filter((post) => post.course && allowedCourses.has(post.course));
     }
 
     return course === "전체" ? posts : posts.filter((post) => post.course === course);
-  }, [posts, course, initialCourse, lockedCourse]);
+  }, [posts, course, initialCourse, courseAliases, lockedCourse]);
 
   return (
     <section className="bg-white">
