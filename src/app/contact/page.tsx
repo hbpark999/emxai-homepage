@@ -21,10 +21,10 @@ export default function ContactPage() {
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
               <p className="font-semibold text-slate-950">문의 수신</p>
               <a
-                href="mailto:contact@emxai.net"
+                href="mailto:hbpark@emxai.net"
                 className="mt-2 inline-flex text-slate-700 underline-offset-4 transition hover:text-[#2563eb] hover:underline"
               >
-                contact@emxai.net
+                hbpark@emxai.net
               </a>
               <p className="mt-3">031-216-2806</p>
             </div>

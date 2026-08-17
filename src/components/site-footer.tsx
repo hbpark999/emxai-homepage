@@ -20,8 +20,8 @@ export function SiteFooter() {
             </div>
 
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-base font-bold text-white">
-              <a href="mailto:contact@emxai.net" className="transition hover:text-lime-200">
-                contact@emxai.net
+              <a href="mailto:hbpark@emxai.net" className="transition hover:text-lime-200">
+                hbpark@emxai.net
               </a>
               <a href="tel:031-216-2806" className="transition hover:text-lime-200">
                 031-216-2806
