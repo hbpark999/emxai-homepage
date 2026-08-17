@@ -22,6 +22,12 @@ export function EducationSamples() {
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link
+              href="/education/board"
+              className="rounded-md bg-[#08a99d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#22c7ba]"
+            >
+              교육 게시판 열기
+            </Link>
+            <Link
               href="/contact"
               className="rounded-md border border-slate-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:border-sky-500 hover:text-sky-600"
             >
