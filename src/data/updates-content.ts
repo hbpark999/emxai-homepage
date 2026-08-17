@@ -44,8 +44,8 @@ export const educationSchedule: EducationScheduleGroup[] = [
     month: "'26년 10월",
     items: [
       {
-        title: "[TTA] 전원 노이즈 저감 및 생성형 AI 실습",
-        startDate: "2026-10-22",
+        title: "[TTA] 전원 노이즈 저감 및 생성형 AI 실습 (10/21~22)",
+        startDate: "2026-10-21",
       },
     ],
   },
