@@ -1,26 +1,64 @@
 export const educationSchedule = [
   {
-    month: "'26년 5월",
+    month: "'26년 8월",
     items: [
-      "[RAPA] 생성형 AI 이용 전자파 분석/설계 기초 (5/7~8)",
-      "[EMTI] AI 기반 고속 디지털 SIㆍPI 설계 실습 (5/19~20)",
-      "[전파신기술WS] EMI/SI에의 AI활용과 일하는 방식변화 (5/22)",
+      {
+        title: "[TTA] 전원노이즈 저감 설계와 생성형 AI 실습 (8/26~27)",
+        startDate: "2026-08-26",
+      },
     ],
   },
   {
-    month: "'26년 8월",
+    month: "'26년 9월",
     items: [
-      "[TTA] 전원노이즈 저감 설계와 생성형 AI 실습 (8/26~27)",
-      "[RAPA] EMI/SI 설계와 생성형 AI 활용 (8/27~28)",
+      {
+        title: "[AI특화] AI기반 전자파분석 및 시뮬레이션기술 (9/2~4)",
+        startDate: "2026-09-02",
+      },
+      {
+        title: "[RAPA] EMI/SI 설계와 생성형 AI 활용 (9/17~18)",
+        startDate: "2026-09-17",
+      },
+      {
+        title: "[AI특화] 전자제품 EMC설계와 생성형 AI활용 (9/21~23)",
+        startDate: "2026-09-21",
+      },
     ],
   },
   {
     month: "'26년 10월",
-    items: ["[TTA] 전원노이즈 저감 및 생성형 AI 실습 - 2차"],
+    items: [
+      {
+        title: "[TTA] 전원 노이즈 저감 및 생성형 AI 실습",
+        startDate: "2026-10-22",
+      },
+    ],
+  },
+  {
+    month: "'26년 11월",
+    items: [
+      {
+        title: "[AI특화] DRC 및 AI기반 PCB검증 (11/18~20)",
+        startDate: "2026-11-18",
+      },
+    ],
   },
   {
     month: "'26년 12월",
-    items: ["[RAPA] 전자파 분석 및 설계 과정 - 2차 (12/10~11)"],
+    items: [
+      {
+        title: "[AI특화] 전자제품 EMC설계와 생성형 AI활용 (12/7~9)",
+        startDate: "2026-12-07",
+      },
+      {
+        title: "[RAPA] 전자파 분석 및 설계 과정 - 2차 (12/10~11)",
+        startDate: "2026-12-10",
+      },
+      {
+        title: "[AI특화] AI기반 전자파분석 및 시뮬레이션기술 (12/16~18)",
+        startDate: "2026-12-16",
+      },
+    ],
   },
 ];
 
@@ -94,8 +132,8 @@ export const updateActivities = [
     href: "",
   },
   {
-    title: "한국 전자파학회 전파신기술 워크샵 ('26.5.22, 건설회관)",
-    body: "튜토리얼 강연",
+    title: "한국 전자파학회 전파신기술 워크샵 튜토리얼 강연 ('26.5.22, 건설회관)",
+    body: "생성형 AI의 EMI/SI활용과 일하는 방법의 변화",
     note: "주제: 생성형 AI의 EMI/SI활용과 일하는 방법의 변화",
     href: "",
   },

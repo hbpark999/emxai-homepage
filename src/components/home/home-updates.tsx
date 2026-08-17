@@ -53,6 +53,20 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
   );
 }
 
+function getClosestEducationDate() {
+  const now = new Date();
+  const upcomingItems = educationSchedule
+    .flatMap((group) => group.items)
+    .filter((item) => new Date(`${item.startDate}T23:59:59+09:00`).getTime() >= now.getTime())
+    .sort(
+      (a, b) =>
+        new Date(`${a.startDate}T00:00:00+09:00`).getTime() -
+        new Date(`${b.startDate}T00:00:00+09:00`).getTime(),
+    );
+
+  return upcomingItems[0]?.startDate ?? null;
+}
+
 function CooperationAndHistory() {
   return (
     <section className="mt-16 border-t border-slate-100 pt-12">
@@ -83,6 +97,8 @@ function CooperationAndHistory() {
 }
 
 export function HomeUpdates() {
+  const closestEducationDate = getClosestEducationDate();
+
   return (
     <section className="border-t border-slate-100 bg-[#f5f8fb]">
       <div className="mx-auto w-full max-w-[94vw] px-6 pb-40 pt-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
@@ -98,7 +114,7 @@ export function HomeUpdates() {
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           <section className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-            <ColumnTitle label="EDU" title="외부 기관 교육" />
+            <ColumnTitle label="EDU" title="다가오는 교육" />
             <div className="mt-7 space-y-6">
               {educationSchedule.map((group) => (
                 <div key={group.month} className="relative pl-6">
@@ -106,7 +122,16 @@ export function HomeUpdates() {
                   <h4 className="text-xl font-medium text-slate-950">{group.month}</h4>
                   <ul className="mt-3 space-y-2 text-sm font-normal leading-6 text-slate-700">
                     {group.items.map((item) => (
-                      <li key={item}>· {item}</li>
+                      <li
+                        key={item.title}
+                        className={
+                          item.startDate === closestEducationDate
+                            ? "animate-pulse font-black text-blue-600"
+                            : undefined
+                        }
+                      >
+                        · {item.title}
+                      </li>
                     ))}
                   </ul>
                 </div>

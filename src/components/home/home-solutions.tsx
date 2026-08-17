@@ -71,7 +71,7 @@ export function HomeSolutions() {
                             href="/education"
                             className="rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50"
                           >
-                            둘러보기
+                            교육 둘러보기
                           </a>
                         ) : (
                           <button
