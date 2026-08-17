@@ -65,7 +65,7 @@ export default function SolutionPage() {
               id="public-tools"
               className="scroll-mt-28 rounded-lg border border-slate-200 bg-slate-50 p-5"
             >
-              <h2 className="text-4xl font-black text-sky-500">간단한 공개 Tools</h2>
+              <h2 className="text-4xl font-black text-sky-500">간단한 공개 Tools & Demos</h2>
               <div className="mt-5 grid gap-3 md:grid-cols-2">
                 {knowledgeItems.map((tool) => {
                   const isExternal = tool.href.startsWith("http");

@@ -163,22 +163,10 @@ export const knowledgeItems = [
     href: "https://www.youtube.com/watch?v=V-Iv6-RgEwo",
   },
   {
-    title: "Microstrip Z0 Calculator",
-    body: "Trace Width, Dk, 두께 조건 변화에 따른 Microstrip 특성 임피던스 계산",
-    action: "계산기 보기",
-    href: "/web-tools",
-  },
-  {
     title: "S-Parameter Plot Viewer",
     body: "S2P 데이터를 불러와 S11, S21 Magnitude와 Phase를 분석하는 시각화 도구",
     action: "도구 보기",
     href: "/web-tools",
-  },
-  {
-    title: "PDN Impedance Optimizer",
-    body: "주파수 범위, 캐패시터, 목표 임피던스를 기반으로 PDN 구성을 검토하는 교육용 도구",
-    action: "자료 보기",
-    href: "/news-event",
   },
 ];
 
