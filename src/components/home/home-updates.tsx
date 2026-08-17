@@ -125,7 +125,7 @@ export function HomeUpdates() {
                       <li
                         key={item.title}
                         className={
-                          item.startDate === closestEducationDate
+                          item.startDate === closestEducationDate || item.highlight
                             ? "animate-pulse font-black text-blue-600"
                             : undefined
                         }

@@ -2,6 +2,7 @@ type EducationScheduleItem = {
   title: string;
   startDate: string;
   href?: string;
+  highlight?: boolean;
 };
 
 type EducationScheduleGroup = {
@@ -26,6 +27,8 @@ export const educationSchedule: EducationScheduleGroup[] = [
       {
         title: "[AI특화] AI기반 전자파분석 및 시뮬레이션기술 (9/2~4)",
         startDate: "2026-09-02",
+        href: "https://champ.rapa.or.kr/web/course/courseView.do?eduCd=K000000001202606190005&eduCertifiedYn=N&category1=",
+        highlight: true,
       },
       {
         title: "[RAPA] EMI/SI 설계와 생성형 AI 활용 (9/17~18)",
