@@ -25,6 +25,36 @@ export const dxAxDiagram = {
 
 export const solutionCards = [
   {
+    title: "기업 교육·자문",
+    subtitle: "Consulting & Education",
+    image: "/images/education.png",
+    imageAlt: "기업 교육 및 자문 이미지",
+    description: "EMI/SI 설계·분석 AX 전환을 위한 자문 및 교육",
+    points: [
+      "EMI/SI 설계·분석에 AI를 적용하기 위한 환경분석과 자문",
+      "전자파 기술 분야 생성형 AI 활용 주문형 교육과 특강",
+    ],
+    href: "/solution#consulting-education",
+    exampleTitle: "기업 맞춤형 교육·자문 프로그램",
+    exampleLead: "전자파 기술 조직의 AX 전환 수준에 맞춰 교육과 자문을 구성합니다.",
+    exampleSteps: [
+      "EMI/SI 설계·분석 업무의 AI 적용 가능성 진단",
+      "실습 중심 생성형 AI 활용 교육과 특강",
+      "조직 내부 활용을 위한 환경 구축 및 운영 자문",
+    ],
+    exampleImages: [
+      "https://cdn.imweb.me/thumbnail/20260515/928478d8c491e.png",
+      "https://cdn.imweb.me/thumbnail/20260515/e416f34d73e0b.png",
+      "https://cdn.imweb.me/thumbnail/20260515/40fce9017a02d.png",
+      "https://cdn.imweb.me/thumbnail/20260515/c578d6cf0905e.png",
+      "https://cdn.imweb.me/thumbnail/20260515/f59143363aa71.png",
+      "https://cdn.imweb.me/thumbnail/20260515/122e10e70d0fb.png",
+      "https://cdn.imweb.me/thumbnail/20260515/87fee542609a3.png",
+      "https://cdn.imweb.me/thumbnail/20260515/fcfd80c52cda9.png",
+    ],
+    inquiryHref: "https://tally.so/r/xX0e5G?inquiry_type=Education",
+  },
+  {
     title: "AIfEM-A",
     subtitle: "AI for EM - Analysis",
     image: "https://cdn.imweb.me/thumbnail/20260515/c91f1284eca3c.png",
@@ -71,36 +101,6 @@ export const solutionCards = [
     ],
     exampleVideo: "https://www.youtube.com/embed/jReysWD-znk",
     inquiryHref: "https://tally.so/r/xX0e5G?inquiry_type=AIfEM-D",
-  },
-  {
-    title: "기업 교육·자문",
-    subtitle: "Consulting & Education",
-    image: "/images/education.png",
-    imageAlt: "기업 교육 및 자문 이미지",
-    description: "EMI/SI 설계·분석 AX 전환을 위한 자문 및 교육",
-    points: [
-      "EMI/SI 설계·분석에 AI를 적용하기 위한 환경분석과 자문",
-      "전자파 기술 분야 생성형 AI 활용 주문형 교육과 특강",
-    ],
-    href: "/solution#consulting-education",
-    exampleTitle: "기업 맞춤형 교육·자문 프로그램",
-    exampleLead: "전자파 기술 조직의 AX 전환 수준에 맞춰 교육과 자문을 구성합니다.",
-    exampleSteps: [
-      "EMI/SI 설계·분석 업무의 AI 적용 가능성 진단",
-      "실습 중심 생성형 AI 활용 교육과 특강",
-      "조직 내부 활용을 위한 환경 구축 및 운영 자문",
-    ],
-    exampleImages: [
-      "https://cdn.imweb.me/thumbnail/20260515/928478d8c491e.png",
-      "https://cdn.imweb.me/thumbnail/20260515/e416f34d73e0b.png",
-      "https://cdn.imweb.me/thumbnail/20260515/40fce9017a02d.png",
-      "https://cdn.imweb.me/thumbnail/20260515/c578d6cf0905e.png",
-      "https://cdn.imweb.me/thumbnail/20260515/f59143363aa71.png",
-      "https://cdn.imweb.me/thumbnail/20260515/122e10e70d0fb.png",
-      "https://cdn.imweb.me/thumbnail/20260515/87fee542609a3.png",
-      "https://cdn.imweb.me/thumbnail/20260515/fcfd80c52cda9.png",
-    ],
-    inquiryHref: "https://tally.so/r/xX0e5G?inquiry_type=Education",
   },
 ];
 

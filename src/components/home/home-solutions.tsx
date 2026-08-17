@@ -66,14 +66,23 @@ export function HomeSolutions() {
 
                     <div className="mt-auto flex flex-col items-center gap-3 pt-8">
                       <div className="flex justify-center gap-2">
-                        <button
-                          type="button"
-                          aria-expanded={isOpen}
-                          className="rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50"
-                          onClick={() => setOpenIndex(isOpen ? null : index)}
-                        >
-                          예시 보기
-                        </button>
+                        {isEducationCard ? (
+                          <a
+                            href="/education"
+                            className="rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50"
+                          >
+                            둘러보기
+                          </a>
+                        ) : (
+                          <button
+                            type="button"
+                            aria-expanded={isOpen}
+                            className="rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50"
+                            onClick={() => setOpenIndex(isOpen ? null : index)}
+                          >
+                            예시 보기
+                          </button>
+                        )}
                         <a
                           href={card.inquiryHref}
                           target="_blank"
@@ -83,11 +92,6 @@ export function HomeSolutions() {
                           문의 하기
                         </a>
                       </div>
-                      {isEducationCard ? (
-                        <p className="text-base font-normal text-slate-950">
-                          교육샘플을 볼 수 있습니다.
-                        </p>
-                      ) : null}
                     </div>
                   </div>
                 </div>
