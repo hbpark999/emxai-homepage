@@ -2,6 +2,7 @@ import Link from "next/link";
 import { educationOverview } from "@/data/education-content";
 import { studentCourses } from "@/data/student-courses";
 import { getEducationCatalog } from "@/lib/education-catalog";
+import { EducationProposalRequest } from "./education-proposal-request";
 import { EducationPreviewTabs } from "./education-preview-tabs";
 
 export function EducationSamples() {
@@ -108,6 +109,8 @@ export function EducationSamples() {
 
             <EducationPreviewTabs catalog={catalog} />
           </section>
+
+          <EducationProposalRequest />
         </div>
       </div>
     </section>
