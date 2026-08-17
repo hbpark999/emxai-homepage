@@ -130,7 +130,19 @@ export function HomeUpdates() {
                             : undefined
                         }
                       >
-                        · {item.title}
+                        ·{" "}
+                        {item.href ? (
+                          <a
+                            href={item.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline-offset-4 hover:underline"
+                          >
+                            {item.title}
+                          </a>
+                        ) : (
+                          item.title
+                        )}
                       </li>
                     ))}
                   </ul>

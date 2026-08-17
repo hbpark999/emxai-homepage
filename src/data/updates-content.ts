@@ -1,10 +1,22 @@
-export const educationSchedule = [
+type EducationScheduleItem = {
+  title: string;
+  startDate: string;
+  href?: string;
+};
+
+type EducationScheduleGroup = {
+  month: string;
+  items: EducationScheduleItem[];
+};
+
+export const educationSchedule: EducationScheduleGroup[] = [
   {
     month: "'26년 8월",
     items: [
       {
         title: "[TTA] 전원노이즈 저감 설계와 생성형 AI 실습 (8/26~27)",
         startDate: "2026-08-26",
+        href: "https://champ.tta.or.kr/usr/EgovUsrEduAppDetail.do?idx=538&baseUsrMenuNo=3&imgNum=1&pageIndex=1",
       },
     ],
   },
