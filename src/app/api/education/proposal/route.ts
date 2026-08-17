@@ -24,12 +24,11 @@ function richText(content: string) {
 
 export async function POST(request: Request) {
   const token = process.env.NOTION_TOKEN;
-  const databaseId =
-    process.env.NOTION_EDUCATION_INQUIRY_DB_ID ?? process.env.NOTION_BOARD_DB_ID;
+  const databaseId = process.env.NOTION_EDUCATION_INQUIRY_DB_ID;
 
   if (!token || !databaseId) {
     return NextResponse.json(
-      { ok: false, error: "접수 저장소가 아직 설정되지 않았습니다." },
+      { ok: false, error: "교육 문의 저장소가 아직 설정되지 않았습니다." },
       { status: 503 },
     );
   }
