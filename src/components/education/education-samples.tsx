@@ -43,32 +43,6 @@ export function EducationSamples() {
           </div>
         </div>
 
-        <nav
-          aria-label="교육 메뉴"
-          className="sticky top-[76px] z-20 -mx-5 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8"
-        >
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            <a
-              href="#student-corner"
-              className="shrink-0 rounded-md border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-black text-teal-700 transition hover:border-teal-400 hover:bg-teal-100"
-            >
-              교육생 전용
-            </a>
-            <a
-              href="#education-preview"
-              className="shrink-0 rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-600 transition hover:border-sky-400 hover:bg-sky-50 hover:text-sky-600"
-            >
-              교육 둘러보기
-            </a>
-            <Link
-              href="/contact"
-              className="shrink-0 rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-600 transition hover:border-sky-400 hover:bg-sky-50 hover:text-sky-600"
-            >
-              교육 문의
-            </Link>
-          </div>
-        </nav>
-
         <div className="space-y-16 py-12">
           <section
             id="student-corner"
