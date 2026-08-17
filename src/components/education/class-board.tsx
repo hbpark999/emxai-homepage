@@ -50,12 +50,17 @@ function formatTime(iso: string) {
   }).format(date);
 }
 
-export function ClassBoard() {
+type ClassBoardProps = {
+  initialCourse?: string;
+  lockedCourse?: boolean;
+};
+
+export function ClassBoard({ initialCourse = "전체", lockedCourse = false }: ClassBoardProps) {
   const [posts, setPosts] = useState<BoardPost[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
-  const [course, setCourse] = useState<string>("전체");
+  const [course, setCourse] = useState<string>(initialCourse);
   const inFlight = useRef(false);
 
   const load = useCallback(async () => {
@@ -106,10 +111,13 @@ export function ClassBoard() {
     return [...names];
   }, [posts]);
 
-  const visiblePosts = useMemo(
-    () => (course === "전체" ? posts : posts.filter((post) => post.course === course)),
-    [posts, course],
-  );
+  const visiblePosts = useMemo(() => {
+    if (lockedCourse) {
+      return posts.filter((post) => post.course === initialCourse);
+    }
+
+    return course === "전체" ? posts : posts.filter((post) => post.course === course);
+  }, [posts, course, initialCourse, lockedCourse]);
 
   return (
     <section className="bg-white">
@@ -119,10 +127,12 @@ export function ClassBoard() {
             Live Board
           </p>
           <h1 className="mt-4 text-4xl font-black leading-tight text-slate-950 sm:text-5xl">
-            교육 게시판
+            {lockedCourse ? "과정 게시판" : "교육 게시판"}
           </h1>
           <p className="mt-5 text-lg leading-8 text-slate-600">
-            교육 중 공유되는 링크·공지·실습 코드가 이곳에 실시간으로 올라옵니다.
+            {lockedCourse
+              ? "이 과정에 공유되는 링크·공지·실습 코드만 모아 보여줍니다."
+              : "교육 중 공유되는 링크·공지·실습 코드가 이곳에 실시간으로 올라옵니다."}
             화면은 자동으로 갱신되니 새로고침하지 않으셔도 됩니다.
           </p>
           <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-slate-400">
@@ -131,7 +141,7 @@ export function ClassBoard() {
           </div>
         </div>
 
-        {courses.length > 1 ? (
+        {!lockedCourse && courses.length > 1 ? (
           <div className="flex flex-wrap gap-2 py-6">
             {["전체", ...courses].map((name) => (
               <button
