@@ -9,6 +9,7 @@ export function EducationProposalRequest() {
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [summary, setSummary] = useState("");
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +43,7 @@ export function EducationProposalRequest() {
       setEmail("");
       setCompany("");
       setSummary("");
+      setPrivacyAgreed(false);
     } catch {
       setError("연결을 확인해 주세요.");
     } finally {
@@ -74,6 +76,15 @@ export function EducationProposalRequest() {
               </div>
             ))}
           </dl>
+          <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
+            <h3 className="text-lg font-black text-slate-950">제안서에 담기는 내용</h3>
+            <ul className="mt-4 grid gap-2 text-sm font-bold leading-6 text-slate-600">
+              <li>· 귀사 요구사항에 맞춘 커리큘럼(일자별)</li>
+              <li>· 실습 환경 및 준비사항</li>
+              <li>· 강사 이력 및 진행 실적</li>
+              <li>· 견적</li>
+            </ul>
+          </div>
         </div>
 
         <div className="rounded-lg bg-slate-50 p-5">
@@ -123,6 +134,16 @@ export function EducationProposalRequest() {
                 className="mt-2 w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-base leading-7 outline-none transition focus:border-sky-500"
                 required
               />
+            </label>
+            <label className="flex items-start gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm font-bold leading-6 text-slate-700">
+              <input
+                type="checkbox"
+                checked={privacyAgreed}
+                onChange={(event) => setPrivacyAgreed(event.target.checked)}
+                className="mt-1 size-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
+                required
+              />
+              <span>제안서 발송을 위한 개인정보 수집·이용에 동의합니다.</span>
             </label>
             <div className="flex flex-wrap gap-3 pt-1">
               <button

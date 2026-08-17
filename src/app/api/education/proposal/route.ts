@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendNotificationEmail } from "@/lib/notification-email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,7 +24,8 @@ function richText(content: string) {
 
 export async function POST(request: Request) {
   const token = process.env.NOTION_TOKEN;
-  const databaseId = process.env.NOTION_BOARD_DB_ID;
+  const databaseId =
+    process.env.NOTION_EDUCATION_INQUIRY_DB_ID ?? process.env.NOTION_BOARD_DB_ID;
 
   if (!token || !databaseId) {
     return NextResponse.json(
@@ -67,14 +69,17 @@ export async function POST(request: Request) {
         Name: {
           title: richText(`[제안서 요청] ${company} - ${name}`),
         },
-        내용: {
+        회사: {
+          rich_text: richText(company),
+        },
+        이메일: {
+          email,
+        },
+        요청내용: {
           rich_text: richText(content),
         },
-        공개: {
-          checkbox: false,
-        },
-        과정: {
-          select: { name: "교육 제안서 요청" },
+        상태: {
+          select: { name: "신규" },
         },
       },
     }),
@@ -92,5 +97,17 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ ok: true });
+  let emailSent = false;
+  try {
+    const result = await sendNotificationEmail({
+      subject: `[EMxAI 교육 제안서 요청] ${company} - ${name}`,
+      text: content,
+    });
+    emailSent = result.sent;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "메일 발송 실패";
+    return NextResponse.json({ ok: true, emailSent: false, warning: message });
+  }
+
+  return NextResponse.json({ ok: true, emailSent });
 }
