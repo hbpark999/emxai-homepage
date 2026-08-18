@@ -1,8 +1,8 @@
 import {
   educationSchedule,
   knowledgeArticles,
+  newsItems,
   relatedEventItems,
-  updateActivities,
 } from "@/data/updates-content";
 
 const visibleEducationMonths = new Set(["'26년 8월", "'26년 9월", "'26년 10월"]);
@@ -18,7 +18,7 @@ export default function NewsEventPage() {
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-5">
             <h2 className="text-4xl font-black text-sky-500">News</h2>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {updateActivities.map((item) => {
+              {newsItems.map((item) => {
                 const isExternal = item.href.startsWith("http");
                 const content = (
                   <>

@@ -246,6 +246,39 @@ export const knowledgeArticles: KnowledgeArticle[] = [
 
 export const updateActivities = [
   {
+    title: "아주대 전자파·기계공학과 협력센터 구성('26.7)",
+    body: "전자파 및 기계공학 분야 산학 협력센터 구성",
+    note: "",
+    href: "",
+  },
+  {
+    title: "한국전자파학회 전자파AI연구반 구성 참여('26.7)",
+    body: "전자파 분야 AI 활용 연구반 구성 참여",
+    note: "",
+    href: "",
+  },
+  {
+    title: "한국 전자파학회 전파신기술 워크샵 튜토리얼 강연 ('26.5.22, 건설회관)",
+    body: "생성형 AI의 EMI/SI활용과 일하는 방법의 변화",
+    note: "주제: 생성형 AI의 EMI/SI활용과 일하는 방법의 변화",
+    href: "",
+  },
+  {
+    title: "국립경상대 ICT융합센터 MOU체결 ('26.4.1)",
+    body: "산학협력을 위한 업무협약(MOU) 체결",
+    note: "게시글 보기 →",
+    href: "http://mumt2.gnu.ac.kr/bbs/board.php?bo_table=sub5_1&wr_id=27",
+  },
+  {
+    title: "전자신문 기고: AI시대 전자파기술 교육",
+    body: "문제 정의, AI 지시, 결과 타당성 판단 역량의 중요성",
+    note: "전자신문 기사 보기 →",
+    href: "https://www.etnews.com/20250512000124",
+  },
+];
+
+export const newsItems = [
+  {
     title: "삼성전자, ChatGPT·Gemini·Claude 전면 도입으로 AX 본격화 ('26.6)",
     body: "삼성전자 DX부문은 임직원이 ChatGPT, Gemini, Claude를 업무 특성에 맞게 선택해 쓰도록 외부 생성형 AI 3종을 공식 도입했습니다. 약 2,500명 대상 실효성 검증 후 문서 작성, 정보 분석, 코드 작성, 의사결정 속도 향상을 목표로 AX를 추진합니다.",
     note: "삼성 뉴스룸 기사 보기 →",
