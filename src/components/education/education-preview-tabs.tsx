@@ -12,7 +12,7 @@ const UNLOCK_STORAGE_KEY = "emxai_edu_preview_unlocked";
 
 function SlideAccessGate({ onUnlock }: { onUnlock: () => void }) {
   const [email, setEmail] = useState("");
-  const [newsletter, setNewsletter] = useState(false);
+  const [newsletter, setNewsletter] = useState(true);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,15 +73,20 @@ function SlideAccessGate({ onUnlock }: { onUnlock: () => void }) {
           {pending ? "확인 중..." : "이메일 입력하기"}
         </button>
       </form>
-      <label className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-slate-600">
-        <input
-          type="checkbox"
-          checked={newsletter}
-          onChange={(event) => setNewsletter(event.target.checked)}
-          className="size-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
-        />
-        <span>EMxAI Newsletter 발송 희망</span>
-      </label>
+      <div className="mt-4">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+          개인정보 이용 동의
+        </p>
+        <label className="mt-2 flex items-center justify-center gap-2 text-sm font-semibold text-slate-600">
+          <input
+            type="checkbox"
+            checked={newsletter}
+            onChange={(event) => setNewsletter(event.target.checked)}
+            className="size-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
+          />
+          <span>입력하신 이메일을 Newsletter 발송에 활용하는 것에 동의합니다.</span>
+        </label>
+      </div>
       {error ? (
         <p className="mt-4 text-sm font-bold text-red-600">{error}</p>
       ) : null}
