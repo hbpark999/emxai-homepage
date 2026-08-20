@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Suspense } from "react";
 import { VisitorTracker } from "@/components/analytics/visitor-tracker";
 import { SiteFooter } from "@/components/site-footer";
@@ -118,6 +119,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </Suspense>
         </div>
         <Analytics />
+        {/* GA4 measurement ID: emxai-20251122 속성 (analytics.google.com) */}
+        <GoogleAnalytics gaId="G-FRG6MFM4WP" />
       </body>
     </html>
   );
