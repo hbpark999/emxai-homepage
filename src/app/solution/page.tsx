@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { solutionCards } from "@/data/home-content";
 import { knowledgeItems } from "@/data/updates-content";
+
+export const metadata: Metadata = {
+  title: "AI 솔루션",
+  description:
+    "생성형 AI 기반 EMI/SI 측정·분석 Workflow 자동화(AIfEM-A)와 Simulation 자동화·Surrogate Model(AIfEM-D) 등 전자파 설계·분석 AI 솔루션을 소개합니다.",
+  alternates: { canonical: "/solution" },
+};
 
 const primarySolutions = solutionCards.filter((card) =>
   ["AIfEM-A", "AIfEM-D"].includes(card.title),

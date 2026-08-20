@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import {
   educationSchedule,
   knowledgeArticles,
   newsItems,
   relatedEventItems,
 } from "@/data/updates-content";
+
+export const metadata: Metadata = {
+  title: "뉴스 · 이벤트 · 지식",
+  description:
+    "전자파 AI, EMI/SI 관련 업계 뉴스, 국내외 학회·행사 일정, EMxAI 교육 일정을 한 곳에서 확인하세요.",
+  alternates: { canonical: "/news-event" },
+};
 
 const visibleEducationMonths = new Set(["'26년 8월", "'26년 9월", "'26년 10월"]);
 const visibleEducationSchedule = educationSchedule.filter((group) =>

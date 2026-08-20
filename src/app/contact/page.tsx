@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/contact-form";
+
+export const metadata: Metadata = {
+  title: "문의하기",
+  description:
+    "EMI/SI/RF 설계·분석 AI 솔루션 개발, Simulation workflow 자동화, 기업 맞춤형 교육 및 자문 문의는 EMxAI로 연락해 주세요.",
+  alternates: { canonical: "/contact" },
+};
 
 export default function ContactPage() {
   return (

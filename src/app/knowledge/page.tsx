@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { knowledgeItems } from "@/data/updates-content";
+
+export const metadata: Metadata = {
+  title: "지식자료",
+  description:
+    "EMI/SI 시뮬레이션 자동화, 생성형 AI 활용 사례, S-parameter 분석 등 전자파 AI 기술 자료와 교육 영상을 모았습니다.",
+  alternates: { canonical: "/knowledge" },
+};
 
 export default function KnowledgePage() {
   return (

@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "회사소개",
+  description:
+    "EMxAI는 30년 이상의 EMC/SI 실무 경험을 바탕으로 EMI/SI 설계·분석 업무의 AI 전환과 엔지니어 교육을 지원하는 전자파 AI 전문 기술기업입니다.",
+  alternates: { canonical: "/about" },
+};
 
 const workChanges = [
   {

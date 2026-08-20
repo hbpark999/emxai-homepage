@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { EngineeringTools } from "@/components/web-tools/engineering-tools";
+
+export const metadata: Metadata = {
+  title: "전자파 설계 계산기",
+  description:
+    "Microstrip Z0 계산기, S-parameter Plot Viewer 등 EMI/SI 설계·분석에 바로 활용할 수 있는 웹 기반 전자파 엔지니어링 도구입니다.",
+  alternates: { canonical: "/web-tools" },
+};
 
 export default function WebToolsPage() {
   return (
