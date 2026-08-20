@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 import { VisitorTracker } from "@/components/analytics/visitor-tracker";
 import { SiteFooter } from "@/components/site-footer";
@@ -116,6 +117,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <VisitorTracker />
           </Suspense>
         </div>
+        <Analytics />
       </body>
     </html>
   );
