@@ -16,7 +16,11 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [materialAvailable, setMaterialAvailable] = useState<boolean | null>(null);
+  const [showPdfToc, setShowPdfToc] = useState(false);
   const materialHref = `/api/education/materials/${course.slug}`;
+  const pdfViewerHref = `${materialHref}#toolbar=1&navpanes=${showPdfToc ? "1" : "0"}&pagemode=${
+    showPdfToc ? "bookmarks" : "none"
+  }&view=FitH&zoom=page-width`;
 
   useEffect(() => {
     if (!unlocked) {
@@ -127,16 +131,27 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
           </div>
         ) : (
           <div className="py-10">
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-              <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+            <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3">
+                <p className="text-sm font-black text-slate-950">수강생 자료</p>
+                <button
+                  type="button"
+                  onClick={() => setShowPdfToc((current) => !current)}
+                  className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:border-sky-400 hover:text-sky-600"
+                >
+                  {showPdfToc ? "목차 숨기기" : "목차 보기"}
+                </button>
+              </div>
+              <div>
                 {materialAvailable ? (
                   <iframe
+                    key={showPdfToc ? "toc-on" : "toc-off"}
                     title={`${course.title} PDF 자료`}
-                    src={materialHref}
-                    className="h-[68vh] min-h-[32rem] w-full bg-white"
+                    src={pdfViewerHref}
+                    className="h-[82vh] min-h-[44rem] w-full bg-white"
                   />
                 ) : (
-                  <div className="flex h-[68vh] min-h-[32rem] items-center justify-center p-6 text-center">
+                  <div className="flex h-[82vh] min-h-[44rem] items-center justify-center p-6 text-center">
                     <div>
                       <p className="text-xl font-black text-slate-950">
                         PDF 자료 첨부 예정
@@ -148,16 +163,6 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                   </div>
                 )}
               </div>
-              <aside className="rounded-lg border border-slate-200 bg-white p-5">
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-sky-500">
-                  Course Materials
-                </p>
-                <h2 className="mt-3 text-xl font-black text-slate-950">수강생 자료</h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  PDF 파일을 아직 첨부하지 않았다면 뷰어에 안내 문구가 표시됩니다. 첨부 후에는
-                  이 화면에서 바로 읽을 수 있습니다.
-                </p>
-              </aside>
             </div>
 
             <div className="mt-12 border-t border-slate-200 pt-4">
