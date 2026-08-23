@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { StudentCourse } from "@/data/student-courses";
 import { ClassBoard } from "./class-board";
 
@@ -17,10 +17,14 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
   const [pending, setPending] = useState(false);
   const [materialAvailable, setMaterialAvailable] = useState<boolean | null>(null);
   const [showPdfToc, setShowPdfToc] = useState(false);
+  const [currentPdfPage, setCurrentPdfPage] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const pdfShellRef = useRef<HTMLDivElement>(null);
   const materialHref = `/api/education/materials/${course.slug}`;
-  const pdfViewerHref = `${materialHref}#toolbar=1&navpanes=${showPdfToc ? "1" : "0"}&pagemode=${
+  const pdfViewerHref = `${materialHref}#page=${currentPdfPage}&toolbar=1&navpanes=${showPdfToc ? "1" : "0"}&pagemode=${
     showPdfToc ? "bookmarks" : "none"
   }&view=FitH&zoom=page-width`;
+  const pageCount = course.pdfPageCount;
 
   useEffect(() => {
     if (!unlocked) {
@@ -44,6 +48,39 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
       ignore = true;
     };
   }, [materialHref, unlocked]);
+
+  useEffect(() => {
+    function syncFullscreenState() {
+      setIsFullscreen(document.fullscreenElement === pdfShellRef.current);
+    }
+
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
+    };
+  }, []);
+
+  async function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    await pdfShellRef.current?.requestFullscreen();
+  }
+
+  function movePdfPage(offset: number) {
+    setCurrentPdfPage((page) => {
+      const nextPage = page + offset;
+
+      if (pageCount) {
+        return Math.min(Math.max(nextPage, 1), pageCount);
+      }
+
+      return Math.max(nextPage, 1);
+    });
+  }
 
   async function submitPassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -130,28 +167,60 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
             </div>
           </div>
         ) : (
-          <div className="py-10">
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+          <div className="grid gap-6 py-10 xl:grid-cols-[minmax(0,1fr)_26rem]">
+            <div
+              ref={pdfShellRef}
+              className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 fullscreen:rounded-none fullscreen:border-0"
+            >
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3">
                 <p className="text-sm font-black text-slate-950">수강생 자료</p>
-                <button
-                  type="button"
-                  onClick={() => setShowPdfToc((current) => !current)}
-                  className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:border-sky-400 hover:text-sky-600"
-                >
-                  {showPdfToc ? "목차 숨기기" : "목차 보기"}
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => movePdfPage(-1)}
+                    disabled={currentPdfPage <= 1}
+                    className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 transition hover:border-sky-400 hover:text-sky-600 disabled:cursor-not-allowed disabled:text-slate-300"
+                  >
+                    이전
+                  </button>
+                  <span className="min-w-24 text-center text-sm font-bold text-slate-500">
+                    {currentPdfPage}
+                    {pageCount ? ` / ${pageCount}` : ""}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => movePdfPage(1)}
+                    disabled={Boolean(pageCount && currentPdfPage >= pageCount)}
+                    className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 transition hover:border-sky-400 hover:text-sky-600 disabled:cursor-not-allowed disabled:text-slate-300"
+                  >
+                    다음
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPdfToc((current) => !current)}
+                    className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:border-sky-400 hover:text-sky-600"
+                  >
+                    {showPdfToc ? "목차 숨기기" : "목차 보기"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    className="rounded-md bg-[#08a99d] px-4 py-2 text-sm font-black text-white transition hover:bg-[#22c7ba]"
+                  >
+                    {isFullscreen ? "전체화면 종료" : "전체화면"}
+                  </button>
+                </div>
               </div>
               <div>
                 {materialAvailable ? (
                   <iframe
-                    key={showPdfToc ? "toc-on" : "toc-off"}
+                    key={`${showPdfToc ? "toc-on" : "toc-off"}-${currentPdfPage}`}
                     title={`${course.title} PDF 자료`}
                     src={pdfViewerHref}
-                    className="h-[82vh] min-h-[44rem] w-full bg-white"
+                    className={isFullscreen ? "h-[calc(100vh-4rem)] w-full bg-white" : "h-[82vh] min-h-[44rem] w-full bg-white"}
                   />
                 ) : (
-                  <div className="flex h-[82vh] min-h-[44rem] items-center justify-center p-6 text-center">
+                  <div className={isFullscreen ? "flex h-[calc(100vh-4rem)] w-full items-center justify-center p-6 text-center" : "flex h-[82vh] min-h-[44rem] items-center justify-center p-6 text-center"}>
                     <div>
                       <p className="text-xl font-black text-slate-950">
                         PDF 자료 첨부 예정
@@ -164,14 +233,14 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                 )}
               </div>
             </div>
-
-            <div className="mt-12 border-t border-slate-200 pt-4">
+            <aside className="xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto xl:rounded-lg xl:border xl:border-slate-200 xl:bg-white xl:p-5">
               <ClassBoard
                 initialCourse={course.title}
                 courseAliases={course.boardCourseNames}
                 lockedCourse
+                compact
               />
-            </div>
+            </aside>
           </div>
         )}
       </div>

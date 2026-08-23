@@ -6,6 +6,7 @@ export type StudentCourse = {
   boardCourseNames: string[];
   passwordEnv: string;
   pdfFile: string;
+  pdfPageCount?: number;
 };
 
 export const studentCourses = [
@@ -62,6 +63,7 @@ export const studentCourses = [
     boardCourseNames: ["6기", "전원 Noise 저감 설계와 생성형 AI활용"],
     passwordEnv: "EDU_PASS_TTA_POWER_NOISE_DAY2",
     pdfFile: "tta-power-noise-genai-day2.pdf",
+    pdfPageCount: 121,
   },
 ] satisfies StudentCourse[];
 

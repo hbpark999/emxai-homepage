@@ -54,12 +54,14 @@ type ClassBoardProps = {
   initialCourse?: string;
   courseAliases?: string[];
   lockedCourse?: boolean;
+  compact?: boolean;
 };
 
 export function ClassBoard({
   initialCourse = "전체",
   courseAliases = [],
   lockedCourse = false,
+  compact = false,
 }: ClassBoardProps) {
   const [posts, setPosts] = useState<BoardPost[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -95,12 +97,13 @@ export function ClassBoard({
   }, []);
 
   useEffect(() => {
-    load();
+    const initialTimer = window.setTimeout(load, 0);
 
     const timer = setInterval(load, REFRESH_MS);
     document.addEventListener("visibilitychange", load);
 
     return () => {
+      clearTimeout(initialTimer);
       clearInterval(timer);
       document.removeEventListener("visibilitychange", load);
     };
@@ -127,21 +130,21 @@ export function ClassBoard({
 
   return (
     <section className="bg-white">
-      <div className="mx-auto max-w-4xl px-5 py-14 sm:px-8">
-        <div className="border-b border-slate-200 pb-8">
-          <p className="text-sm font-black uppercase tracking-[0.16em] text-sky-500">
+      <div className={compact ? "px-0 py-0" : "mx-auto max-w-4xl px-5 py-14 sm:px-8"}>
+        <div className={compact ? "border-b border-slate-200 pb-4" : "border-b border-slate-200 pb-8"}>
+          <p className={compact ? "text-xs font-black uppercase tracking-[0.16em] text-sky-500" : "text-sm font-black uppercase tracking-[0.16em] text-sky-500"}>
             Live Board
           </p>
-          <h1 className="mt-4 text-4xl font-black leading-tight text-slate-950 sm:text-5xl">
+          <h1 className={compact ? "mt-2 text-2xl font-black leading-tight text-slate-950" : "mt-4 text-4xl font-black leading-tight text-slate-950 sm:text-5xl"}>
             {lockedCourse ? "과정 게시판" : "교육 게시판"}
           </h1>
-          <p className="mt-5 text-lg leading-8 text-slate-600">
+          <p className={compact ? "mt-3 text-sm leading-6 text-slate-600" : "mt-5 text-lg leading-8 text-slate-600"}>
             {lockedCourse
               ? "이 과정에 공유되는 링크·공지·실습 코드만 모아 보여줍니다."
               : "교육 중 공유되는 링크·공지·실습 코드가 이곳에 실시간으로 올라옵니다."}
             화면은 자동으로 갱신되니 새로고침하지 않으셔도 됩니다.
           </p>
-          <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-slate-400">
+          <div className={compact ? "mt-3 flex items-center gap-2 text-xs font-semibold text-slate-400" : "mt-5 flex items-center gap-2 text-sm font-semibold text-slate-400"}>
             <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             {updatedAt ? `${formatTime(updatedAt)} 기준 · 5초마다 갱신` : "연결 중..."}
           </div>
@@ -184,14 +187,14 @@ export function ClassBoard({
           </div>
         ) : null}
 
-        <div className="mt-8 space-y-5">
+        <div className={compact ? "mt-5 space-y-4" : "mt-8 space-y-5"}>
           {visiblePosts.map((post) => (
             <article
               key={post.id}
-              className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+              className={compact ? "rounded-lg border border-slate-200 bg-white p-4 shadow-sm" : "rounded-lg border border-slate-200 bg-white p-6 shadow-sm"}
             >
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                <h2 className="text-xl font-black text-slate-950">{post.title}</h2>
+                <h2 className={compact ? "text-base font-black text-slate-950" : "text-xl font-black text-slate-950"}>{post.title}</h2>
                 <div className="flex items-center gap-2">
                   {post.course ? (
                     <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
