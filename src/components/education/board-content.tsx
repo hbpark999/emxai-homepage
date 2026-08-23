@@ -24,11 +24,73 @@ type Block =
   | { kind: "list"; items: string[] }
   | { kind: "para"; lines: string[] };
 
-const FENCE = /^\s*```/;
+const FENCE = /^\s*`{2,}/;
 const BULLET = /^\s*[-*]\s+/;
+const HTML_LIKE = /<!DOCTYPE\s+html|<html[\s>]/i;
+
+function normalizeFenceMarkers(text: string) {
+  return text
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => {
+      const trimmed = line.trim();
+      const fence = trimmed.match(/^[`'"\u2018\u2019\u201C\u201D]{2,3}\s*([A-Za-z0-9_-]+)?\s*$/);
+
+      if (!fence) {
+        return line;
+      }
+
+      return `${line.match(/^\s*/)?.[0] ?? ""}\`\`\`${fence[1] ?? ""}`;
+    })
+    .join("\n");
+}
+
+function formatHtmlSnippet(text: string) {
+  const compact = text.trim();
+
+  if (!HTML_LIKE.test(compact) || compact.split("\n").length > 3) {
+    return text;
+  }
+
+  const lines = compact
+    .replace(/>\s*</g, ">\n<")
+    .replace(/\s+(?=<!--)/g, "\n")
+    .replace(/\s+(?=<(?:!DOCTYPE|html|head|body|meta|title|link|style|script|header|main|div|section|button|svg|path|h[1-6]|p|span|label|input|\/))/gi, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  let depth = 0;
+
+  return lines
+    .map((line) => {
+      if (/^<\//.test(line)) {
+        depth = Math.max(0, depth - 1);
+      }
+
+      const indented = `${"  ".repeat(depth)}${line}`;
+      const opensElement = /^<([A-Za-z][\w:-]*)\b/.test(line);
+      const isVoid = /^<(?:!DOCTYPE|meta|link|input|br|hr|img)\b/i.test(line);
+      const closesSameLine = /<\/[A-Za-z][\w:-]*>\s*$/.test(line);
+      const isComment = /^<!--/.test(line);
+
+      if (opensElement && !isVoid && !closesSameLine && !isComment) {
+        depth += 1;
+      }
+
+      return indented;
+    })
+    .join("\n");
+}
 
 function parseBlocks(text: string): Block[] {
-  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const normalizedText = normalizeFenceMarkers(text);
+
+  if (!FENCE.test(normalizedText.trimStart()) && HTML_LIKE.test(normalizedText)) {
+    return [{ kind: "code", lang: "html", code: formatHtmlSnippet(normalizedText) }];
+  }
+
+  const lines = normalizedText.split("\n");
   const blocks: Block[] = [];
   let index = 0;
 
@@ -36,7 +98,7 @@ function parseBlocks(text: string): Block[] {
     const line = lines[index];
 
     if (FENCE.test(line)) {
-      const lang = line.trim().replace(/^```/, "").trim();
+      const lang = line.trim().replace(/^`{2,}/, "").trim();
       const code: string[] = [];
       index += 1;
 
@@ -46,7 +108,12 @@ function parseBlocks(text: string): Block[] {
       }
       index += 1; // 닫는 펜스 건너뛰기
 
-      blocks.push({ kind: "code", lang, code: code.join("\n") });
+      const codeText = code.join("\n");
+      blocks.push({
+        kind: "code",
+        lang,
+        code: lang.toLowerCase() === "html" ? formatHtmlSnippet(codeText) : codeText,
+      });
       continue;
     }
 
