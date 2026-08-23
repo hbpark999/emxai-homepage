@@ -1,0 +1,107 @@
+From a031d623f2edded77a2d33a5d03af93e32e998cf Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 20 Aug 2026 21:44:07 +0000
+Subject: [PATCH] feat: add Vercel Web Analytics
+
+Install @vercel/analytics and mount <Analytics/> in the root layout
+so page views/visitors are collected in the Vercel dashboard.
+---
+ package-lock.json  | 43 +++++++++++++++++++++++++++++++++++++++++++
+ package.json       |  1 +
+ src/app/layout.tsx |  2 ++
+ 3 files changed, 46 insertions(+)
+
+diff --git a/package-lock.json b/package-lock.json
+index 91ca012..8a34f49 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -8,6 +8,7 @@
+       "name": "emxai-homepage",
+       "version": "0.1.0",
+       "dependencies": {
++        "@vercel/analytics": "^2.0.1",
+         "next": "16.3.0",
+         "react": "19.2.8",
+         "react-dom": "19.2.8"
+@@ -2285,6 +2286,48 @@
+         "win32"
+       ]
+     },
++    "node_modules/@vercel/analytics": {
++      "version": "2.0.1",
++      "resolved": "https://registry.npmjs.org/@vercel/analytics/-/analytics-2.0.1.tgz",
++      "integrity": "sha512-MTQG6V9qQrt1tsDeF+2Uoo5aPjqbVPys1xvnIftXSJYG2SrwXRHnqEvVoYID7BTruDz4lCd2Z7rM1BdkUehk2g==",
++      "license": "MIT",
++      "peerDependencies": {
++        "@remix-run/react": "^2",
++        "@sveltejs/kit": "^1 || ^2",
++        "next": ">= 13",
++        "nuxt": ">= 3",
++        "react": "^18 || ^19 || ^19.0.0-rc",
++        "svelte": ">= 4",
++        "vue": "^3",
++        "vue-router": "^4"
++      },
++      "peerDependenciesMeta": {
++        "@remix-run/react": {
++          "optional": true
++        },
++        "@sveltejs/kit": {
++          "optional": true
++        },
++        "next": {
++          "optional": true
++        },
++        "nuxt": {
++          "optional": true
++        },
++        "react": {
++          "optional": true
++        },
++        "svelte": {
++          "optional": true
++        },
++        "vue": {
++          "optional": true
++        },
++        "vue-router": {
++          "optional": true
++        }
++      }
++    },
+     "node_modules/acorn": {
+       "version": "8.18.0",
+       "resolved": "https://registry.npmjs.org/acorn/-/acorn-8.18.0.tgz",
+diff --git a/package.json b/package.json
+index 2c5ac0f..a0c38ab 100644
+--- a/package.json
++++ b/package.json
+@@ -9,6 +9,7 @@
+     "lint": "eslint"
+   },
+   "dependencies": {
++    "@vercel/analytics": "^2.0.1",
+     "next": "16.3.0",
+     "react": "19.2.8",
+     "react-dom": "19.2.8"
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index 749b5e2..f1f97f4 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { Analytics } from "@vercel/analytics/next";
+ import { Suspense } from "react";
+ import { VisitorTracker } from "@/components/analytics/visitor-tracker";
+ import { SiteFooter } from "@/components/site-footer";
+@@ -116,6 +117,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
+             <VisitorTracker />
+           </Suspense>
+         </div>
++        <Analytics />
+       </body>
+     </html>
+   );
+-- 
+2.43.0
+
