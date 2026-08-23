@@ -117,7 +117,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
             <div className="rounded-lg border border-slate-200 bg-white p-6">
               <p className="text-sm font-black text-slate-950">이 과정에서 제공되는 기능</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {["PDF 읽기", "PDF 다운로드", "과정별 게시판", "수강 중 공지 확인"].map((item) => (
+                {["PDF 읽기", "과정별 게시판", "수강 중 공지 확인"].map((item) => (
                   <div key={item} className="rounded-md border border-slate-200 px-4 py-3">
                     <p className="text-sm font-bold text-slate-700">{item}</p>
                   </div>
@@ -142,8 +142,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                         PDF 자료 첨부 예정
                       </p>
                       <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
-                        자료 파일이 등록되면 이 영역에서 바로 읽을 수 있고 다운로드 버튼도
-                        활성화됩니다.
+                        자료 파일이 등록되면 이 영역에서 바로 읽을 수 있습니다.
                       </p>
                     </div>
                   </div>
@@ -156,19 +155,8 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                 <h2 className="mt-3 text-xl font-black text-slate-950">수강생 자료</h2>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
                   PDF 파일을 아직 첨부하지 않았다면 뷰어에 안내 문구가 표시됩니다. 첨부 후에는
-                  같은 주소에서 바로 읽고 내려받을 수 있습니다.
+                  이 화면에서 바로 읽을 수 있습니다.
                 </p>
-                <a
-                  href={`${materialHref}?download=1`}
-                  aria-disabled={!materialAvailable}
-                  className={
-                    materialAvailable
-                      ? "mt-5 inline-flex w-full items-center justify-center rounded-md bg-[#08a99d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#22c7ba]"
-                      : "mt-5 inline-flex w-full pointer-events-none items-center justify-center rounded-md bg-slate-300 px-5 py-3 text-sm font-bold text-white"
-                  }
-                >
-                  PDF 다운로드
-                </a>
               </aside>
             </div>
 
