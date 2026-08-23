@@ -54,10 +54,20 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
       setIsFullscreen(document.fullscreenElement === pdfShellRef.current);
     }
 
+    async function exitOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape" || document.fullscreenElement !== pdfShellRef.current) {
+        return;
+      }
+
+      await document.exitFullscreen();
+    }
+
     document.addEventListener("fullscreenchange", syncFullscreenState);
+    document.addEventListener("keydown", exitOnEscape);
 
     return () => {
       document.removeEventListener("fullscreenchange", syncFullscreenState);
+      document.removeEventListener("keydown", exitOnEscape);
     };
   }, []);
 
@@ -205,9 +215,10 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                   <button
                     type="button"
                     onClick={toggleFullscreen}
+                    aria-pressed={isFullscreen}
                     className="rounded-md bg-[#08a99d] px-4 py-2 text-sm font-black text-white transition hover:bg-[#22c7ba]"
                   >
-                    {isFullscreen ? "전체화면 종료" : "전체화면"}
+                    {isFullscreen ? "Exit Full Screen" : "Full Screen"}
                   </button>
                 </div>
               </div>
