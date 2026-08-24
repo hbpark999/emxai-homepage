@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { StudentCourse } from "@/data/student-courses";
 import { ClassBoard } from "./class-board";
+import { HtmlSandbox } from "./html-sandbox";
 
 type StudentCourseRoomProps = {
   course: StudentCourse;
@@ -178,6 +179,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
           </div>
         ) : (
           <div className="grid gap-6 py-10 xl:grid-cols-[minmax(0,1fr)_26rem]">
+            <div className="flex flex-col gap-6">
             <div
               ref={pdfShellRef}
               className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 fullscreen:rounded-none fullscreen:border-0"
@@ -243,6 +245,8 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                   </div>
                 )}
               </div>
+            </div>
+            <HtmlSandbox postCourse={course.boardCourseNames[0] ?? course.title} />
             </div>
             <aside className="xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto xl:rounded-lg xl:border xl:border-slate-200 xl:bg-white xl:p-5">
               <ClassBoard

@@ -225,6 +225,8 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
 
 function CodeBlock({ lang, code }: { lang: string; code: string }) {
   const [copied, setCopied] = useState(false);
+  const isHtml = lang.toLowerCase() === "html";
+  const [showPreview, setShowPreview] = useState(isHtml);
 
   async function copy() {
     try {
@@ -242,14 +244,33 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
         <span className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-400">
           {lang || "code"}
         </span>
-        <button
-          type="button"
-          onClick={copy}
-          className="rounded border border-slate-600 px-3 py-1 text-xs font-bold text-slate-200 transition hover:border-sky-400 hover:text-sky-300"
-        >
-          {copied ? "복사됨" : "복사"}
-        </button>
+        <div className="flex items-center gap-2">
+          {isHtml ? (
+            <button
+              type="button"
+              onClick={() => setShowPreview((current) => !current)}
+              className="rounded border border-slate-600 px-3 py-1 text-xs font-bold text-slate-200 transition hover:border-sky-400 hover:text-sky-300"
+            >
+              {showPreview ? "코드만 보기" : "미리보기"}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={copy}
+            className="rounded border border-slate-600 px-3 py-1 text-xs font-bold text-slate-200 transition hover:border-sky-400 hover:text-sky-300"
+          >
+            {copied ? "복사됨" : "복사"}
+          </button>
+        </div>
       </div>
+      {isHtml && showPreview ? (
+        <iframe
+          title="HTML 미리보기"
+          srcDoc={code}
+          sandbox="allow-scripts allow-modals"
+          className="h-64 w-full border-b border-slate-700 bg-white"
+        />
+      ) : null}
       <pre className="overflow-x-auto px-4 py-3">
         <code className="font-mono text-[13px] leading-6 text-slate-100">{code}</code>
       </pre>
