@@ -250,6 +250,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                 courseAliases={course.boardCourseNames}
                 lockedCourse
                 compact
+                allowPosting
               />
             </aside>
           </div>

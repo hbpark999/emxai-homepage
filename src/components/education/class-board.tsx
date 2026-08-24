@@ -13,7 +13,7 @@
  * 수강생은 로그인 없이 주소만으로 열람한다. 글 작성은 Notion에서만 가능하다.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { BoardContent } from "./board-content";
 
 const REFRESH_MS = 5_000;
@@ -55,13 +55,102 @@ type ClassBoardProps = {
   courseAliases?: string[];
   lockedCourse?: boolean;
   compact?: boolean;
+  allowPosting?: boolean;
 };
+
+function PostForm({
+  compact,
+  postCourse,
+  onPosted,
+}: {
+  compact: boolean;
+  postCourse: string | null;
+  onPosted: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [content, setContent] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submitPost(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!event.currentTarget.reportValidity()) {
+      return;
+    }
+
+    setPending(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/board", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, content, course: postCourse }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; error?: string };
+
+      if (!payload.ok) {
+        setError(payload.error ?? "글을 올리지 못했습니다.");
+        return;
+      }
+
+      setContent("");
+      onPosted();
+    } catch {
+      setError("연결을 확인해 주세요.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <form
+      onSubmit={submitPost}
+      className={
+        compact
+          ? "mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4"
+          : "mt-8 rounded-lg border border-slate-200 bg-slate-50 p-6"
+      }
+    >
+      <p className={compact ? "text-sm font-black text-slate-950" : "text-base font-black text-slate-950"}>
+        글쓰기
+      </p>
+      <input
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        placeholder="이름"
+        required
+        className="mt-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-sky-500"
+      />
+      <textarea
+        value={content}
+        onChange={(event) => setContent(event.target.value)}
+        placeholder="질문이나 공유할 내용을 입력하세요."
+        rows={compact ? 3 : 4}
+        required
+        className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm leading-6 outline-none transition focus:border-sky-500"
+      />
+      <div className="mt-3 flex items-center justify-between gap-3">
+        {error ? <p className="text-xs font-bold text-red-600">{error}</p> : <span />}
+        <button
+          type="submit"
+          disabled={pending}
+          className="ml-auto inline-flex items-center justify-center rounded-md bg-sky-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+        >
+          {pending ? "올리는 중..." : "올리기"}
+        </button>
+      </div>
+    </form>
+  );
+}
 
 export function ClassBoard({
   initialCourse = "전체",
   courseAliases = [],
   lockedCourse = false,
   compact = false,
+  allowPosting = false,
 }: ClassBoardProps) {
   const [posts, setPosts] = useState<BoardPost[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -212,6 +301,14 @@ export function ClassBoard({
             </article>
           ))}
         </div>
+
+        {allowPosting ? (
+          <PostForm
+            compact={compact}
+            postCourse={courseAliases[0] ?? (lockedCourse ? initialCourse : null)}
+            onPosted={load}
+          />
+        ) : null}
       </div>
     </section>
   );

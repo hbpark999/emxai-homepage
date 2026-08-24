@@ -108,6 +108,60 @@ export function isBoardConfigured() {
   return Boolean(process.env.NOTION_TOKEN && process.env.NOTION_BOARD_DB_ID);
 }
 
+function richText(content: string) {
+  return [{ type: "text", text: { content: content.slice(0, 2000) } }];
+}
+
+/** 교육생이 게시판에 글을 올린다. 통합(Integration) 토큰으로 직접 쓰기 때문에
+ * Notion의 "링크가 있는 사람 편집" 유료 제한과 무관하게 동작한다. */
+export async function createBoardPost({
+  name,
+  content,
+  course,
+}: {
+  name: string;
+  content: string;
+  course: string | null;
+}) {
+  const token = process.env.NOTION_TOKEN;
+  const databaseId = process.env.NOTION_BOARD_DB_ID;
+
+  if (!token || !databaseId) {
+    throw new Error("NOTION_TOKEN 또는 NOTION_BOARD_DB_ID 환경변수가 설정되지 않았습니다.");
+  }
+
+  const properties: Record<string, unknown> = {
+    Name: { title: richText(name.slice(0, 100)) },
+    내용: { rich_text: richText(content) },
+    공개: { checkbox: true },
+  };
+
+  if (course) {
+    properties["과정"] = { select: { name: course.slice(0, 100) } };
+  }
+
+  const response = await fetch(`${NOTION_API}/pages`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": NOTION_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      parent: { database_id: databaseId },
+      properties,
+    }),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`게시글 작성 실패 (${response.status}). ${detail.slice(0, 300)}`);
+  }
+
+  cache = null;
+}
+
 export async function getBoardPosts(): Promise<BoardPost[]> {
   const token = process.env.NOTION_TOKEN;
   const databaseId = process.env.NOTION_BOARD_DB_ID;

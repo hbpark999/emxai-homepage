@@ -9,10 +9,49 @@
  */
 
 import { NextResponse } from "next/server";
-import { getBoardPosts, isBoardConfigured } from "@/lib/board/notion";
+import { createBoardPost, getBoardPosts, isBoardConfigured } from "@/lib/board/notion";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+type CreatePostPayload = {
+  name?: string;
+  content?: string;
+  course?: string | null;
+};
+
+function trimText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+export async function POST(request: Request) {
+  if (!isBoardConfigured()) {
+    return NextResponse.json(
+      { ok: false, error: "게시판이 아직 설정되지 않았습니다. 환경변수를 확인하세요." },
+      { status: 503 },
+    );
+  }
+
+  const payload = (await request.json().catch(() => ({}))) as CreatePostPayload;
+  const name = trimText(payload.name);
+  const content = trimText(payload.content);
+  const course = trimText(payload.course);
+
+  if (!name || !content) {
+    return NextResponse.json(
+      { ok: false, error: "이름과 내용을 입력해 주세요." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    await createBoardPost({ name, content, course: course || null });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "알 수 없는 오류";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+  }
+}
 
 export async function GET() {
   if (!isBoardConfigured()) {
