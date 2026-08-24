@@ -18,6 +18,7 @@
  */
 
 import { useState, type ReactNode } from "react";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 
 type Block =
   | { kind: "code"; lang: string; code: string }
@@ -224,6 +225,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
 }
 
 function CodeBlock({ lang, code }: { lang: string; code: string }) {
+  const { ref: previewRef, isFullscreen, toggleFullscreen } = useFullscreen<HTMLDivElement>();
   const [copied, setCopied] = useState(false);
   const isHtml = lang.toLowerCase() === "html";
   const [showPreview, setShowPreview] = useState(isHtml);
@@ -245,6 +247,15 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
           {lang || "code"}
         </span>
         <div className="flex items-center gap-2">
+          {isHtml && showPreview ? (
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="rounded border border-slate-600 px-3 py-1 text-xs font-bold text-slate-200 transition hover:border-sky-400 hover:text-sky-300"
+            >
+              {isFullscreen ? "전체화면 나가기" : "전체화면"}
+            </button>
+          ) : null}
           {isHtml ? (
             <button
               type="button"
@@ -264,12 +275,14 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
         </div>
       </div>
       {isHtml && showPreview ? (
-        <iframe
-          title="HTML 미리보기"
-          srcDoc={code}
-          sandbox="allow-scripts allow-modals"
-          className="h-64 w-full border-b border-slate-700 bg-white"
-        />
+        <div ref={previewRef} className="fullscreen:flex fullscreen:flex-col">
+          <iframe
+            title="HTML 미리보기"
+            srcDoc={code}
+            sandbox="allow-scripts allow-modals"
+            className={isFullscreen ? "h-full w-full flex-1 bg-white" : "h-64 w-full border-b border-slate-700 bg-white"}
+          />
+        </div>
       ) : null}
       <pre className="overflow-x-auto px-4 py-3">
         <code className="font-mono text-[13px] leading-6 text-slate-100">{code}</code>

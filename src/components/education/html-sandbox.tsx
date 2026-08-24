@@ -11,6 +11,7 @@
  */
 
 import { useState, type FormEvent } from "react";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 
 const DEFAULT_HTML = `<!-- 여기에 HTML을 붙여넣고 확인해 보세요 -->
 <h1>Hello EMxAI</h1>
@@ -21,6 +22,7 @@ type HtmlSandboxProps = {
 };
 
 export function HtmlSandbox({ postCourse }: HtmlSandboxProps) {
+  const { ref: previewRef, isFullscreen, toggleFullscreen } = useFullscreen<HTMLDivElement>();
   const [code, setCode] = useState(DEFAULT_HTML);
   const [name, setName] = useState("");
   const [pending, setPending] = useState(false);
@@ -77,12 +79,21 @@ export function HtmlSandbox({ postCourse }: HtmlSandboxProps) {
           aria-label="HTML 코드 입력"
           className="h-72 w-full resize-none border-b border-slate-200 bg-slate-950 p-4 font-mono text-xs leading-6 text-slate-100 outline-none lg:border-b-0 lg:border-r"
         />
-        <iframe
-          title="HTML 미리보기"
-          srcDoc={code}
-          sandbox="allow-scripts allow-modals"
-          className="h-72 w-full bg-white"
-        />
+        <div ref={previewRef} className="relative fullscreen:flex fullscreen:flex-col">
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="absolute right-2 top-2 z-10 rounded-md border border-slate-300 bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:border-sky-400 hover:text-sky-600"
+          >
+            {isFullscreen ? "전체화면 나가기" : "전체화면"}
+          </button>
+          <iframe
+            title="HTML 미리보기"
+            srcDoc={code}
+            sandbox="allow-scripts allow-modals"
+            className={isFullscreen ? "h-full w-full flex-1 bg-white" : "h-72 w-full bg-white"}
+          />
+        </div>
       </div>
       <form
         onSubmit={shareToBoard}

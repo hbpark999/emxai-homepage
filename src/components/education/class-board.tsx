@@ -309,11 +309,33 @@ export function ClassBoard({
         </div>
 
         {allowPosting ? (
-          <PostForm
-            compact={compact}
-            postCourse={courseAliases[0] ?? (lockedCourse ? initialCourse : null)}
-            onPosted={load}
-          />
+          <>
+            <PostForm
+              compact={compact}
+              postCourse={courseAliases[0] ?? (lockedCourse ? initialCourse : null)}
+              onPosted={load}
+            />
+            <div className="mt-4">
+              <p className="text-xs font-bold text-slate-400">→ 작성하면 이렇게 보입니다</p>
+              <article
+                className={
+                  compact
+                    ? "mt-2 rounded-lg border border-dashed border-slate-300 bg-white p-4 opacity-70"
+                    : "mt-2 rounded-lg border border-dashed border-slate-300 bg-white p-6 opacity-70"
+                }
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <h2 className={compact ? "text-base font-black text-slate-950" : "text-xl font-black text-slate-950"}>
+                    홍길동
+                  </h2>
+                  <time className="text-xs font-semibold text-slate-400">방금 전</time>
+                </div>
+                <div className="pt-4">
+                  <BoardContent text={"질문 있습니다! 1페이지 링크가 안 열려요 https://example.com"} />
+                </div>
+              </article>
+            </div>
+          </>
         ) : null}
       </div>
     </section>
