@@ -209,13 +209,19 @@ export function ClassBoard({
   }, [posts]);
 
   const visiblePosts = useMemo(() => {
-    if (lockedCourse) {
-      const allowedCourses = new Set([initialCourse, ...courseAliases]);
-      return posts.filter((post) => post.course && allowedCourses.has(post.course));
-    }
+    const filtered = lockedCourse
+      ? posts.filter((post) => {
+          const allowedCourses = new Set([initialCourse, ...courseAliases]);
+          return post.course && allowedCourses.has(post.course);
+        })
+      : course === "전체"
+        ? posts
+        : posts.filter((post) => post.course === course);
 
-    return course === "전체" ? posts : posts.filter((post) => post.course === course);
-  }, [posts, course, initialCourse, courseAliases, lockedCourse]);
+    // 글쓰기가 켜진 화면(채팅형)은 오래된 글이 위, 최신 글이 입력창 바로 위에 오도록 순서를 뒤집는다.
+    // 조회 API는 항상 최신순으로 내려주므로(공개 게시판은 그대로 최신순 유지), 여기서만 뒤집는다.
+    return allowPosting ? [...filtered].reverse() : filtered;
+  }, [posts, course, initialCourse, courseAliases, lockedCourse, allowPosting]);
 
   return (
     <section className="bg-white">
