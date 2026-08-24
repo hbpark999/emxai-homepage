@@ -24,6 +24,7 @@ type BoardPost = {
   content: string;
   course: string | null;
   createdAt: string;
+  origin: "web" | "notion";
 };
 
 type BoardResponse = {
@@ -130,31 +131,29 @@ function CompleteCounter() {
   }
 
   return (
-    <div className="shrink-0 border-t border-slate-200 bg-white px-3 py-2">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-black text-slate-950">
-          작업완료 <span className="text-sky-600">{count ?? 0}</span>명
-        </p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => act("increment")}
-            disabled={pending}
-            className="rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
-          >
-            작업완료
-          </button>
-          <button
-            type="button"
-            onClick={() => act("reset")}
-            disabled={pending}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:border-red-400 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            초기화
-          </button>
-        </div>
+    <div className="shrink-0 border-t border-slate-200 bg-white px-3 py-3">
+      <p className="text-center text-[2.625rem] font-black leading-none text-slate-950">
+        작업완료 <span className="text-sky-600">{count ?? 0}</span>명
+      </p>
+      <div className="mt-3 flex items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={() => act("increment")}
+          disabled={pending}
+          className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+        >
+          작업완료
+        </button>
+        <button
+          type="button"
+          onClick={() => act("reset")}
+          disabled={pending}
+          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-red-400 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          초기화
+        </button>
       </div>
-      {error ? <p className="mt-1 text-xs font-bold text-red-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-center text-xs font-bold text-red-600">{error}</p> : null}
     </div>
   );
 }
@@ -248,6 +247,7 @@ export function ClassBoard({
   const [course, setCourse] = useState<string>(initialCourse);
   const inFlight = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const webScrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     if (inFlight.current || document.visibilityState === "hidden") {
@@ -313,13 +313,31 @@ export function ClassBoard({
     return allowPosting ? [...filtered].reverse() : filtered;
   }, [posts, course, initialCourse, courseAliases, lockedCourse, allowPosting]);
 
+  // Notion에서 직접 올린 글(기존 방식)과 홈페이지 글쓰기로 올린 글을 구분해 각자 다른 박스에 보여준다.
+  const notionPosts = useMemo(
+    () => visiblePosts.filter((post) => post.origin !== "web"),
+    [visiblePosts],
+  );
+  const webPosts = useMemo(
+    () => visiblePosts.filter((post) => post.origin === "web"),
+    [visiblePosts],
+  );
+
   useEffect(() => {
     if (!allowPosting || !scrollRef.current) {
       return;
     }
 
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [visiblePosts, allowPosting]);
+  }, [notionPosts, allowPosting]);
+
+  useEffect(() => {
+    if (!allowPosting || !webScrollRef.current) {
+      return;
+    }
+
+    webScrollRef.current.scrollTop = webScrollRef.current.scrollHeight;
+  }, [webPosts, allowPosting]);
 
   return (
     <section className="bg-white">
@@ -371,14 +389,15 @@ export function ClassBoard({
 
         {allowPosting ? (
           <>
-            <div className="mt-5 flex aspect-square w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+            <p className="mt-5 text-xs font-bold text-slate-400">Notion에 올린 글</p>
+            <div className="mt-2 flex aspect-square w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
               <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-3">
-                {loaded && visiblePosts.length === 0 ? (
+                {loaded && notionPosts.length === 0 ? (
                   <p className="py-6 text-center text-sm font-semibold text-slate-400">
-                    아직 올라온 글이 없습니다. 첫 글을 남겨보세요!
+                    아직 올라온 글이 없습니다.
                   </p>
                 ) : (
-                  visiblePosts.map((post) => <ChatBubble key={post.id} post={post} />)
+                  notionPosts.map((post) => <ChatBubble key={post.id} post={post} />)
                 )}
               </div>
               <CompleteCounter />
@@ -387,6 +406,21 @@ export function ClassBoard({
                 onPosted={load}
               />
             </div>
+
+            <p className="mt-5 text-xs font-bold text-slate-400">홈페이지에서 올린 글</p>
+            <div
+              ref={webScrollRef}
+              className="mt-2 max-h-64 space-y-2 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3"
+            >
+              {loaded && webPosts.length === 0 ? (
+                <p className="py-6 text-center text-sm font-semibold text-slate-400">
+                  아직 올라온 글이 없습니다. 첫 글을 남겨보세요!
+                </p>
+              ) : (
+                webPosts.map((post) => <ChatBubble key={post.id} post={post} />)
+              )}
+            </div>
+
             <div className="mt-3">
               <p className="text-xs font-bold text-slate-400">→ 작성하면 이렇게 보입니다</p>
               <div className="mt-2 opacity-70">
@@ -397,6 +431,7 @@ export function ClassBoard({
                     content: "질문 있습니다! 1페이지 링크가 안 열려요 https://example.com",
                     course: null,
                     createdAt: new Date().toISOString(),
+                    origin: "web",
                   }}
                 />
               </div>

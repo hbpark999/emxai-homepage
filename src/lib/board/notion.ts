@@ -27,6 +27,7 @@ export type BoardPost = {
   content: string;
   course: string | null;
   createdAt: string;
+  origin: "web" | "notion";
 };
 
 type NotionRichText = { plain_text?: string };
@@ -88,6 +89,7 @@ function toPost(page: NotionPage): BoardPost {
   const content = joinText(pick(properties, ["내용", "본문", "Content"], "rich_text")?.rich_text);
   const course = pick(properties, ["과정", "교육", "Course"], "select")?.select?.name ?? null;
   const dateProperty = pick(properties, ["작성일", "날짜", "Date"], "date")?.date?.start;
+  const source = properties["출처"]?.select?.name;
 
   return {
     id: page.id,
@@ -95,6 +97,7 @@ function toPost(page: NotionPage): BoardPost {
     content: content.trim(),
     course,
     createdAt: dateProperty ?? page.created_time,
+    origin: source === "홈페이지" ? "web" : "notion",
   };
 }
 
@@ -134,6 +137,7 @@ export async function createBoardPost({
     Name: { title: richText(name.slice(0, 100)) },
     내용: { rich_text: richText(content) },
     공개: { checkbox: true },
+    출처: { select: { name: "홈페이지" } },
   };
 
   if (course) {
