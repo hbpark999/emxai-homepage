@@ -58,12 +58,111 @@ type ClassBoardProps = {
   allowPosting?: boolean;
 };
 
+function ChatBubble({ post }: { post: BoardPost }) {
+  return (
+    <div className="rounded-lg bg-slate-50 px-3 py-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="text-xs font-black text-slate-950">{post.title}</span>
+        <time className="text-[10px] font-semibold text-slate-400">{formatTime(post.createdAt)}</time>
+      </div>
+      <div className="mt-1 text-sm leading-6 text-slate-700">
+        <BoardContent text={post.content} />
+      </div>
+    </div>
+  );
+}
+
+function CompleteCounter() {
+  const [count, setCount] = useState<number | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const response = await fetch("/api/board/complete-count", { cache: "no-store" });
+      const payload = (await response.json()) as { ok?: boolean; count?: number };
+
+      if (payload.ok) {
+        setCount(payload.count ?? 0);
+      }
+    } catch {
+      // 폴링 중 일시적 오류는 무시하고 다음 주기에 재시도한다.
+    }
+  }, []);
+
+  useEffect(() => {
+    const initialTimer = window.setTimeout(load, 0);
+    const timer = setInterval(load, REFRESH_MS);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(timer);
+    };
+  }, [load]);
+
+  async function act(action: "increment" | "reset") {
+    if (action === "reset" && !window.confirm("카운트를 0으로 초기화할까요?")) {
+      return;
+    }
+
+    setPending(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/board/complete-count", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; count?: number; error?: string };
+
+      if (!payload.ok) {
+        setError(payload.error ?? "처리하지 못했습니다.");
+        return;
+      }
+
+      setCount(payload.count ?? 0);
+    } catch {
+      setError("연결을 확인해 주세요.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="shrink-0 border-t border-slate-200 bg-white px-3 py-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-black text-slate-950">
+          작업완료 <span className="text-sky-600">{count ?? 0}</span>명
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => act("increment")}
+            disabled={pending}
+            className="rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            작업완료
+          </button>
+          <button
+            type="button"
+            onClick={() => act("reset")}
+            disabled={pending}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:border-red-400 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            초기화
+          </button>
+        </div>
+      </div>
+      {error ? <p className="mt-1 text-xs font-bold text-red-600">{error}</p> : null}
+    </div>
+  );
+}
+
 function PostForm({
-  compact,
   postCourse,
   onPosted,
 }: {
-  compact: boolean;
   postCourse: string | null;
   onPosted: () => void;
 }) {
@@ -105,38 +204,28 @@ function PostForm({
   }
 
   return (
-    <form
-      onSubmit={submitPost}
-      className={
-        compact
-          ? "mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4"
-          : "mt-8 rounded-lg border border-slate-200 bg-slate-50 p-6"
-      }
-    >
-      <p className={compact ? "text-sm font-black text-slate-950" : "text-base font-black text-slate-950"}>
-        글쓰기
-      </p>
+    <form onSubmit={submitPost} className="shrink-0 border-t border-slate-200 bg-slate-50 p-3">
+      {error ? <p className="mb-2 text-xs font-bold text-red-600">{error}</p> : null}
       <input
         value={name}
         onChange={(event) => setName(event.target.value)}
         placeholder="이름"
         required
-        className="mt-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-sky-500"
+        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-sky-500"
       />
-      <textarea
-        value={content}
-        onChange={(event) => setContent(event.target.value)}
-        placeholder="질문이나 공유할 내용을 입력하세요."
-        rows={compact ? 3 : 4}
-        required
-        className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm leading-6 outline-none transition focus:border-sky-500"
-      />
-      <div className="mt-3 flex items-center justify-between gap-3">
-        {error ? <p className="text-xs font-bold text-red-600">{error}</p> : <span />}
+      <div className="mt-2 flex items-end gap-2">
+        <textarea
+          value={content}
+          onChange={(event) => setContent(event.target.value)}
+          placeholder="질문이나 공유할 내용을 입력하세요."
+          rows={2}
+          required
+          className="w-full flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm leading-6 outline-none transition focus:border-sky-500"
+        />
         <button
           type="submit"
           disabled={pending}
-          className="ml-auto inline-flex items-center justify-center rounded-md bg-sky-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="shrink-0 rounded-md bg-sky-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           {pending ? "올리는 중..." : "올리기"}
         </button>
@@ -158,6 +247,7 @@ export function ClassBoard({
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [course, setCourse] = useState<string>(initialCourse);
   const inFlight = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     if (inFlight.current || document.visibilityState === "hidden") {
@@ -223,6 +313,14 @@ export function ClassBoard({
     return allowPosting ? [...filtered].reverse() : filtered;
   }, [posts, course, initialCourse, courseAliases, lockedCourse, allowPosting]);
 
+  useEffect(() => {
+    if (!allowPosting || !scrollRef.current) {
+      return;
+    }
+
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [visiblePosts, allowPosting]);
+
   return (
     <section className="bg-white">
       <div className={compact ? "px-0 py-0" : "mx-auto max-w-4xl px-5 py-14 sm:px-8"}>
@@ -271,72 +369,79 @@ export function ClassBoard({
           </div>
         ) : null}
 
-        {!error && loaded && visiblePosts.length === 0 ? (
-          <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-8 text-center">
-            <p className="text-base font-semibold text-slate-600">
-              아직 올라온 글이 없습니다.
-            </p>
-            <p className="mt-2 text-sm text-slate-500">
-              교육이 시작되면 이곳에 자료가 표시됩니다.
-            </p>
-          </div>
-        ) : null}
-
-        <div className={compact ? "mt-5 space-y-4" : "mt-8 space-y-5"}>
-          {visiblePosts.map((post) => (
-            <article
-              key={post.id}
-              className={compact ? "rounded-lg border border-slate-200 bg-white p-4 shadow-sm" : "rounded-lg border border-slate-200 bg-white p-6 shadow-sm"}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                <h2 className={compact ? "text-base font-black text-slate-950" : "text-xl font-black text-slate-950"}>{post.title}</h2>
-                <div className="flex items-center gap-2">
-                  {post.course ? (
-                    <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
-                      {post.course}
-                    </span>
-                  ) : null}
-                  <time className="text-xs font-semibold text-slate-400">
-                    {formatTime(post.createdAt)}
-                  </time>
-                </div>
-              </div>
-              <div className="pt-4">
-                <BoardContent text={post.content} />
-              </div>
-            </article>
-          ))}
-        </div>
-
         {allowPosting ? (
           <>
-            <PostForm
-              compact={compact}
-              postCourse={courseAliases[0] ?? (lockedCourse ? initialCourse : null)}
-              onPosted={load}
-            />
-            <div className="mt-4">
+            <div className="mt-5 flex aspect-square w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+              <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-3">
+                {loaded && visiblePosts.length === 0 ? (
+                  <p className="py-6 text-center text-sm font-semibold text-slate-400">
+                    아직 올라온 글이 없습니다. 첫 글을 남겨보세요!
+                  </p>
+                ) : (
+                  visiblePosts.map((post) => <ChatBubble key={post.id} post={post} />)
+                )}
+              </div>
+              <CompleteCounter />
+              <PostForm
+                postCourse={courseAliases[0] ?? (lockedCourse ? initialCourse : null)}
+                onPosted={load}
+              />
+            </div>
+            <div className="mt-3">
               <p className="text-xs font-bold text-slate-400">→ 작성하면 이렇게 보입니다</p>
-              <article
-                className={
-                  compact
-                    ? "mt-2 rounded-lg border border-dashed border-slate-300 bg-white p-4 opacity-70"
-                    : "mt-2 rounded-lg border border-dashed border-slate-300 bg-white p-6 opacity-70"
-                }
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                  <h2 className={compact ? "text-base font-black text-slate-950" : "text-xl font-black text-slate-950"}>
-                    홍길동
-                  </h2>
-                  <time className="text-xs font-semibold text-slate-400">방금 전</time>
-                </div>
-                <div className="pt-4">
-                  <BoardContent text={"질문 있습니다! 1페이지 링크가 안 열려요 https://example.com"} />
-                </div>
-              </article>
+              <div className="mt-2 opacity-70">
+                <ChatBubble
+                  post={{
+                    id: "example",
+                    title: "홍길동",
+                    content: "질문 있습니다! 1페이지 링크가 안 열려요 https://example.com",
+                    course: null,
+                    createdAt: new Date().toISOString(),
+                  }}
+                />
+              </div>
             </div>
           </>
-        ) : null}
+        ) : (
+          <>
+            {!error && loaded && visiblePosts.length === 0 ? (
+              <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-8 text-center">
+                <p className="text-base font-semibold text-slate-600">
+                  아직 올라온 글이 없습니다.
+                </p>
+                <p className="mt-2 text-sm text-slate-500">
+                  교육이 시작되면 이곳에 자료가 표시됩니다.
+                </p>
+              </div>
+            ) : null}
+
+            <div className={compact ? "mt-5 space-y-4" : "mt-8 space-y-5"}>
+              {visiblePosts.map((post) => (
+                <article
+                  key={post.id}
+                  className={compact ? "rounded-lg border border-slate-200 bg-white p-4 shadow-sm" : "rounded-lg border border-slate-200 bg-white p-6 shadow-sm"}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <h2 className={compact ? "text-base font-black text-slate-950" : "text-xl font-black text-slate-950"}>{post.title}</h2>
+                    <div className="flex items-center gap-2">
+                      {post.course ? (
+                        <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
+                          {post.course}
+                        </span>
+                      ) : null}
+                      <time className="text-xs font-semibold text-slate-400">
+                        {formatTime(post.createdAt)}
+                      </time>
+                    </div>
+                  </div>
+                  <div className="pt-4">
+                    <BoardContent text={post.content} />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

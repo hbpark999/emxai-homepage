@@ -162,6 +162,97 @@ export async function createBoardPost({
   cache = null;
 }
 
+/** 과정 게시판의 "작업완료" 카운터. 별도 Notion 페이지 하나의 숫자 속성 값을 그대로 쓴다.
+ * 모든 수강생이 같은 값을 보도록 서버(Notion)에 저장하며, 브라우저별 상태가 아니다. */
+export function isCompleteCounterConfigured() {
+  return Boolean(process.env.NOTION_TOKEN && process.env.NOTION_COMPLETE_COUNTER_PAGE_ID);
+}
+
+async function fetchCounterPageProperties(): Promise<Record<string, NotionProperty>> {
+  const token = process.env.NOTION_TOKEN;
+  const pageId = process.env.NOTION_COMPLETE_COUNTER_PAGE_ID;
+
+  if (!token || !pageId) {
+    throw new Error("NOTION_TOKEN 또는 NOTION_COMPLETE_COUNTER_PAGE_ID 환경변수가 설정되지 않았습니다.");
+  }
+
+  const response = await fetch(`${NOTION_API}/pages/${pageId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": NOTION_VERSION,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`카운터 조회 실패 (${response.status}). ${detail.slice(0, 300)}`);
+  }
+
+  const page = (await response.json()) as NotionPage;
+  return page.properties ?? {};
+}
+
+/** 속성 "이름"이 아니라 number 타입인 속성을 찾는다(생성 과정에서 이름이 깨지더라도 안전하게 동작). */
+function findCounterPropertyName(properties: Record<string, NotionProperty>) {
+  const entry = Object.entries(properties).find(([, value]) => value?.type === "number");
+
+  if (!entry) {
+    throw new Error("카운터 데이터베이스에 숫자(number) 속성이 없습니다.");
+  }
+
+  return entry[0];
+}
+
+async function writeCompleteCounter(value: number) {
+  const token = process.env.NOTION_TOKEN;
+  const pageId = process.env.NOTION_COMPLETE_COUNTER_PAGE_ID;
+
+  if (!token || !pageId) {
+    throw new Error("NOTION_TOKEN 또는 NOTION_COMPLETE_COUNTER_PAGE_ID 환경변수가 설정되지 않았습니다.");
+  }
+
+  const properties = await fetchCounterPageProperties();
+  const propertyName = findCounterPropertyName(properties);
+
+  const response = await fetch(`${NOTION_API}/pages/${pageId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": NOTION_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      properties: { [propertyName]: { number: value } },
+    }),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`카운터 갱신 실패 (${response.status}). ${detail.slice(0, 300)}`);
+  }
+
+  return value;
+}
+
+export async function getCompleteCount() {
+  const properties = await fetchCounterPageProperties();
+  const propertyName = findCounterPropertyName(properties);
+  const numberProperty = properties[propertyName] as { number?: number | null };
+
+  return numberProperty.number ?? 0;
+}
+
+export async function incrementCompleteCount() {
+  const current = await getCompleteCount();
+  return writeCompleteCounter(current + 1);
+}
+
+export async function resetCompleteCount() {
+  return writeCompleteCounter(0);
+}
+
 export async function getBoardPosts(): Promise<BoardPost[]> {
   const token = process.env.NOTION_TOKEN;
   const databaseId = process.env.NOTION_BOARD_DB_ID;
