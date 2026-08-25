@@ -73,18 +73,26 @@ function ChatBubble({ post }: { post: BoardPost }) {
   );
 }
 
-function CompleteCounter() {
+function CompleteCounter({ storageKey }: { storageKey: string }) {
   const [count, setCount] = useState<number | null>(null);
+  const [round, setRound] = useState(0);
+  // 마운트 시점(=비밀번호 통과 후, 클라이언트에서만 렌더되는 지점)에만 읽으면 되므로
+  // effect가 아니라 지연 초기값으로 읽어 불필요한 렌더 사이클을 만들지 않는다.
+  const [clickedRound, setClickedRound] = useState<number | null>(() => {
+    const stored = window.localStorage.getItem(storageKey);
+    return stored === null ? null : Number(stored);
+  });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
       const response = await fetch("/api/board/complete-count", { cache: "no-store" });
-      const payload = (await response.json()) as { ok?: boolean; count?: number };
+      const payload = (await response.json()) as { ok?: boolean; count?: number; round?: number };
 
       if (payload.ok) {
         setCount(payload.count ?? 0);
+        setRound(payload.round ?? 0);
       }
     } catch {
       // 폴링 중 일시적 오류는 무시하고 다음 주기에 재시도한다.
@@ -101,8 +109,14 @@ function CompleteCounter() {
     };
   }, [load]);
 
+  const alreadyClickedThisRound = clickedRound === round;
+
   async function act(action: "increment" | "reset") {
-    if (action === "reset" && !window.confirm("카운트를 0으로 초기화할까요?")) {
+    if (action === "reset" && !window.confirm("카운트를 0으로 초기화할까요? (모든 학생이 다시 누를 수 있게 됩니다)")) {
+      return;
+    }
+
+    if (action === "increment" && alreadyClickedThisRound) {
       return;
     }
 
@@ -115,7 +129,12 @@ function CompleteCounter() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
       });
-      const payload = (await response.json()) as { ok?: boolean; count?: number; error?: string };
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        count?: number;
+        round?: number;
+        error?: string;
+      };
 
       if (!payload.ok) {
         setError(payload.error ?? "처리하지 못했습니다.");
@@ -123,6 +142,12 @@ function CompleteCounter() {
       }
 
       setCount(payload.count ?? 0);
+      setRound(payload.round ?? 0);
+
+      if (action === "increment") {
+        window.localStorage.setItem(storageKey, String(payload.round ?? 0));
+        setClickedRound(payload.round ?? 0);
+      }
     } catch {
       setError("연결을 확인해 주세요.");
     } finally {
@@ -139,10 +164,10 @@ function CompleteCounter() {
         <button
           type="button"
           onClick={() => act("increment")}
-          disabled={pending}
+          disabled={pending || alreadyClickedThisRound}
           className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          작업완료
+          {alreadyClickedThisRound ? "완료함" : "작업완료"}
         </button>
         <button
           type="button"
@@ -400,7 +425,9 @@ export function ClassBoard({
                   notionPosts.map((post) => <ChatBubble key={post.id} post={post} />)
                 )}
               </div>
-              <CompleteCounter />
+              <CompleteCounter
+                storageKey={`emxai_complete_round_${courseAliases[0] ?? initialCourse}`}
+              />
               <PostForm
                 postCourse={courseAliases[0] ?? (lockedCourse ? initialCourse : null)}
                 onPosted={load}

@@ -246,7 +246,14 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                 )}
               </div>
             </div>
-            <HtmlSandbox postCourse={course.boardCourseNames[0] ?? course.title} />
+            <HtmlSandbox
+              label="HTML 실습 1"
+              postCourse={course.boardCourseNames[0] ?? course.title}
+            />
+            <HtmlSandbox
+              label="HTML 실습 2 (비교용)"
+              postCourse={course.boardCourseNames[0] ?? course.title}
+            />
             </div>
             <aside className="xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto xl:rounded-lg xl:border xl:border-slate-200 xl:bg-white xl:p-5">
               <ClassBoard

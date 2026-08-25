@@ -37,6 +37,7 @@ type NotionProperty = {
   title?: NotionRichText[];
   rich_text?: NotionRichText[];
   checkbox?: boolean;
+  number?: number | null;
   select?: { name?: string } | null;
   date?: { start?: string } | null;
 };
@@ -166,13 +167,21 @@ export async function createBoardPost({
   cache = null;
 }
 
-/** 과정 게시판의 "작업완료" 카운터. 별도 Notion 페이지 하나의 숫자 속성 값을 그대로 쓴다.
- * 모든 수강생이 같은 값을 보도록 서버(Notion)에 저장하며, 브라우저별 상태가 아니다. */
+/** 과정 게시판의 "작업완료" 카운터. 별도 Notion 페이지 하나의 두 숫자 속성을 그대로 쓴다.
+ * 모든 수강생이 같은 값을 보도록 서버(Notion)에 저장하며, 브라우저별 상태가 아니다.
+ *
+ * 카운트 : 현재 완료 인원 수
+ * 회차   : "초기화"를 누를 때마다 1씩 늘어난다. 학생 화면은 자신이 클릭했던 회차를
+ *          localStorage에 저장해 두고, 서버의 회차와 다르면(=강사가 초기화함) 다시
+ *          누를 수 있게 한다 — 한 회차당 한 번만 반영되게 하는 용도.
+ */
+export type CompleteCounterState = { count: number; round: number };
+
 export function isCompleteCounterConfigured() {
   return Boolean(process.env.NOTION_TOKEN && process.env.NOTION_COMPLETE_COUNTER_PAGE_ID);
 }
 
-async function fetchCounterPageProperties(): Promise<Record<string, NotionProperty>> {
+async function fetchCounterState(): Promise<CompleteCounterState> {
   const token = process.env.NOTION_TOKEN;
   const pageId = process.env.NOTION_COMPLETE_COUNTER_PAGE_ID;
 
@@ -194,30 +203,21 @@ async function fetchCounterPageProperties(): Promise<Record<string, NotionProper
   }
 
   const page = (await response.json()) as NotionPage;
-  return page.properties ?? {};
+  const properties = page.properties ?? {};
+
+  return {
+    count: properties["카운트"]?.number ?? 0,
+    round: properties["회차"]?.number ?? 0,
+  };
 }
 
-/** 속성 "이름"이 아니라 number 타입인 속성을 찾는다(생성 과정에서 이름이 깨지더라도 안전하게 동작). */
-function findCounterPropertyName(properties: Record<string, NotionProperty>) {
-  const entry = Object.entries(properties).find(([, value]) => value?.type === "number");
-
-  if (!entry) {
-    throw new Error("카운터 데이터베이스에 숫자(number) 속성이 없습니다.");
-  }
-
-  return entry[0];
-}
-
-async function writeCompleteCounter(value: number) {
+async function writeCounterState(state: CompleteCounterState) {
   const token = process.env.NOTION_TOKEN;
   const pageId = process.env.NOTION_COMPLETE_COUNTER_PAGE_ID;
 
   if (!token || !pageId) {
     throw new Error("NOTION_TOKEN 또는 NOTION_COMPLETE_COUNTER_PAGE_ID 환경변수가 설정되지 않았습니다.");
   }
-
-  const properties = await fetchCounterPageProperties();
-  const propertyName = findCounterPropertyName(properties);
 
   const response = await fetch(`${NOTION_API}/pages/${pageId}`, {
     method: "PATCH",
@@ -227,7 +227,10 @@ async function writeCompleteCounter(value: number) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      properties: { [propertyName]: { number: value } },
+      properties: {
+        카운트: { number: state.count },
+        회차: { number: state.round },
+      },
     }),
     cache: "no-store",
   });
@@ -237,24 +240,21 @@ async function writeCompleteCounter(value: number) {
     throw new Error(`카운터 갱신 실패 (${response.status}). ${detail.slice(0, 300)}`);
   }
 
-  return value;
+  return state;
 }
 
 export async function getCompleteCount() {
-  const properties = await fetchCounterPageProperties();
-  const propertyName = findCounterPropertyName(properties);
-  const numberProperty = properties[propertyName] as { number?: number | null };
-
-  return numberProperty.number ?? 0;
+  return fetchCounterState();
 }
 
 export async function incrementCompleteCount() {
-  const current = await getCompleteCount();
-  return writeCompleteCounter(current + 1);
+  const current = await fetchCounterState();
+  return writeCounterState({ count: current.count + 1, round: current.round });
 }
 
 export async function resetCompleteCount() {
-  return writeCompleteCounter(0);
+  const current = await fetchCounterState();
+  return writeCounterState({ count: 0, round: current.round + 1 });
 }
 
 export async function getBoardPosts(): Promise<BoardPost[]> {
