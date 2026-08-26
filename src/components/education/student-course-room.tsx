@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { StudentCourse } from "@/data/student-courses";
 import { ClassBoard } from "./class-board";
 import { HtmlSandbox } from "./html-sandbox";
-import { SessionTimer } from "./session-timer";
+import { TimerBadge, TimerControls, useSessionTimer } from "./session-timer";
 
 type StudentCourseRoomProps = {
   course: StudentCourse;
@@ -27,6 +27,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
     showPdfToc ? "bookmarks" : "none"
   }&view=FitH&zoom=page-width`;
   const pageCount = course.pdfPageCount;
+  const timer = useSessionTimer();
 
   useEffect(() => {
     if (!unlocked) {
@@ -131,13 +132,16 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
           <p className="mt-6 text-sm font-black uppercase tracking-[0.16em] text-sky-500">
             Student Corner
           </p>
-          <h1 className="mt-4 max-w-5xl text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
-            {course.title}
-          </h1>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <h1 className="max-w-5xl text-3xl font-black leading-tight text-slate-950 sm:text-5xl">
+              {course.title}
+            </h1>
+            <TimerBadge state={timer} />
+          </div>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
             수강생 전용 자료와 해당 과정 게시판을 한 화면에서 확인합니다.
           </p>
-          <SessionTimer />
+          <TimerControls state={timer} />
         </div>
 
         {!unlocked ? (

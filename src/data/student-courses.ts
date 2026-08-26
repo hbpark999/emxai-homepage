@@ -62,8 +62,8 @@ export const studentCourses = [
     dayLabel: "2일 차",
     boardCourseNames: ["6기", "전원 Noise 저감 설계와 생성형 AI활용"],
     passwordEnv: "EDU_PASS_TTA_POWER_NOISE_DAY2",
-    pdfFile: "tta-power-noise-genai-day2.pdf",
-    pdfPageCount: 121,
+    pdfFile: "TTA] 전원 노이즈설계 및 생성형AI활용_2일차 20260826(교육진행_1).pdf",
+    pdfPageCount: 130,
   },
 ] satisfies StudentCourse[];
 

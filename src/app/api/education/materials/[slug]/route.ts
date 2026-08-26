@@ -50,12 +50,15 @@ export async function GET(
 
   const stream = Readable.toWeb(createReadStream(normalizedFilePath));
   const disposition = request.nextUrl.searchParams.get("download") === "1" ? "attachment" : "inline";
+  // Content-Disposition의 filename은 ASCII만 허용되므로, 한글 등은 filename* (RFC 5987)로 인코딩해 전달한다.
+  const asciiFallbackName = course.pdfFile.replace(/[^\x20-\x7e]/g, "_");
+  const encodedName = encodeURIComponent(course.pdfFile);
 
   return new Response(stream as BodyInit, {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Length": String(fileStat.size),
-      "Content-Disposition": `${disposition}; filename="${course.pdfFile}"`,
+      "Content-Disposition": `${disposition}; filename="${asciiFallbackName}"; filename*=UTF-8''${encodedName}`,
       "Cache-Control": "private, no-store",
     },
   });
