@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { StudentCourse } from "@/data/student-courses";
 import { ClassBoard } from "./class-board";
 import { HtmlSandbox } from "./html-sandbox";
+import { SessionTimer } from "./session-timer";
 
 type StudentCourseRoomProps = {
   course: StudentCourse;
@@ -136,6 +137,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
           <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
             수강생 전용 자료와 해당 과정 게시판을 한 화면에서 확인합니다.
           </p>
+          <SessionTimer />
         </div>
 
         {!unlocked ? (

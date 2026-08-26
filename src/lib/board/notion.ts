@@ -257,6 +257,74 @@ export async function resetCompleteCount() {
   return writeCounterState({ count: 0, round: current.round + 1 });
 }
 
+/** 교시/휴식 타이머. 같은 "완료 카운터" Notion 페이지의 날짜 속성(종료시각)에
+ * 종료 시각(ISO 문자열)을 저장한다. 강사가 "남은 시간(분)"을 입력하면 그 시점 +
+ * N분을 계산해 저장하고, 모든 화면은 이 절대 시각을 기준으로 각자 카운트다운한다. */
+export async function getTimerEndsAt(): Promise<string | null> {
+  const token = process.env.NOTION_TOKEN;
+  const pageId = process.env.NOTION_COMPLETE_COUNTER_PAGE_ID;
+
+  if (!token || !pageId) {
+    throw new Error("NOTION_TOKEN 또는 NOTION_COMPLETE_COUNTER_PAGE_ID 환경변수가 설정되지 않았습니다.");
+  }
+
+  const response = await fetch(`${NOTION_API}/pages/${pageId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": NOTION_VERSION,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`타이머 조회 실패 (${response.status}). ${detail.slice(0, 300)}`);
+  }
+
+  const page = (await response.json()) as NotionPage;
+  return page.properties?.["종료시각"]?.date?.start ?? null;
+}
+
+async function writeTimerEndsAt(endsAt: string | null) {
+  const token = process.env.NOTION_TOKEN;
+  const pageId = process.env.NOTION_COMPLETE_COUNTER_PAGE_ID;
+
+  if (!token || !pageId) {
+    throw new Error("NOTION_TOKEN 또는 NOTION_COMPLETE_COUNTER_PAGE_ID 환경변수가 설정되지 않았습니다.");
+  }
+
+  const response = await fetch(`${NOTION_API}/pages/${pageId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": NOTION_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      properties: {
+        종료시각: { date: endsAt ? { start: endsAt } : null },
+      },
+    }),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`타이머 갱신 실패 (${response.status}). ${detail.slice(0, 300)}`);
+  }
+
+  return endsAt;
+}
+
+export async function startTimer(minutes: number) {
+  const endsAt = new Date(Date.now() + minutes * 60_000).toISOString();
+  return writeTimerEndsAt(endsAt);
+}
+
+export async function clearTimer() {
+  return writeTimerEndsAt(null);
+}
+
 export async function getBoardPosts(): Promise<BoardPost[]> {
   const token = process.env.NOTION_TOKEN;
   const databaseId = process.env.NOTION_BOARD_DB_ID;
