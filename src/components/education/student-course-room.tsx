@@ -25,7 +25,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
   const materialHref = `/api/education/materials/${course.slug}`;
   const pdfViewerHref = `${materialHref}#page=${currentPdfPage}&toolbar=0&navpanes=${showPdfToc ? "1" : "0"}&pagemode=${
     showPdfToc ? "bookmarks" : "none"
-  }&view=FitH&zoom=page-width`;
+  }&view=Fit`;
   const pageCount = course.pdfPageCount;
   const timer = useSessionTimer();
 
