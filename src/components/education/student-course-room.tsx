@@ -232,12 +232,26 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
               </div>
               <div>
                 {materialAvailable ? (
-                  <iframe
-                    key={`${showPdfToc ? "toc-on" : "toc-off"}-${currentPdfPage}`}
-                    title={`${course.title} PDF 자료`}
-                    src={pdfViewerHref}
-                    className={isFullscreen ? "h-[calc(100vh-4rem)] w-full bg-white" : "h-[82vh] min-h-[44rem] w-full bg-white"}
-                  />
+                  <div
+                    className={
+                      isFullscreen
+                        ? "flex h-[calc(100vh-4rem)] w-full items-center justify-center bg-slate-950"
+                        : "w-full"
+                    }
+                  >
+                    {/* 자료가 16:9 슬라이드라서, 컨테이너를 페이지와 같은 비율로 맞춰야
+                        브라우저 내장 PDF 뷰어가 다음 페이지를 이어서 보여주지 않는다. */}
+                    <iframe
+                      key={`${showPdfToc ? "toc-on" : "toc-off"}-${currentPdfPage}`}
+                      title={`${course.title} PDF 자료`}
+                      src={pdfViewerHref}
+                      className={
+                        isFullscreen
+                          ? "aspect-video max-h-full w-full bg-white"
+                          : "aspect-video w-full bg-white"
+                      }
+                    />
+                  </div>
                 ) : (
                   <div className={isFullscreen ? "flex h-[calc(100vh-4rem)] w-full items-center justify-center p-6 text-center" : "flex h-[82vh] min-h-[44rem] items-center justify-center p-6 text-center"}>
                     <div>
