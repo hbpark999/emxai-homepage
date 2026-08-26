@@ -22,7 +22,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const pdfShellRef = useRef<HTMLDivElement>(null);
   const materialHref = `/api/education/materials/${course.slug}`;
-  const pdfViewerHref = `${materialHref}#page=${currentPdfPage}&toolbar=1&navpanes=${showPdfToc ? "1" : "0"}&pagemode=${
+  const pdfViewerHref = `${materialHref}#page=${currentPdfPage}&toolbar=0&navpanes=${showPdfToc ? "1" : "0"}&pagemode=${
     showPdfToc ? "bookmarks" : "none"
   }&view=FitH&zoom=page-width`;
   const pageCount = course.pdfPageCount;
