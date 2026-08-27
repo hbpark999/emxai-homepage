@@ -120,7 +120,7 @@ export function HomeUpdates() {
                 <div key={group.month} className="relative pl-6">
                   <span className="absolute left-0 top-2.5 size-2 rounded-full border-2 border-cyan-300" />
                   <h4 className="text-xl font-medium text-slate-950">{group.month}</h4>
-                  <ul className="mt-3 space-y-2 text-sm font-normal leading-6 text-slate-700">
+                  <ul className="mt-3 space-y-2 text-lg font-normal leading-7 text-slate-700">
                     {group.items.map((item) => (
                       <li
                         key={item.title}

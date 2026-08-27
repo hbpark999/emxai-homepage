@@ -325,6 +325,91 @@ export async function clearTimer() {
   return writeTimerEndsAt(null);
 }
 
+/** HTML 실습 1/2 공유 슬롯. 같은 "완료 카운터" Notion 페이지에 슬롯마다 코드(rich_text)와
+ * "사용 중" 체크박스를 저장한다. 참가자 아무나 두 슬롯 중 하나에 코드를 붙여넣으면,
+ * 그 슬롯을 폴링하는 모두의 화면에 코드와 렌더링 결과가 그대로 반영된다. */
+export type HtmlSlotState = { code: string; inUse: boolean };
+export type HtmlSlotsState = { slot1: HtmlSlotState; slot2: HtmlSlotState };
+
+const HTML_SLOT_PROPERTY_NAMES = {
+  1: { code: "입력1", inUse: "입력1사용중" },
+  2: { code: "입력2", inUse: "입력2사용중" },
+} as const;
+
+export async function getHtmlSlots(): Promise<HtmlSlotsState> {
+  const token = process.env.NOTION_TOKEN;
+  const pageId = process.env.NOTION_COMPLETE_COUNTER_PAGE_ID;
+
+  if (!token || !pageId) {
+    throw new Error("NOTION_TOKEN 또는 NOTION_COMPLETE_COUNTER_PAGE_ID 환경변수가 설정되지 않았습니다.");
+  }
+
+  const response = await fetch(`${NOTION_API}/pages/${pageId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": NOTION_VERSION,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`실습 슬롯 조회 실패 (${response.status}). ${detail.slice(0, 300)}`);
+  }
+
+  const page = (await response.json()) as NotionPage;
+  const properties = page.properties ?? {};
+
+  return {
+    slot1: {
+      code: joinText(properties[HTML_SLOT_PROPERTY_NAMES[1].code]?.rich_text),
+      inUse: properties[HTML_SLOT_PROPERTY_NAMES[1].inUse]?.checkbox ?? false,
+    },
+    slot2: {
+      code: joinText(properties[HTML_SLOT_PROPERTY_NAMES[2].code]?.rich_text),
+      inUse: properties[HTML_SLOT_PROPERTY_NAMES[2].inUse]?.checkbox ?? false,
+    },
+  };
+}
+
+export async function setHtmlSlot(
+  slot: 1 | 2,
+  update: { code?: string; inUse?: boolean },
+) {
+  const token = process.env.NOTION_TOKEN;
+  const pageId = process.env.NOTION_COMPLETE_COUNTER_PAGE_ID;
+
+  if (!token || !pageId) {
+    throw new Error("NOTION_TOKEN 또는 NOTION_COMPLETE_COUNTER_PAGE_ID 환경변수가 설정되지 않았습니다.");
+  }
+
+  const names = HTML_SLOT_PROPERTY_NAMES[slot];
+  const properties: Record<string, unknown> = {};
+
+  if (update.code !== undefined) {
+    properties[names.code] = { rich_text: richText(update.code) };
+  }
+  if (update.inUse !== undefined) {
+    properties[names.inUse] = { checkbox: update.inUse };
+  }
+
+  const response = await fetch(`${NOTION_API}/pages/${pageId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": NOTION_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ properties }),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`실습 슬롯 갱신 실패 (${response.status}). ${detail.slice(0, 300)}`);
+  }
+}
+
 export async function getBoardPosts(): Promise<BoardPost[]> {
   const token = process.env.NOTION_TOKEN;
   const databaseId = process.env.NOTION_BOARD_DB_ID;

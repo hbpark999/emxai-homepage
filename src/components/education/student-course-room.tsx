@@ -15,6 +15,7 @@ type StudentCourseRoomProps = {
 export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
   const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [materialAvailable, setMaterialAvailable] = useState<boolean | null>(null);
@@ -28,6 +29,32 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
   }&view=Fit`;
   const pageCount = course.pdfPageCount;
   const timer = useSessionTimer();
+
+  // 이전에 비밀번호를 확인한 적이 있으면(서버가 8시간 유지되는 쿠키를 이미 갖고 있음)
+  // 새로고침해도 다시 입력하지 않도록, 마운트 시 한 번 조용히 접근 가능 여부를 확인한다.
+  useEffect(() => {
+    let ignore = false;
+
+    async function checkExistingAccess() {
+      try {
+        const response = await fetch(`${materialHref}?status=1`, { cache: "no-store" });
+
+        if (!ignore && response.ok) {
+          setUnlocked(true);
+        }
+      } finally {
+        if (!ignore) {
+          setCheckingAccess(false);
+        }
+      }
+    }
+
+    checkExistingAccess();
+
+    return () => {
+      ignore = true;
+    };
+  }, [materialHref]);
 
   useEffect(() => {
     if (!unlocked) {
@@ -144,7 +171,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
           <TimerControls state={timer} />
         </div>
 
-        {!unlocked ? (
+        {checkingAccess ? null : !unlocked ? (
           <div className="grid gap-8 py-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <form
               onSubmit={submitPassword}
@@ -266,8 +293,8 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                 )}
               </div>
             </div>
-            <HtmlSandbox label="HTML 실습 1" />
-            <HtmlSandbox label="HTML 실습 2 (비교용)" />
+            <HtmlSandbox slot={1} label="HTML 실습 1" />
+            <HtmlSandbox slot={2} label="HTML 실습 2 (비교용)" />
             </div>
             <aside className="xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto xl:rounded-lg xl:border xl:border-slate-200 xl:bg-white xl:p-5">
               <ClassBoard
