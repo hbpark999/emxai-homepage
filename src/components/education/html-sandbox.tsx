@@ -21,13 +21,49 @@
  * 미리보기는 sandbox 속성이 걸린 iframe에서 렌더링되어 부모 페이지와 격리된다.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ClipboardEvent } from "react";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 
 const POLL_MS = 3_000;
 const SAVE_DEBOUNCE_MS = 700;
+const PASTED_IMAGE_MAX_WIDTH = 900;
+const PASTED_IMAGE_QUALITY = 0.7;
 
-const CODE_PLACEHOLDER = "<!-- 여기에 HTML을 붙여넣으면 바로 오른쪽과 다른 참가자 화면에 반영됩니다 -->\n<h1>Hello EMxAI</h1>";
+const CODE_PLACEHOLDER = "<!-- 여기에 HTML을 붙여넣거나, 스크린 캡처 이미지를 그대로 붙여넣어도(Ctrl+V) 됩니다 -->\n<h1>Hello EMxAI</h1>";
+
+/** 붙여넣은 이미지를 적당한 크기로 줄여 data URL로 변환한다. 원본 그대로 쓰면
+ * 용량이 너무 커져서 다른 참가자에게 동기화하기 부담스러워지기 때문. */
+function resizeImageToDataUrl(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = new window.Image();
+
+      img.onload = () => {
+        const scale = Math.min(1, PASTED_IMAGE_MAX_WIDTH / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("canvas를 사용할 수 없습니다."));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", PASTED_IMAGE_QUALITY));
+      };
+
+      img.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
+      img.src = reader.result as string;
+    };
+
+    reader.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
+    reader.readAsDataURL(file);
+  });
+}
 
 type HtmlSandboxProps = {
   slot: 1 | 2;
@@ -127,6 +163,48 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
     saveTimerRef.current = window.setTimeout(() => saveCode(value), SAVE_DEBOUNCE_MS);
   }
 
+  function insertAtCursor(snippet: string) {
+    const el = textareaRef.current;
+    const start = el?.selectionStart ?? code.length;
+    const end = el?.selectionEnd ?? code.length;
+    const next = code.slice(0, start) + snippet + code.slice(end);
+
+    handleChange(next);
+
+    requestAnimationFrame(() => {
+      if (!el) {
+        return;
+      }
+      const cursor = start + snippet.length;
+      el.selectionStart = cursor;
+      el.selectionEnd = cursor;
+      el.focus();
+    });
+  }
+
+  async function handlePaste(event: ClipboardEvent<HTMLTextAreaElement>) {
+    const imageItem = Array.from(event.clipboardData?.items ?? []).find((item) =>
+      item.type.startsWith("image/"),
+    );
+
+    if (!imageItem) {
+      return;
+    }
+
+    event.preventDefault();
+    const file = imageItem.getAsFile();
+    if (!file) {
+      return;
+    }
+
+    try {
+      const dataUrl = await resizeImageToDataUrl(file);
+      insertAtCursor(`<img src="${dataUrl}" style="max-width:100%" />`);
+    } catch {
+      setError("이미지를 붙여넣지 못했습니다.");
+    }
+  }
+
   async function toggleInUse() {
     if (isLockedByOther) {
       // 다른 사람이 이미 소유한 상태에서는 체크박스가 비활성화돼 있어 여기 오지 않지만, 방어적으로 막는다.
@@ -165,7 +243,8 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
         <div>
           <p className="text-sm font-black text-slate-950">{label}</p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            왼쪽에 HTML 코드를 붙여넣으면 오른쪽과 다른 참가자 화면에 바로 반영됩니다.
+            HTML 코드를 붙여넣거나 스크린 캡처 이미지를 그대로 붙여넣으면(Ctrl+V) 아래
+            결과와 다른 참가자 화면에 바로 반영됩니다.
           </p>
         </div>
         <label
@@ -185,9 +264,9 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
           사용 중
         </label>
       </div>
-      <div className="grid gap-0 lg:grid-cols-2">
+      <div className="flex flex-col">
         {isLockedByOther ? (
-          <div className="flex h-72 w-full items-center justify-center border-b border-slate-200 bg-slate-900 p-4 text-center lg:border-b-0 lg:border-r">
+          <div className="flex h-40 w-full items-center justify-center border-b border-slate-200 bg-slate-900 p-4 text-center">
             <p className="text-sm font-bold text-amber-300">
               다른 곳에서 입력 중입니다.
               <br />
@@ -201,6 +280,7 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
             ref={textareaRef}
             value={code}
             onChange={(event) => handleChange(event.target.value)}
+            onPaste={handlePaste}
             onFocus={() => {
               isFocusedRef.current = true;
             }}
@@ -210,7 +290,7 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
             placeholder={CODE_PLACEHOLDER}
             spellCheck={false}
             aria-label="HTML 코드 입력"
-            className="h-72 w-full resize-none border-b border-slate-200 bg-slate-950 p-4 font-mono text-xs leading-6 text-slate-100 outline-none placeholder:text-slate-500 lg:border-b-0 lg:border-r"
+            className="h-40 w-full resize-none border-b border-slate-200 bg-slate-950 p-4 font-mono text-xs leading-6 text-slate-100 outline-none placeholder:text-slate-500"
           />
         )}
         <div ref={previewRef} className="relative fullscreen:flex fullscreen:flex-col">
@@ -225,7 +305,7 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
             title="HTML 미리보기"
             srcDoc={code}
             sandbox="allow-scripts allow-modals"
-            className={isFullscreen ? "h-full w-full flex-1 bg-white" : "h-72 w-full bg-white"}
+            className={isFullscreen ? "h-full w-full flex-1 bg-white" : "h-64 w-full bg-white"}
           />
         </div>
       </div>

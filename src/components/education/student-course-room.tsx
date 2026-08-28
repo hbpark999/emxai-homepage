@@ -293,8 +293,10 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                 )}
               </div>
             </div>
-            <HtmlSandbox slot={1} label="HTML 실습 1" />
-            <HtmlSandbox slot={2} label="HTML 실습 2 (비교용)" />
+            <div className="grid gap-6 md:grid-cols-2">
+              <HtmlSandbox slot={1} label="HTML 실습 1" />
+              <HtmlSandbox slot={2} label="HTML 실습 2 (비교용)" />
+            </div>
             </div>
             <aside className="xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto xl:rounded-lg xl:border xl:border-slate-200 xl:bg-white xl:p-5">
               <ClassBoard

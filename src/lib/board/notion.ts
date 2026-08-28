@@ -112,8 +112,22 @@ export function isBoardConfigured() {
   return Boolean(process.env.NOTION_TOKEN && process.env.NOTION_BOARD_DB_ID);
 }
 
+const RICH_TEXT_BLOCK_LIMIT = 2000;
+const RICH_TEXT_MAX_BLOCKS = 90; // Notion 한 속성에 넣을 수 있는 rich_text 블록당 2000자 제한을 우회하기 위해 여러 블록으로 쪼갠다(스크린샷 붙여넣기 등 긴 내용 대비).
+
+/** 긴 텍스트(붙여넣은 이미지의 data URL 등)를 그대로 한 블록에 자르지 않고,
+ * 2000자 블록 여러 개로 쪼개 담는다. 단순 truncate보다 훨씬 큰 내용을 보존할 수 있다. */
 function richText(content: string) {
-  return [{ type: "text", text: { content: content.slice(0, 2000) } }];
+  const chunks: { type: "text"; text: { content: string } }[] = [];
+
+  for (let offset = 0; offset < content.length && chunks.length < RICH_TEXT_MAX_BLOCKS; offset += RICH_TEXT_BLOCK_LIMIT) {
+    chunks.push({
+      type: "text",
+      text: { content: content.slice(offset, offset + RICH_TEXT_BLOCK_LIMIT) },
+    });
+  }
+
+  return chunks.length > 0 ? chunks : [{ type: "text" as const, text: { content: "" } }];
 }
 
 /** 교육생이 게시판에 글을 올린다. 통합(Integration) 토큰으로 직접 쓰기 때문에
