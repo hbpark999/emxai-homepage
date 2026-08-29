@@ -18,7 +18,7 @@ export function HomeHero() {
             <div className="mt-4 overflow-hidden border-y border-slate-200 py-2 text-base leading-relaxed text-slate-700 sm:text-lg lg:text-xl">
               <div className="hero-marquee flex w-max gap-10 whitespace-nowrap">
                 <span>
-                  <strong className="text-slate-900">AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동형 EMI/SI Engineering Tool 개발
+                  <strong className="text-slate-900">AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
                 </span>
                 <span>
                   <strong className="text-slate-900">Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
@@ -27,7 +27,7 @@ export function HomeHero() {
                   <strong className="text-slate-900">Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
                 </span>
                 <span aria-hidden="true">
-                  <strong className="text-slate-900">AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동형 EMI/SI Engineering Tool 개발
+                  <strong className="text-slate-900">AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
                 </span>
                 <span aria-hidden="true">
                   <strong className="text-slate-900">Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
