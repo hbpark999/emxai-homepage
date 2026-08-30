@@ -11,11 +11,6 @@ export function HomeHero() {
             </span>
             <span className="block">솔루션 개발, 자문 및 교육</span>
           </h1>
-          <div className="mx-auto mb-10 max-w-6xl text-center">
-            <p className="text-xl font-black tracking-normal text-slate-900 sm:text-2xl lg:text-4xl">
-              AI-Connected · Integrated · Agentic EMI/SI Engineering
-            </p>
-          </div>
           <Image
             src="/이엠엑스아이_AI도입효과1.png"
             alt="AI 기반 EMI/SI Engineering 업무 전환 전후 요약"
@@ -25,6 +20,11 @@ export function HomeHero() {
             priority
             sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
           />
+          <div className="mx-auto mt-14 max-w-6xl text-center">
+            <p className="text-xl font-black tracking-normal text-slate-900 sm:text-2xl lg:text-4xl">
+              AI-Connected · Integrated · Agentic EMI/SI Engineering
+            </p>
+          </div>
           <div className="mx-auto mt-4 max-w-6xl px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
             <div className="hero-message-rotator relative grid min-h-[4.25rem] place-items-center overflow-hidden sm:min-h-[3rem]">
               <p className="hero-rotating-message text-center">
