@@ -20,38 +20,43 @@ export function HomeSolutions() {
           </p>
         </div>
 
-        <div className="mt-10 grid items-stretch gap-6 lg:grid-cols-3">
+        <div className="mt-10 grid items-stretch gap-6 lg:grid-cols-2">
           {solutionCards.map((card, index) => {
             const isOpen = openIndex === index;
             const isEducationCard = card.title === "기업 교육·자문";
             const isExternalInquiry = card.inquiryHref.startsWith("http");
+            const imageClassName = isEducationCard
+              ? "object-contain scale-125"
+              : "object-contain";
 
             return (
               <article
                 key={card.title}
-                className="flex min-h-[48rem] overflow-hidden rounded-lg border border-sky-100 bg-white shadow-[0_0_0_1px_rgba(14,165,233,0.04)]"
+                className="flex min-h-[48rem] min-w-0 overflow-hidden rounded-lg border border-sky-100 bg-white shadow-[0_0_0_1px_rgba(14,165,233,0.04)]"
               >
                 <div className="flex w-full flex-col">
                   <div className="h-1 bg-gradient-to-r from-sky-400 via-cyan-300 to-lime-300" />
                   <div className="px-6 pt-7 text-center">
                     <p className="text-3xl font-black tracking-normal text-sky-400">
-                      {card.title}
+                      {card.displayTitle ?? card.title}
                     </p>
-                    <p className="mt-3 text-base font-bold text-sky-200">{card.subtitle}</p>
+                    <p className="mt-3 text-base font-bold text-sky-200">
+                      {card.displaySubtitle ?? card.subtitle}
+                    </p>
                   </div>
 
-                  <div className="relative mx-5 mt-5 h-72 bg-white">
+                  <div className="relative mx-5 mt-5 h-96 bg-white sm:h-[28rem] lg:h-[30rem]">
                     <Image
                       src={card.image}
                       alt={card.imageAlt}
                       fill
-                      className="object-contain"
+                      className={imageClassName}
                       sizes="(min-width: 1024px) 30vw, 100vw"
                     />
                   </div>
 
                   <div className="flex flex-1 flex-col px-7 pb-7 pt-4">
-                    <h3 className="text-center text-2xl font-semibold leading-snug text-slate-950 [word-break:keep-all]">
+                    <h3 className="flex min-h-[5rem] items-end justify-center text-center text-2xl font-semibold leading-snug text-slate-950 [word-break:keep-all]">
                       {card.description}
                     </h3>
                     <ul className="mt-6 space-y-4 text-lg leading-8 text-slate-700 [word-break:keep-all] xl:text-xl">
@@ -126,36 +131,50 @@ export function HomeSolutions() {
               </div>
 
               {openCard.exampleImages ? (
-                <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                  {openCard.exampleImages.map((src, index) => (
-                    <div
-                      key={src}
-                      className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
-                    >
-                      <div className="relative aspect-[16/10]">
-                        <Image
-                          src={src}
-                          alt={`${openCard.title} 예시 자료 ${index + 1}`}
-                          fill
-                          className="object-contain p-2"
-                          sizes="(min-width: 1024px) 28vw, 100vw"
-                        />
+                <div className="mt-6">
+                  {openCard.exampleImagesTitle ? (
+                    <h4 className="text-xl font-black leading-snug text-slate-950 [word-break:keep-all]">
+                      {openCard.exampleImagesTitle}
+                    </h4>
+                  ) : null}
+                  <div className="mt-3 grid gap-4 lg:grid-cols-2">
+                    {openCard.exampleImages.map((src, index) => (
+                      <div
+                        key={src}
+                        className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+                      >
+                        <div className="relative aspect-[16/10]">
+                          <Image
+                            src={src}
+                            alt={`${openCard.title} 예시 자료 ${index + 1}`}
+                            fill
+                            className="object-contain p-2"
+                            sizes="(min-width: 1024px) 28vw, 100vw"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               ) : null}
 
               {openCard.exampleVideo ? (
-                <div className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-slate-950">
-                  <div className="aspect-video">
-                    <iframe
-                      src={openCard.exampleVideo}
-                      title={`${openCard.title} 예시 영상`}
-                      className="h-full w-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    />
+                <div className="mt-8">
+                  {openCard.exampleVideoTitle ? (
+                    <h4 className="text-xl font-black leading-snug text-slate-950 [word-break:keep-all]">
+                      {openCard.exampleVideoTitle}
+                    </h4>
+                  ) : null}
+                  <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-950">
+                    <div className="aspect-video">
+                      <iframe
+                        src={openCard.exampleVideo}
+                        title={`${openCard.title} 예시 영상`}
+                        className="h-full w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    </div>
                   </div>
                 </div>
               ) : null}

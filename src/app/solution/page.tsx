@@ -7,13 +7,14 @@ import { knowledgeItems } from "@/data/updates-content";
 export const metadata: Metadata = {
   title: "AI 솔루션",
   description:
-    "생성형 AI 기반 EMI/SI 측정·분석 Workflow 자동화(AIfEM-A)와 Simulation 자동화·Surrogate Model(AIfEM-D) 등 전자파 설계·분석 AI 솔루션을 소개합니다.",
+    "AI 기반 Design Guide, Simulation, AI 연결 Tool 제작과 기업 교육·자문을 통해 전자파 설계·분석 업무의 AI 전환을 지원합니다.",
   alternates: { canonical: "/solution" },
 };
 
-const primarySolutions = solutionCards.filter((card) =>
-  ["AIfEM-A", "AIfEM-D"].includes(card.title),
-);
+const solutionAnchorByTitle: Record<string, string> = {
+  "AIfEM-D": "aifem-d",
+  "기업 교육·자문": "consulting-education",
+};
 
 export default function SolutionPage() {
   return (
@@ -21,14 +22,16 @@ export default function SolutionPage() {
       <section className="bg-white">
         <div className="mx-auto w-full max-w-[92vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
           <div className="grid gap-8">
-            {primarySolutions.map((card) => (
+            {solutionCards.map((card) => (
               <article
                 key={card.title}
-                id={card.title === "AIfEM-A" ? "aifem-a" : "aifem-d"}
+                id={solutionAnchorByTitle[card.title]}
                 className="scroll-mt-28 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
               >
                 <div className="border-b border-slate-200 bg-slate-50 p-5">
-                  <h2 className="text-4xl font-black text-sky-500">{card.title}</h2>
+                  <h2 className="text-4xl font-black text-sky-500">
+                    {card.displayTitle ?? card.title}
+                  </h2>
                 </div>
                 <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr]">
                   <div className="relative min-h-[18rem] border-b border-slate-100 bg-white p-5 lg:border-b-0 lg:border-r">
@@ -41,7 +44,9 @@ export default function SolutionPage() {
                     />
                   </div>
                   <div className="p-7 sm:p-9">
-                    <p className="text-sm font-semibold text-teal-700">{card.subtitle}</p>
+                    <p className="text-sm font-semibold text-teal-700">
+                      {card.displaySubtitle ?? card.subtitle}
+                    </p>
                     <p className="mt-4 text-lg leading-8 text-slate-600">{card.description}</p>
                     <ul className="mt-7 grid gap-4 text-base leading-7 text-slate-700">
                       {card.points.map((point) => (
