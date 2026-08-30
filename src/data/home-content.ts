@@ -92,7 +92,7 @@ export const solutionCards: SolutionCard[] = [
       "AI 기반 설계·분석 Workflow구현을 위한 환경분석과 자문",
     ],
     href: "/solution#consulting-education",
-    exampleTitle: "예시. Z0 계산기 제작 및 AI연결하기 교육 중",
+    exampleTitle: "예시. Z0 계산기 제작 및 AI연결하기 교육 내용 중",
     exampleLead: "전자파 기술 조직의 AX 전환 수준에 맞춰 교육과 자문을 구성합니다.",
     exampleSteps: [
       "전자파 설계·분석 업무의 AI 적용 가능성 진단",
