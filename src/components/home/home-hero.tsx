@@ -15,26 +15,26 @@ export function HomeHero() {
             <p className="text-xl font-black tracking-normal text-slate-900 sm:text-2xl lg:text-4xl">
               AI-Connected · Integrated · Agentic EMI/SI Engineering
             </p>
-            <div className="mt-4 rounded bg-sky-50 px-4 py-3 text-base leading-relaxed text-slate-700 shadow-sm ring-1 ring-sky-100 sm:text-lg lg:text-xl">
+            <div className="mt-4 px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
               <div className="hero-message-rotator relative grid min-h-[4.25rem] place-items-center overflow-hidden sm:min-h-[3rem]">
                 <p className="hero-rotating-message text-center">
-                  <strong className="text-slate-900">AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
+                  <strong>AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
                 </p>
                 <p className="hero-rotating-message text-center">
-                  <strong className="text-slate-900">Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
+                  <strong>Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
                 </p>
                 <p className="hero-rotating-message text-center">
-                  <strong className="text-slate-900">Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
+                  <strong>Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
                 </p>
               </div>
             </div>
           </div>
           <Image
-            src="/images/emxai-business-summary-revised.png"
-            alt="전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 위한 솔루션 개발, 자문 및 교육"
-            width={3260}
-            height={1023}
-            className="mx-auto h-auto w-full"
+            src="/이엠엑스아이_업무요약.png"
+            alt="AI 기반 EMI/SI Engineering 업무 전환 전후 요약"
+            width={3308}
+            height={1235}
+            className="mx-auto mt-2 h-auto w-full"
             priority
             sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
           />

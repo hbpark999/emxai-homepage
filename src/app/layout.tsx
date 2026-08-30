@@ -51,10 +51,10 @@ export const metadata: Metadata = {
     description: defaultDescription,
     images: [
       {
-        url: "/images/emxai-business-summary-revised.png",
-        width: 3260,
-        height: 1023,
-        alt: "EMxAI - 전자파 설계·분석 AI 전환 솔루션",
+        url: "/이엠엑스아이_업무요약.png",
+        width: 3308,
+        height: 1235,
+        alt: "EMxAI - AI 기반 EMI/SI Engineering 업무 전환 전후 요약",
       },
     ],
   },
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: defaultTitle,
     description: defaultDescription,
-    images: ["/images/emxai-business-summary-revised.png"],
+    images: ["/이엠엑스아이_업무요약.png"],
   },
   icons: {
     icon: "/favicon.ico",
