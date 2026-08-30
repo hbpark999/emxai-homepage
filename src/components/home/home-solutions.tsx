@@ -121,34 +121,6 @@ export function HomeSolutions() {
                 </button>
               </div>
 
-              {openCard.exampleImages ? (
-                <div className="mt-6">
-                  {openCard.exampleImagesTitle ? (
-                    <h4 className="text-xl font-black leading-snug text-slate-950 [word-break:keep-all]">
-                      {openCard.exampleImagesTitle}
-                    </h4>
-                  ) : null}
-                  <div className="mt-3 grid gap-4 lg:grid-cols-2">
-                    {openCard.exampleImages.map((src, index) => (
-                      <div
-                        key={src}
-                        className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
-                      >
-                        <div className="relative aspect-[16/10]">
-                          <Image
-                            src={src}
-                            alt={`${openCard.title} 예시 자료 ${index + 1}`}
-                            fill
-                            className="object-contain p-2"
-                            sizes="(min-width: 1024px) 28vw, 100vw"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
               {openCard.exampleVideo ? (
                 <div className="mt-8">
                   {openCard.exampleVideoTitle ? (
@@ -187,6 +159,34 @@ export function HomeSolutions() {
                         sizes="(min-width: 1024px) 56vw, 100vw"
                       />
                     </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {openCard.exampleImages ? (
+                <div className="mt-8">
+                  {openCard.exampleImagesTitle ? (
+                    <h4 className="text-xl font-black leading-snug text-slate-950 [word-break:keep-all]">
+                      {openCard.exampleImagesTitle}
+                    </h4>
+                  ) : null}
+                  <div className="mt-3 grid gap-4 lg:grid-cols-2">
+                    {openCard.exampleImages.map((src, index) => (
+                      <div
+                        key={src}
+                        className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+                      >
+                        <div className="relative aspect-[16/10]">
+                          <Image
+                            src={src}
+                            alt={`${openCard.title} 예시 자료 ${index + 1}`}
+                            fill
+                            className="object-contain p-2"
+                            sizes="(min-width: 1024px) 28vw, 100vw"
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ) : null}
