@@ -12,7 +12,7 @@ export function HomeHero() {
             <span className="block">솔루션 개발, 자문 및 교육</span>
           </h1>
           <Image
-            src="/이엠엑스아이_AI도입효과1_v4.png"
+            src="/이엠엑스아이_AI도입효과1_v5.png"
             alt="AI 기반 EMI/SI Engineering 업무 전환 전후 요약"
             width={1809}
             height={748}
