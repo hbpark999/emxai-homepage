@@ -84,7 +84,7 @@ export const solutionCards: SolutionCard[] = [
   {
     title: "기업 교육·자문",
     subtitle: "Consulting & Education",
-    image: "/images/education.png",
+    image: "/교육.png",
     imageAlt: "기업 교육 및 자문 이미지",
     description: "전자파 설계·분석 업무의 AI 전환을 위한 자문 및 교육",
     points: [
