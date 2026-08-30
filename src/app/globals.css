@@ -24,7 +24,7 @@ button {
 }
 
 .hero-rotating-message {
-  animation: hero-message-rotate 30s ease-in-out infinite;
+  animation: hero-message-rotate 20s ease-in-out infinite;
   grid-area: 1 / 1;
   opacity: 0;
   transform: translateY(0.4rem);
@@ -38,18 +38,14 @@ button {
   animation-delay: 10s;
 }
 
-.hero-rotating-message:nth-child(3) {
-  animation-delay: 20s;
-}
-
 @keyframes hero-message-rotate {
   0%,
-  30% {
+  45% {
     opacity: 1;
     transform: translateY(0);
   }
 
-  33.333%,
+  50%,
   100% {
     opacity: 0;
     transform: translateY(-0.25rem);

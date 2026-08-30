@@ -28,10 +28,7 @@ export function HomeHero() {
           <div className="mx-auto mt-4 max-w-6xl px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
             <div className="hero-message-rotator relative grid min-h-[4.25rem] place-items-center overflow-hidden sm:min-h-[3rem]">
               <p className="hero-rotating-message text-center">
-                <strong>AI-Connected&Integrated:</strong> AI 연결 분석 Tool(Surrogate Model등), 계측기, Simulation Tool 등
-              </p>
-              <p className="hero-rotating-message text-center">
-                <strong>Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
+                <strong>AI-Connected&Integrated:</strong> Simulation Tool, 계측장비를 AI로 연결하여 측정, 분석, 보고서 작성 진행, AI연결 Tool개발
               </p>
               <p className="hero-rotating-message text-center">
                 <strong>Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
