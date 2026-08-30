@@ -11,33 +11,33 @@ export function HomeHero() {
             </span>
             <span className="block">솔루션 개발, 자문 및 교육</span>
           </h1>
-          <div className="mx-auto mb-6 max-w-6xl text-center">
+          <div className="mx-auto mb-10 max-w-6xl text-center">
             <p className="text-xl font-black tracking-normal text-slate-900 sm:text-2xl lg:text-4xl">
               AI-Connected · Integrated · Agentic EMI/SI Engineering
             </p>
-            <div className="mt-4 px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
-              <div className="hero-message-rotator relative grid min-h-[4.25rem] place-items-center overflow-hidden sm:min-h-[3rem]">
-                <p className="hero-rotating-message text-center">
-                  <strong>AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
-                </p>
-                <p className="hero-rotating-message text-center">
-                  <strong>Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
-                </p>
-                <p className="hero-rotating-message text-center">
-                  <strong>Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
-                </p>
-              </div>
-            </div>
           </div>
           <Image
-            src="/이엠엑스아이_업무요약.png"
+            src="/이엠엑스아이_AI도입효과1.png"
             alt="AI 기반 EMI/SI Engineering 업무 전환 전후 요약"
-            width={3308}
-            height={1235}
-            className="mx-auto mt-2 h-auto w-full"
+            width={1809}
+            height={948}
+            className="mx-auto h-auto w-full"
             priority
             sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
           />
+          <div className="mx-auto mt-4 max-w-6xl px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
+            <div className="hero-message-rotator relative grid min-h-[4.25rem] place-items-center overflow-hidden sm:min-h-[3rem]">
+              <p className="hero-rotating-message text-center">
+                <strong>AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
+              </p>
+              <p className="hero-rotating-message text-center">
+                <strong>Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
+              </p>
+              <p className="hero-rotating-message text-center">
+                <strong>Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
