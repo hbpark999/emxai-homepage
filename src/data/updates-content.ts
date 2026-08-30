@@ -43,14 +43,9 @@ export const educationSchedule: EducationScheduleGroup[] = [
     month: "'26년 9월",
     items: [
       {
-        title: "[AI특화] AI기반 전자파분석 및 시뮬레이션기술 (9/2~4)",
-        startDate: "2026-09-02",
-        href: "https://champ.rapa.or.kr/web/course/courseView.do?eduCd=K000000001202606190005&eduCertifiedYn=N&category1=",
-        highlight: true,
-      },
-      {
         title: "[RAPA] EMI/SI 설계와 생성형 AI 활용 (9/17~18)",
         startDate: "2026-09-17",
+        highlight: true,
       },
       {
         title: "[AI특화] 전자제품 EMC설계와 생성형 AI활용 (9/21~23)",

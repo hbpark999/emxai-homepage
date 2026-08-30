@@ -113,9 +113,9 @@ export function HomeUpdates() {
         </div>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          <section className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+          <section className="flex h-[24rem] flex-col rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
             <ColumnTitle label="EDU" title="다가오는 교육" />
-            <div className="mt-7 space-y-6">
+            <div className="mt-7 min-h-0 flex-1 space-y-6 overflow-y-auto pr-2">
               {educationSchedule.map((group) => (
                 <div key={group.month} className="relative pl-6">
                   <span className="absolute left-0 top-2.5 size-2 rounded-full border-2 border-cyan-300" />
@@ -151,9 +151,9 @@ export function HomeUpdates() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+          <section className="flex h-[24rem] flex-col rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
             <ColumnTitle label="NEW" title="최신 게시물 & 도구" />
-            <div className="mt-7 space-y-6">
+            <div className="mt-7 min-h-0 flex-1 space-y-6 overflow-y-auto pr-2">
               {postsAndTools.map((post) => (
                 <article key={post.title}>
                   <h4 className="text-xl font-normal leading-7 text-slate-950">
@@ -172,9 +172,9 @@ export function HomeUpdates() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+          <section className="flex h-[24rem] flex-col rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
             <ColumnTitle label="ACT" title="주요활동" />
-            <div className="mt-7 space-y-6">
+            <div className="mt-7 min-h-0 flex-1 space-y-6 overflow-y-auto pr-2">
               {updateActivities.map((activity) => (
                 <article key={activity.title}>
                   <h4 className="text-xl font-normal leading-7 text-slate-950">

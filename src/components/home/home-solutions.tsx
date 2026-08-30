@@ -26,7 +26,7 @@ export function HomeSolutions() {
             const isEducationCard = card.title === "기업 교육·자문";
             const isExternalInquiry = card.inquiryHref.startsWith("http");
             const imageClassName = isEducationCard
-              ? "object-contain scale-125"
+              ? "object-contain scale-80"
               : "object-contain";
 
             return (
@@ -173,6 +173,27 @@ export function HomeSolutions() {
                         className="h-full w-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {openCard.exampleExtraImage ? (
+                <div className="mt-8">
+                  {openCard.exampleExtraImageTitle ? (
+                    <h4 className="text-xl font-black leading-snug text-slate-950 [word-break:keep-all]">
+                      {openCard.exampleExtraImageTitle}
+                    </h4>
+                  ) : null}
+                  <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                    <div className="relative aspect-[16/9]">
+                      <Image
+                        src={openCard.exampleExtraImage}
+                        alt={`${openCard.title} 추가 예시 자료`}
+                        fill
+                        className="object-contain p-3"
+                        sizes="(min-width: 1024px) 56vw, 100vw"
                       />
                     </div>
                   </div>

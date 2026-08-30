@@ -40,6 +40,8 @@ type SolutionCard = {
   exampleImages?: string[];
   exampleVideoTitle?: string;
   exampleVideo?: string;
+  exampleExtraImageTitle?: string;
+  exampleExtraImage?: string;
   inquiryHref: string;
 };
 
@@ -75,6 +77,8 @@ export const solutionCards: SolutionCard[] = [
     ],
     exampleVideoTitle: "예시2. Differential Signal의 S-parameter 및 Field예측 Surrogate Model",
     exampleVideo: "https://www.youtube.com/embed/jReysWD-znk",
+    exampleExtraImageTitle: "예시3. AI기반 S-parameter 자동분석 Workflow",
+    exampleExtraImage: "/Agentic Workflow S-parameter.png",
     inquiryHref: "/contact",
   },
   {
