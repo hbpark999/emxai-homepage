@@ -72,23 +72,14 @@ export function HomeSolutions() {
 
                     <div className="mt-auto flex flex-col items-center gap-3 pt-8">
                       <div className="flex justify-center gap-2">
-                        {isEducationCard ? (
-                          <a
-                            href="/education"
-                            className="rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50"
-                          >
-                            교육 둘러보기
-                          </a>
-                        ) : (
-                          <button
-                            type="button"
-                            aria-expanded={isOpen}
-                            className="rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50"
-                            onClick={() => setOpenIndex(isOpen ? null : index)}
-                          >
-                            예시 보기
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          aria-expanded={isOpen}
+                          className="rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50"
+                          onClick={() => setOpenIndex(isOpen ? null : index)}
+                        >
+                          {isEducationCard ? "교육 예시" : "예시 보기"}
+                        </button>
                         <a
                           href={card.inquiryHref}
                           target={isExternalInquiry ? "_blank" : undefined}
