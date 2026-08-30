@@ -22,13 +22,13 @@ export function HomeHero() {
           />
           <div className="mx-auto mt-14 max-w-6xl text-center">
             <p className="text-xl font-black tracking-normal text-[#4E95D9] sm:text-2xl lg:text-4xl">
-              AI-Connected · Integrated · Agentic EMI/SI Engineering
+              AI-Connected&Integrated, Agentic EMI/SI Engineering
             </p>
           </div>
           <div className="mx-auto mt-4 max-w-6xl px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
             <div className="hero-message-rotator relative grid min-h-[4.25rem] place-items-center overflow-hidden sm:min-h-[3rem]">
               <p className="hero-rotating-message text-center">
-                <strong>AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
+                <strong>AI-Connected&Integrated:</strong> AI 연결 분석 Tool(Surrogate Model등), 계측기, Simulation Tool 등
               </p>
               <p className="hero-rotating-message text-center">
                 <strong>Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
