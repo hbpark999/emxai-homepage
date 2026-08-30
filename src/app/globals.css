@@ -23,27 +23,57 @@ button {
   outline-color: #0f766e;
 }
 
-.hero-marquee {
-  animation: hero-marquee 26s linear infinite;
+.hero-rotating-message {
+  animation: hero-message-rotate 9s ease-in-out infinite;
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(0.4rem);
 }
 
-.hero-marquee:hover {
+.hero-message-rotator:hover .hero-rotating-message {
   animation-play-state: paused;
 }
 
-@keyframes hero-marquee {
-  from {
-    transform: translateX(0);
+.hero-rotating-message:nth-child(2) {
+  animation-delay: 3s;
+}
+
+.hero-rotating-message:nth-child(3) {
+  animation-delay: 6s;
+}
+
+@keyframes hero-message-rotate {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translateY(0.4rem);
   }
 
-  to {
-    transform: translateX(-50%);
+  12%,
+  30% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  34%,
+  100% {
+    opacity: 0;
+    transform: translateY(-0.4rem);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-marquee {
+  .hero-rotating-message {
     animation: none;
-    white-space: normal;
+    opacity: 1;
+    position: static;
+    transform: none;
+  }
+
+  .hero-message-rotator {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-height: auto;
   }
 }

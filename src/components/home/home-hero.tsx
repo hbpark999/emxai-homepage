@@ -15,26 +15,17 @@ export function HomeHero() {
             <p className="text-xl font-black tracking-normal text-slate-900 sm:text-2xl lg:text-4xl">
               AI-Connected · Integrated · Agentic EMI/SI Engineering
             </p>
-            <div className="mt-4 overflow-hidden border-y border-slate-200 py-2 text-base leading-relaxed text-slate-700 sm:text-lg lg:text-xl">
-              <div className="hero-marquee flex w-max gap-10 whitespace-nowrap">
-                <span>
+            <div className="mt-4 rounded bg-sky-50 px-4 py-3 text-base leading-relaxed text-slate-700 shadow-sm ring-1 ring-sky-100 sm:text-lg lg:text-xl">
+              <div className="hero-message-rotator relative grid min-h-[4.25rem] place-items-center overflow-hidden sm:min-h-[3rem]">
+                <p className="hero-rotating-message text-center">
                   <strong className="text-slate-900">AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
-                </span>
-                <span>
+                </p>
+                <p className="hero-rotating-message text-center">
                   <strong className="text-slate-900">Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
-                </span>
-                <span>
+                </p>
+                <p className="hero-rotating-message text-center">
                   <strong className="text-slate-900">Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
-                </span>
-                <span aria-hidden="true">
-                  <strong className="text-slate-900">AI-Connected</strong> — 계측기·Simulation Tool과 AI 연동, AI연동 EMI/SI Engineering Tool 개발
-                </span>
-                <span aria-hidden="true">
-                  <strong className="text-slate-900">Integrated</strong> — 측정·Simulation·분석·보고를 하나의 AI Workflow로 통합
-                </span>
-                <span aria-hidden="true">
-                  <strong className="text-slate-900">Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
-                </span>
+                </p>
               </div>
             </div>
           </div>
