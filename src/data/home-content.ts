@@ -48,7 +48,7 @@ type SolutionCard = {
 export const solutionCards: SolutionCard[] = [
   {
     title: "AIfEM-D",
-    displayTitle: "AI Connected&Integrated",
+    displayTitle: "AI Connected&Integrated Solution",
     subtitle: "AI for EM - Design",
     displaySubtitle: "(AIfEM-D)",
     image: "https://cdn.imweb.me/thumbnail/20260514/55b9c82ea78c9.png",
@@ -86,7 +86,7 @@ export const solutionCards: SolutionCard[] = [
     subtitle: "Consulting & Education",
     image: "/교육.png",
     imageAlt: "기업 교육 및 자문 이미지",
-    description: "전자파 설계·분석 업무의 AI 전환을 위한 자문 및 교육",
+    description: "전자파 설계·분석 업무의 AI 전환을 위한\n자문 및 교육",
     points: [
       "전자파 기술 분야 생성형 AI 활용 주문형 교육과 특강",
       "AI 기반 설계·분석 Workflow구현을 위한 환경분석과 자문",
