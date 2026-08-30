@@ -125,20 +125,8 @@ export function HomeSolutions() {
                 </button>
               </div>
 
-              {openCard.exampleVideo ? (
-                <div className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-slate-950">
-                  <div className="aspect-video">
-                    <iframe
-                      src={openCard.exampleVideo}
-                      title={`${openCard.title} 예시 영상`}
-                      className="h-full w-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    />
-                  </div>
-                </div>
-              ) : openCard.exampleImages ? (
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {openCard.exampleImages ? (
+                <div className="mt-6 grid gap-4 lg:grid-cols-2">
                   {openCard.exampleImages.map((src, index) => (
                     <div
                       key={src}
@@ -155,6 +143,20 @@ export function HomeSolutions() {
                       </div>
                     </div>
                   ))}
+                </div>
+              ) : null}
+
+              {openCard.exampleVideo ? (
+                <div className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-slate-950">
+                  <div className="aspect-video">
+                    <iframe
+                      src={openCard.exampleVideo}
+                      title={`${openCard.title} 예시 영상`}
+                      className="h-full w-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
                 </div>
               ) : null}
 

@@ -12,16 +12,16 @@ export function HomeHero() {
             <span className="block">솔루션 개발, 자문 및 교육</span>
           </h1>
           <Image
-            src="/이엠엑스아이_AI도입효과1.png"
+            src="/이엠엑스아이_AI도입효과1_v2.png"
             alt="AI 기반 EMI/SI Engineering 업무 전환 전후 요약"
             width={1809}
-            height={948}
+            height={748}
             className="mx-auto h-auto w-full"
             priority
             sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
           />
           <div className="mx-auto mt-14 max-w-6xl text-center">
-            <p className="text-xl font-black tracking-normal text-slate-900 sm:text-2xl lg:text-4xl">
+            <p className="text-xl font-black tracking-normal text-[#4E95D9] sm:text-2xl lg:text-4xl">
               AI-Connected · Integrated · Agentic EMI/SI Engineering
             </p>
           </div>

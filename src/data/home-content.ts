@@ -23,7 +23,23 @@ export const dxAxDiagram = {
   ],
 };
 
-export const solutionCards = [
+type SolutionCard = {
+  title: string;
+  subtitle: string;
+  image: string;
+  imageAlt: string;
+  description: string;
+  points: string[];
+  href: string;
+  exampleTitle: string;
+  exampleLead: string;
+  exampleSteps: string[];
+  exampleImages?: string[];
+  exampleVideo?: string;
+  inquiryHref: string;
+};
+
+export const solutionCards: SolutionCard[] = [
   {
     title: "기업 교육·자문",
     subtitle: "Consulting & Education",
@@ -55,6 +71,35 @@ export const solutionCards = [
     inquiryHref: "/contact",
   },
   {
+    title: "AIfEM-D",
+    subtitle: "AI for EM - Design",
+    image: "https://cdn.imweb.me/thumbnail/20260514/55b9c82ea78c9.png",
+    imageAlt: "전자파 시뮬레이션 이미지",
+    description: "Simulation 자동화 및 Surrogate Model 제작",
+    points: [
+      "생성형 AI 기반 HFSS Simulation Workflow 자동화",
+      "실시간 EMI/SI 성능 예측을 위한 Surrogate Model",
+    ],
+    href: "/solution#aifem-d",
+    exampleTitle: "AI + VIA 예측 AI Model & Surrogate Model",
+    exampleLead: "VIA 설계 변수 변경에 따른 특성을 AI가 예측하고, Surrogate Model 기반 설계 탐색과 결과 보고서 작성을 지원합니다.",
+    exampleSteps: [
+      "Design Guide와 Simulation 기반 설계 조건을 AI Workflow로 연결",
+      "VIA 설계 변수 변경에 따른 성능 예측과 조건 탐색",
+      "Surrogate Model을 통한 빠른 EMI/SI 성능 예측",
+      "AI 기반 결과 분석 및 보고서 자동 작성",
+      "주요 설계 영향도와 최적 설계 조건 도출",
+    ],
+    exampleImages: [
+      "/AI기반 Design Guide-1.png",
+      "/AI기반 Design Guide-2.png",
+      "/AI기반 Design Guide-3.png",
+      "/AI기반 Design Guide-4.png",
+    ],
+    exampleVideo: "https://www.youtube.com/embed/jReysWD-znk",
+    inquiryHref: "/contact",
+  },
+  {
     title: "AIfEM-A",
     subtitle: "AI for EM - Analysis",
     image: "https://cdn.imweb.me/thumbnail/20260515/c91f1284eca3c.png",
@@ -79,27 +124,6 @@ export const solutionCards = [
       "https://cdn.imweb.me/thumbnail/20260515/3f55a45b94bdb.png",
       "https://cdn.imweb.me/thumbnail/20260515/d8bd3eb4fd46d.png",
     ],
-    inquiryHref: "/contact",
-  },
-  {
-    title: "AIfEM-D",
-    subtitle: "AI for EM - Design",
-    image: "https://cdn.imweb.me/thumbnail/20260514/55b9c82ea78c9.png",
-    imageAlt: "전자파 시뮬레이션 이미지",
-    description: "Simulation 자동화 및 Surrogate Model 제작",
-    points: [
-      "생성형 AI 기반 HFSS Simulation Workflow 자동화",
-      "실시간 EMI/SI 성능 예측을 위한 Surrogate Model",
-    ],
-    href: "/solution#aifem-d",
-    exampleTitle: "Fast Differential Pair Design Predictor",
-    exampleLead: "반복 설계 공간을 빠르게 탐색하고 EMI/SI 성능을 예측합니다.",
-    exampleSteps: [
-      "설계 파라미터 기반 자동 시뮬레이션 후보 생성",
-      "Surrogate Model을 통한 빠른 성능 예측",
-      "E-field, S-parameter, Trace Slice 결과 비교",
-    ],
-    exampleVideo: "https://www.youtube.com/embed/jReysWD-znk",
     inquiryHref: "/contact",
   },
 ];

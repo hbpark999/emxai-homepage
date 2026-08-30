@@ -51,9 +51,9 @@ export const metadata: Metadata = {
     description: defaultDescription,
     images: [
       {
-        url: "/이엠엑스아이_AI도입효과1.png",
+        url: "/이엠엑스아이_AI도입효과1_v2.png",
         width: 1809,
-        height: 948,
+        height: 748,
         alt: "EMxAI - AI 기반 EMI/SI Engineering 업무 전환 전후 요약",
       },
     ],
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: defaultTitle,
     description: defaultDescription,
-    images: ["/이엠엑스아이_AI도입효과1.png"],
+    images: ["/이엠엑스아이_AI도입효과1_v2.png"],
   },
   icons: {
     icon: "/favicon.ico",
