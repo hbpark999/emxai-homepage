@@ -100,8 +100,8 @@ export function HomeSolutions() {
         {openCard ? (
           <div className="mt-8 rounded-lg border border-sky-100 bg-sky-50/60 p-4">
             <div className="rounded-lg bg-white p-5 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-5">
-                <div>
+              <div className="grid gap-4 border-b border-slate-200 pb-5 sm:grid-cols-[1fr_auto] sm:items-start">
+                <div className="min-w-0">
                   <p className="text-sm font-black uppercase tracking-[0.14em] text-sky-400">
                     Example
                   </p>
@@ -114,7 +114,7 @@ export function HomeSolutions() {
                 </div>
                 <button
                   type="button"
-                  className="rounded-md border border-slate-300 px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-sky-400 hover:text-sky-500"
+                  className="justify-self-start rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50 sm:justify-self-end"
                   onClick={() => setOpenIndex(null)}
                 >
                   예시 닫기
@@ -198,6 +198,39 @@ export function HomeSolutions() {
                       );
                     })}
                         </div>
+                </div>
+              ) : null}
+
+              {openCard.exampleSections ? (
+                <div className="mt-8 space-y-10">
+                  {openCard.exampleSections.map((section) => (
+                    <section key={section.title} className="border-t border-slate-200 pt-7 first:border-t-0 first:pt-0">
+                      <h4 className="text-2xl font-black leading-snug text-slate-950 [word-break:keep-all]">
+                        {section.title}
+                      </h4>
+                      <p className="mt-3 max-w-5xl text-base leading-7 text-slate-600 [word-break:keep-all]">
+                        {section.description}
+                      </p>
+                      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                        {section.images.map((src, index) => (
+                          <div
+                            key={src}
+                            className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+                          >
+                            <div className="relative aspect-[16/10]">
+                              <Image
+                                src={src}
+                                alt={`${section.title} 슬라이드 ${index + 1}`}
+                                fill
+                                className="object-contain p-2"
+                                sizes="(min-width: 1024px) 28vw, 100vw"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
                 </div>
               ) : null}
 

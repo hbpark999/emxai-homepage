@@ -39,6 +39,11 @@ type SolutionCard = {
   exampleImagesTitle?: string;
   exampleImageSectionTitles?: { startIndex: number; title: string }[];
   exampleImages?: string[];
+  exampleSections?: {
+    title: string;
+    description: string;
+    images: string[];
+  }[];
   exampleVideoTitle?: string;
   exampleVideo?: string;
   exampleExtraImageTitle?: string;
@@ -101,26 +106,32 @@ export const solutionCards: SolutionCard[] = [
       "Coax feeding point d sweep으로 S11이 낮은 최적 위치 탐색",
       "형상, S11, radiation pattern 결과를 검토하고 보고서/PPT 산출물로 정리",
     ],
-    exampleImagesTitle: "교육 실습 예시",
-    exampleImageSectionTitles: [
-      { startIndex: 0, title: "1. Z0계산기 제작 및 Claude연결 실습" },
+    exampleSections: [
       {
-        startIndex: 7,
-        title: "2. 간단한 Agentic Workflow 실습 예시: Modeling, Simulation, 최적화 및 보고서 작성",
+        title: "예시1. Z0계산기 제작 및 Claude연결 실습",
+        description:
+          "Microstrip 구조의 Z0 계산기를 AI Coding으로 제작하고, Claude와 연결해 설계값 입력, 계산 결과 확인, 분석 흐름까지 실습합니다.",
+        images: [
+          "/교육 개요_배경.png",
+          "/교육1.PNG",
+          "/교육2.PNG",
+          "/교육3.PNG",
+          "/교육4.PNG",
+          "/교육5.PNG",
+          "/교육6.PNG",
+        ],
       },
-    ],
-    exampleImages: [
-      "/교육 개요_배경.png",
-      "/교육1.PNG",
-      "/교육2.PNG",
-      "/교육3.PNG",
-      "/교육4.PNG",
-      "/교육5.PNG",
-      "/교육6.PNG",
-      "/newmatlab/슬라이드1.PNG",
-      "/newmatlab/슬라이드2.PNG",
-      "/newmatlab/슬라이드3.PNG",
-      "/newmatlab/슬라이드4.PNG",
+      {
+        title: "예시2. 간단한 Agentic Workflow 실습 예시: Modeling, Simulation, 최적화 및 보고서 작성",
+        description:
+          "Codex와 MATLAB을 연결해 patch antenna를 모델링하고, simulation 결과를 바탕으로 feed 위치 최적화와 보고서 작성을 자동화하는 흐름을 실습합니다.",
+        images: [
+          "/newmatlab/슬라이드1.PNG",
+          "/newmatlab/슬라이드2.PNG",
+          "/newmatlab/슬라이드3.PNG",
+          "/newmatlab/슬라이드4.PNG",
+        ],
+      },
     ],
     inquiryHref: "/contact",
   },
