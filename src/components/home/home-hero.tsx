@@ -21,13 +21,13 @@ export function HomeHero() {
               priority
               sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
             />
-            <span className="absolute left-[49.5%] top-[34.5%] -translate-x-1/2 text-[clamp(0.75rem,1.65vw,1.875rem)] font-black leading-none text-violet-700">
+            <span className="absolute left-[50.5%] top-[38.2%] -translate-x-1/2 -translate-y-1/2 text-[clamp(0.75rem,1.65vw,1.875rem)] font-black leading-none text-violet-700">
               AI-Connected
             </span>
-            <span className="absolute left-[0.3%] top-[65.1%] bg-white pr-2 text-[clamp(0.875rem,2.05vw,2.5rem)] font-black leading-none text-slate-950">
+            <span className="absolute left-[0.3%] top-[65.1%] bg-white pr-2 text-[clamp(0.5rem,1.025vw,1.25rem)] font-black leading-none text-zinc-700">
               Before
             </span>
-            <span className="absolute left-[0.3%] top-[84.4%] bg-white pr-2 text-[clamp(0.875rem,2.05vw,2.5rem)] font-black leading-none text-slate-950">
+            <span className="absolute left-[0.3%] top-[84.4%] bg-white pr-2 text-[clamp(0.5rem,1.025vw,1.25rem)] font-black leading-none text-zinc-700">
               After
             </span>
           </div>
