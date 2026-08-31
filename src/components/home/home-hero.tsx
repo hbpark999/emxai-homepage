@@ -3,8 +3,8 @@ import Image from "next/image";
 export function HomeHero() {
   return (
     <section className="overflow-hidden border-b border-slate-200 bg-[#f6f9fc]">
-      <div className="mx-auto px-6 py-6 sm:px-8 lg:py-8">
-        <div className="mx-auto w-full max-w-[94vw] lg:max-w-[76vw] xl:max-w-[70vw]">
+      <div className="mx-auto py-6 lg:py-8">
+        <div className="mx-auto w-full max-w-[94vw] px-6 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
           <h1 className="mx-auto mb-3 max-w-7xl text-center text-3xl font-black leading-tight tracking-normal text-blue-600 sm:text-4xl lg:text-5xl">
             <span className="block">
               전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 위한
@@ -22,7 +22,7 @@ export function HomeHero() {
           />
           <div className="mx-auto mt-14 max-w-6xl text-center">
             <p className="text-xl font-black tracking-normal text-[#4E95D9] sm:text-2xl lg:text-4xl">
-              AI-Connected&Integrated, Agentic EMI/SI Engineering
+              AI-Connected EM Solutions for AI-Integrated, Agentic Engineering
             </p>
           </div>
           <div className="mx-auto mt-4 max-w-6xl px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
