@@ -11,15 +11,26 @@ export function HomeHero() {
             </span>
             <span className="block">솔루션 개발, 자문 및 교육</span>
           </h1>
-          <Image
-            src="/이엠엑스아이_AI도입효과1_v5.png"
-            alt="AI 기반 EMI/SI Engineering 업무 전환 전후 요약"
-            width={1809}
-            height={748}
-            className="mx-auto h-auto w-full"
-            priority
-            sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
-          />
+          <div className="relative mx-auto w-full">
+            <Image
+              src="/이엠엑스아이_AI도입효과1_v5.png"
+              alt="AI 기반 EMI/SI Engineering 업무 전환 전후 요약"
+              width={1809}
+              height={748}
+              className="h-auto w-full"
+              priority
+              sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
+            />
+            <span className="absolute left-[49.5%] top-[34.5%] -translate-x-1/2 text-[clamp(0.75rem,1.65vw,1.875rem)] font-black leading-none text-violet-700">
+              AI-Connected
+            </span>
+            <span className="absolute left-[0.3%] top-[65.1%] bg-white pr-2 text-[clamp(0.875rem,2.05vw,2.5rem)] font-black leading-none text-slate-950">
+              Before
+            </span>
+            <span className="absolute left-[0.3%] top-[84.4%] bg-white pr-2 text-[clamp(0.875rem,2.05vw,2.5rem)] font-black leading-none text-slate-950">
+              After
+            </span>
+          </div>
           <div className="mx-auto mt-14 max-w-6xl text-center">
             <p className="text-xl font-black tracking-normal text-[#4E95D9] sm:text-2xl lg:text-4xl">
               AI-Connected EM Solutions for AI-Integrated, Agentic Engineering
