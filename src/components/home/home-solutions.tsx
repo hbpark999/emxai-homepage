@@ -100,21 +100,10 @@ export function HomeSolutions() {
         {openCard ? (
           <div className="mt-8 rounded-lg border border-sky-100 bg-sky-50/60 p-4">
             <div className="rounded-lg bg-white p-5 shadow-sm">
-              <div className="grid gap-4 border-b border-slate-200 pb-5 sm:grid-cols-[1fr_auto] sm:items-start">
-                <div className="min-w-0">
-                  <p className="text-sm font-black uppercase tracking-[0.14em] text-sky-400">
-                    Example
-                  </p>
-                  <h3 className="mt-3 text-2xl font-black text-slate-950">
-                    {openCard.exampleTitle}
-                  </h3>
-                  <p className="mt-4 text-base leading-7 text-slate-600">
-                    {openCard.exampleLead}
-                  </p>
-                </div>
+              <div className="flex justify-end border-b border-slate-200 pb-5">
                 <button
                   type="button"
-                  className="justify-self-start rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50 sm:justify-self-end"
+                  className="rounded-md border border-sky-400 px-8 py-3 text-base font-bold text-sky-500 transition hover:bg-sky-50"
                   onClick={() => setOpenIndex(null)}
                 >
                   예시 닫기
