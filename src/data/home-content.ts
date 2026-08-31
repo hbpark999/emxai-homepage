@@ -37,6 +37,7 @@ type SolutionCard = {
   exampleLead: string;
   exampleSteps: string[];
   exampleImagesTitle?: string;
+  exampleImageSectionTitles?: { startIndex: number; title: string }[];
   exampleImages?: string[];
   exampleVideoTitle?: string;
   exampleVideo?: string;
@@ -100,7 +101,14 @@ export const solutionCards: SolutionCard[] = [
       "Coax feeding point d sweep으로 S11이 낮은 최적 위치 탐색",
       "형상, S11, radiation pattern 결과를 검토하고 보고서/PPT 산출물로 정리",
     ],
-    exampleImagesTitle: "간단한 Agentic Workflow 실습 예시: Modeling, Simulation, 최적화 및 보고서 작성",
+    exampleImagesTitle: "교육 실습 예시",
+    exampleImageSectionTitles: [
+      { startIndex: 0, title: "1. Z0계산기 제작 및 Claude연결 실습" },
+      {
+        startIndex: 7,
+        title: "2. 간단한 Agentic Workflow 실습 예시: Modeling, Simulation, 최적화 및 보고서 작성",
+      },
+    ],
     exampleImages: [
       "/교육 개요_배경.png",
       "/교육1.PNG",

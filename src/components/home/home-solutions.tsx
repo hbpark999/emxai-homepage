@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { solutionCards } from "@/data/home-content";
 
 export function HomeSolutions() {
@@ -171,23 +171,33 @@ export function HomeSolutions() {
                     </h4>
                   ) : null}
                   <div className="mt-3 grid gap-4 lg:grid-cols-2">
-                    {openCard.exampleImages.map((src, index) => (
-                      <div
-                        key={src}
-                        className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
-                      >
-                        <div className="relative aspect-[16/10]">
-                          <Image
-                            src={src}
-                            alt={`${openCard.title} 예시 자료 ${index + 1}`}
-                            fill
-                            className="object-contain p-2"
-                            sizes="(min-width: 1024px) 28vw, 100vw"
-                          />
+                    {openCard.exampleImages.map((src, index) => {
+                      const sectionTitle = openCard.exampleImageSectionTitles?.find(
+                        (section) => section.startIndex === index,
+                      )?.title;
+
+                      return (
+                        <Fragment key={src}>
+                          {sectionTitle ? (
+                            <h5 className="mt-5 text-lg font-black leading-snug text-sky-600 [word-break:keep-all] first:mt-0 lg:col-span-2">
+                              {sectionTitle}
+                            </h5>
+                          ) : null}
+                          <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                            <div className="relative aspect-[16/10]">
+                              <Image
+                                src={src}
+                                alt={`${openCard.title} 예시 자료 ${index + 1}`}
+                                fill
+                                className="object-contain p-2"
+                                sizes="(min-width: 1024px) 28vw, 100vw"
+                              />
+                            </div>
+                          </div>
+                        </Fragment>
+                      );
+                    })}
                         </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               ) : null}
 
