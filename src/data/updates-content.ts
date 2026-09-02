@@ -43,13 +43,10 @@ export const educationSchedule: EducationScheduleGroup[] = [
     month: "'26년 9월",
     items: [
       {
-        title: "[RAPA] EMI/SI 설계와 생성형 AI 활용 (9/17~18)",
-        startDate: "2026-09-17",
-        highlight: true,
-      },
-      {
         title: "[AI특화] 전자제품 EMC설계와 생성형 AI활용 (9/21~23)",
         startDate: "2026-09-21",
+        href: "https://champ.rapa.or.kr/web/course/courseView.do?eduCd=K000000001202606190008&eduCertifiedYn=N&category1=",
+        highlight: true,
       },
     ],
   },
