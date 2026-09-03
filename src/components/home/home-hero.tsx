@@ -33,7 +33,8 @@ export function HomeHero() {
           </div>
           <div className="mx-auto mt-14 max-w-6xl text-center">
             <p className="text-xl font-black tracking-normal text-[#4E95D9] sm:text-2xl lg:text-4xl">
-              AI-Connected EM Solutions for AI-Integrated, Agentic Engineering
+              EMxAI는 생성형 AI에 자체 개발 분석 도구와 기존 전자파 설계·분석 도구를 연결하여 EMI/SI/RF 업무
+              Workflow를 자동화·지능화합니다.
             </p>
           </div>
           <div className="mx-auto mt-4 max-w-6xl px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
