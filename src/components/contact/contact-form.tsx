@@ -7,6 +7,7 @@ const inquiryTypes = [
   "전자파 설계·분석 업무의 AI 전환 솔루션 개발",
   "Simulation workflow 자동화",
   "기업 맞춤형 교육 및 자문",
+  "교육 견적 요청",
   "기타",
 ];
 

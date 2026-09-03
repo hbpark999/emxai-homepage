@@ -86,7 +86,7 @@ export function HomeSolutions() {
                           rel={isExternalInquiry ? "noopener noreferrer" : undefined}
                           className="rounded-md bg-sky-400 px-8 py-3 text-base font-bold text-white transition hover:bg-sky-500"
                         >
-                          문의 하기
+                          문의/견적 요청
                         </a>
                       </div>
                     </div>
@@ -237,7 +237,7 @@ export function HomeSolutions() {
                   rel={openCard.inquiryHref.startsWith("http") ? "noopener noreferrer" : undefined}
                   className="inline-flex justify-center rounded-md bg-sky-400 px-6 py-3 text-sm font-bold text-white transition hover:bg-sky-500"
                 >
-                  문의 하기
+                  문의/견적 요청
                 </a>
               </div>
             </div>
