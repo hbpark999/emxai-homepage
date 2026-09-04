@@ -32,7 +32,7 @@ export function HomeHero() {
             </span>
           </div>
           <div className="mx-auto mt-14 max-w-6xl text-center">
-            <p className="text-xl font-black tracking-normal text-[#4E95D9] sm:text-2xl lg:text-4xl">
+            <p className="text-sm font-black tracking-normal text-[#4E95D9] sm:text-base lg:text-2xl">
               EMxAI는 생성형 AI에 자체 개발 분석 도구와 기존 전자파 설계·분석 도구를 연결하여 EMI/SI/RF 업무
               Workflow를 자동화·지능화합니다.
             </p>
