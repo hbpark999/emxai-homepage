@@ -1,7 +1,7 @@
 export type StudentCourse = {
   slug: string;
   title: string;
-  organizer: "RAPA" | "TTA";
+  organizer: "RAPA" | "TTA" | "대학생 실습";
   dayLabel: string;
   boardCourseNames: string[];
   passwordEnv: string;
@@ -64,6 +64,15 @@ export const studentCourses = [
     passwordEnv: "EDU_PASS_TTA_POWER_NOISE_DAY2",
     pdfFile: "TTA] 전원 노이즈설계 및 생성형AI활용_2일차 20260826(교육진행_1).pdf",
     pdfPageCount: 130,
+  },
+  {
+    slug: "univ-student-em-design-practice",
+    title: "대학생 실습: 생성형 AI기반 전자파 설계 실습",
+    organizer: "대학생 실습",
+    dayLabel: "1일 차",
+    boardCourseNames: ["7기", "생성형 AI기반 전자파 설계 실습"],
+    passwordEnv: "EDU_PASS_UNIV_STUDENT_EM_DESIGN_PRACTICE",
+    pdfFile: "univ-student-em-design-practice.pdf",
   },
 ] satisfies StudentCourse[];
 
