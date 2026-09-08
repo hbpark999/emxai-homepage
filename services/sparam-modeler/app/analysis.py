@@ -148,13 +148,13 @@ def _is_stable(vf: VectorFitting) -> bool:
     return bool(np.all(np.real(vf.poles) < 0.0))
 
 
-def _fit_candidate(network: rf.Network, real_poles: int, complex_pairs: int) -> tuple[VectorFitting, CandidateResult]:
+def _fit_candidate(network: rf.Network, real_poles: int, complex_pairs: int, spacing: str = "log") -> tuple[VectorFitting, CandidateResult]:
     vf = VectorFitting(network)
     vf.max_iterations = 60
     vf.vector_fit(
         n_poles_real=real_poles,
         n_poles_cmplx=complex_pairs,
-        init_pole_spacing="log",
+        init_pole_spacing=spacing,
         parameter_type="s",
         fit_constant=True,
         fit_proportional=False,
@@ -186,6 +186,18 @@ def _select_fit(network: rf.Network, target_error: float) -> tuple[VectorFitting
             warnings.append(f"후보 {real_poles}+{complex_pairs}쌍 피팅 실패: {exc}")
     if not fits:
         raise AnalysisError("모든 Vector Fitting 후보가 실패했습니다.")
+    # Resolve repeated resonances with progressively higher order and two starts.
+    # Evaluate every candidate on the original frequency samples, not plot data.
+    for pairs in (8, 12, 20, 32):
+        if any(c.stable and c.rms_error <= target_error for _, c in fits):
+            break
+        if 1 + 2 * pairs >= len(network.f):
+            break
+        for spacing in ("lin", "log"):
+            try:
+                fits.append(_fit_candidate(network, 1, pairs, spacing))
+            except Exception as exc:
+                warnings.append(f"추가 후보 {1 + 2 * pairs}차 ({spacing}) 실패: {exc}")
     eligible = [item for item in fits if item[1].stable and item[1].passive and item[1].rms_error <= target_error]
     if eligible:
         chosen = min(eligible, key=lambda item: (item[1].model_order, item[1].rms_error))
@@ -202,7 +214,7 @@ def _select_fit(network: rf.Network, target_error: float) -> tuple[VectorFitting
             passivated = copy.deepcopy(vf)
             passivated.passivity_enforce(n_samples=400, f_max=float(network.f[-1]), parameter_type="s", preserve_dc=True)
             passivated_error = float(passivated.get_rms_error(parameter_type="s"))
-            acceptable_error = max(target_error, selected.rms_error * 5.0)
+            acceptable_error = min(target_error, selected.rms_error * 1.1 + 1e-10)
             if passivated.is_passive(parameter_type="s") and passivated_error <= acceptable_error:
                 vf = passivated
             else:
@@ -324,7 +336,7 @@ def analyze(data: bytes, filename: str, target_error: float = 0.02, pairing: str
     output_checks = [
         CheckResult(name="pole_stability", status=_status(stable), value=stable, summary="모든 pole의 실수부가 0보다 작습니다." if stable else "우반평면 pole이 남아 있습니다."),
         CheckResult(name="fitted_passivity", status=_status(passive), value=passive, summary="피팅 모델이 수동성 검사를 통과했습니다." if passive else "피팅 모델의 수동성 위반을 해결하지 못했습니다."),
-        CheckResult(name="fit_accuracy", status=_status(rms <= target_error, warning=True), value=rms, summary=f"Complex RMS error = {rms:.6g}"),
+        CheckResult(name="fit_accuracy", status=_status(rms <= target_error), value=rms, summary=f"Complex RMS error = {rms:.6g}; 목표 = {target_error:.6g}"),
     ]
     return FittingResult(
         network=network,
@@ -336,4 +348,3 @@ def analyze(data: bytes, filename: str, target_error: float = 0.02, pairing: str
         warnings=warnings,
         spice_text=_write_spice(vf),
     )
-
