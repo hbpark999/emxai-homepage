@@ -30,7 +30,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
   const pageCount = course.pdfPageCount;
   const timer = useSessionTimer();
 
-  // 이전에 비밀번호를 확인한 적이 있으면(서버가 8시간 유지되는 쿠키를 이미 갖고 있음)
+  // 오늘 비밀번호를 확인한 적이 있으면(한국시간 자정까지 유지되는 쿠키를 이미 갖고 있음)
   // 새로고침해도 다시 입력하지 않도록, 마운트 시 한 번 조용히 접근 가능 여부를 확인한다.
   useEffect(() => {
     let ignore = false;

@@ -8,7 +8,7 @@
  *   NOTION_TOKEN        : Notion 내부 통합(Integration) 시크릿  (ntn_... 로 시작)
  *   NOTION_BOARD_DB_ID  : 게시판용 데이터베이스 ID (32자리 hex)
  *
- * 캐시 : 수강생 여러 명이 동시에 5초 간격으로 폴링해도 Notion API 호출이
+ * 캐시 : 수강생 여러 명이 동시에 짧은 간격으로 폴링해도 Notion API 호출이
  *        몰리지 않도록, 서버 메모리에 CACHE_TTL_MS 동안 결과를 보관한다.
  *
  * 속성 인식 : 데이터베이스의 속성 "이름"에 의존하지 않고 "타입"으로 찾는다.
@@ -18,7 +18,7 @@
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
-const CACHE_TTL_MS = 5_000;
+const CACHE_TTL_MS = 2_000;
 const PAGE_SIZE = 50;
 
 export type BoardPost = {

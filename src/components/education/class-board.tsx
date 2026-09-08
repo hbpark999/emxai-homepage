@@ -6,7 +6,7 @@
  * 용도 : 교육 중 강사가 Notion에 올린 링크·공지·코드를 수강생 화면에 실시간 표시한다.
  *
  * 동작
- *   - 5초마다 /api/board 를 호출해 목록을 갱신한다.
+ *   - 2초마다 /api/board 를 호출해 목록을 갱신한다.
  *   - 브라우저 탭이 백그라운드일 때는 호출하지 않는다(불필요한 트래픽 방지).
  *   - 과정(select 속성)이 여러 개면 상단에 필터 버튼이 나타난다.
  *
@@ -16,7 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { BoardContent } from "./board-content";
 
-const REFRESH_MS = 5_000;
+const REFRESH_MS = 2_000;
 
 type BoardPost = {
   id: string;
@@ -102,10 +102,22 @@ function CompleteCounter({ storageKey }: { storageKey: string }) {
   useEffect(() => {
     const initialTimer = window.setTimeout(load, 0);
     const timer = setInterval(load, REFRESH_MS);
+    const refreshNow = () => {
+      if (document.visibilityState === "visible") {
+        void load();
+      }
+    };
+
+    document.addEventListener("visibilitychange", refreshNow);
+    window.addEventListener("focus", refreshNow);
+    window.addEventListener("online", refreshNow);
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshNow);
+      window.removeEventListener("focus", refreshNow);
+      window.removeEventListener("online", refreshNow);
     };
   }, [load]);
 
@@ -304,12 +316,21 @@ export function ClassBoard({
     const initialTimer = window.setTimeout(load, 0);
 
     const timer = setInterval(load, REFRESH_MS);
-    document.addEventListener("visibilitychange", load);
+    const refreshNow = () => {
+      if (document.visibilityState === "visible") {
+        void load();
+      }
+    };
+    document.addEventListener("visibilitychange", refreshNow);
+    window.addEventListener("focus", refreshNow);
+    window.addEventListener("online", refreshNow);
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(timer);
-      document.removeEventListener("visibilitychange", load);
+      document.removeEventListener("visibilitychange", refreshNow);
+      window.removeEventListener("focus", refreshNow);
+      window.removeEventListener("online", refreshNow);
     };
   }, [load]);
 
@@ -382,7 +403,7 @@ export function ClassBoard({
           </p>
           <div className={compact ? "mt-3 flex items-center gap-2 text-xs font-semibold text-slate-400" : "mt-5 flex items-center gap-2 text-sm font-semibold text-slate-400"}>
             <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            {updatedAt ? `${formatTime(updatedAt)} 기준 · 5초마다 갱신` : "연결 중..."}
+            {updatedAt ? `${formatTime(updatedAt)} 기준 · 실시간 자동 갱신` : "연결 중..."}
           </div>
         </div>
 
