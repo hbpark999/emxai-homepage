@@ -143,6 +143,12 @@ export const postsAndTools = [
 
 export const knowledgeItems = [
   {
+    title: "S-Parameter Vector Fitting & SPICE Modeler",
+    body: "HFSS·제조사 S2P/S4P의 원본 validity 검사, Vector Fitting, 피팅 모델 검증 및 SPICE subcircuit 생성을 단계별로 수행하는 Cloud 도구",
+    action: "Cloud 도구 실행",
+    href: "https://emxai-sparam-modeler-612006724841.asia-northeast3.run.app/",
+  },
+  {
     title: "Z0 Design → HFSS Simulation → TDR Plot Automation",
     body: "Z0 설계, HFSS 시뮬레이션, TDR Plot 자동화 흐름을 보여주는 교육 영상",
     action: "영상 보기",
