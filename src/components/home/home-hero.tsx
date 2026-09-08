@@ -5,12 +5,15 @@ export function HomeHero() {
     <section className="overflow-hidden border-b border-slate-200 bg-[#f6f9fc]">
       <div className="mx-auto py-6 lg:py-8">
         <div className="mx-auto w-full max-w-[94vw] px-6 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
-          <h1 className="mx-auto mb-3 max-w-7xl text-center text-3xl font-black leading-tight tracking-normal text-blue-600 sm:text-4xl lg:text-5xl">
-            <span className="block">
-              전자파(EMI/EMC, SI, RF) 설계·분석 업무의 AI 전환을 위한
-            </span>
-            <span className="block">솔루션 개발, 자문 및 교육</span>
-          </h1>
+          <div className="mx-auto mb-3 max-w-7xl border-l-4 border-slate-200 pl-4 text-left sm:pl-6">
+            <h1 className="text-2xl font-black leading-tight tracking-normal text-slate-900 sm:text-3xl lg:text-4xl">
+              AI-Connected EMI/SI Engineering Enablement
+            </h1>
+            <p className="mt-2 text-lg italic leading-snug text-slate-500 sm:text-xl lg:text-2xl">
+              Enabling smarter EMI/SI engineering through education,
+              AI-connected workflow consulting, and solution development.
+            </p>
+          </div>
           <div className="relative mx-auto w-full">
             <Image
               src="/이엠엑스아이_AI도입효과1_v5.png"
