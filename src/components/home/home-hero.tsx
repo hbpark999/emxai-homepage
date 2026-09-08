@@ -6,16 +6,16 @@ export function HomeHero() {
       <div className="mx-auto py-6 lg:py-8">
         <div className="mx-auto w-full max-w-[94vw] px-6 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
           <div className="mx-auto mb-3 max-w-7xl border-l-4 border-slate-200 pl-4 text-left sm:pl-6">
-            <h1 className="text-2xl font-black leading-tight tracking-normal text-slate-900 sm:text-3xl lg:text-4xl">
+            <h1 className="text-xl font-black leading-tight tracking-normal text-slate-900 sm:text-2xl lg:text-3xl">
               EMI/SI Problem Solving Services
             </h1>
-            <p className="mt-2 text-lg italic leading-snug text-slate-500 sm:text-xl lg:text-2xl">
+            <p className="mt-2 text-base italic leading-snug text-slate-500 sm:text-lg lg:text-xl">
               Expert-Guided, AI-Accelerated EMI/SI Problem Solving
             </p>
-            <p className="mt-4 text-2xl font-black leading-tight tracking-normal text-slate-900 sm:text-3xl lg:text-4xl">
+            <p className="mt-4 text-xl font-black leading-tight tracking-normal text-slate-900 sm:text-2xl lg:text-3xl">
               AI-Connected EMI/SI Engineering Enablement
             </p>
-            <p className="mt-2 text-lg italic leading-snug text-slate-500 sm:text-xl lg:text-2xl">
+            <p className="mt-2 text-base italic leading-snug text-slate-500 sm:text-lg lg:text-xl">
               Enabling smarter EMI/SI engineering through education,
               AI-connected workflow consulting, and solution development.
             </p>

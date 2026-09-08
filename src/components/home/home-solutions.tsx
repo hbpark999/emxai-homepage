@@ -25,9 +25,10 @@ export function HomeSolutions() {
             const isOpen = openIndex === index;
             const isEducationCard = card.title === "기업 교육·자문";
             const isExternalInquiry = card.inquiryHref.startsWith("http");
-            const imageClassName = isEducationCard
-              ? "object-contain scale-80"
-              : "object-contain";
+            const imageClassName = "object-contain";
+            const imageAspectClass = isEducationCard
+              ? "aspect-[777/528]"
+              : "aspect-[739/338]";
 
             return (
               <article
@@ -45,7 +46,7 @@ export function HomeSolutions() {
                     </p>
                   </div>
 
-                  <div className="relative mx-5 mt-5 h-96 bg-white sm:h-[28rem] lg:h-[30rem]">
+                  <div className={`relative mx-5 mt-5 ${imageAspectClass} bg-white`}>
                     <Image
                       src={card.image}
                       alt={card.imageAlt}
