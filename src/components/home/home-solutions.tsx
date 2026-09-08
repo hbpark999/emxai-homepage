@@ -60,7 +60,7 @@ export function HomeSolutions() {
                     <h3 className="grid h-[5rem] place-content-start justify-center whitespace-pre-line text-center text-2xl font-semibold leading-snug text-slate-950 [word-break:keep-all]">
                       {card.description}
                     </h3>
-                    <ul className="mt-6 h-[9.5rem] space-y-4 text-lg leading-8 text-slate-700 [word-break:keep-all] xl:text-xl">
+                    <ul className="mt-6 space-y-4 text-lg leading-8 text-slate-700 [word-break:keep-all] xl:text-xl">
                       {card.points.map((point) => (
                         <li key={point} className="flex gap-3">
                           <span className="mt-1 grid size-7 shrink-0 place-items-center rounded-full bg-sky-400 text-base font-black text-white">
