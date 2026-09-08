@@ -22,6 +22,7 @@ main{min-width:0}.hero{display:flex;justify-content:space-between;align-items:ce
 <div class="sidebar-note"><strong>Touchstone → SPICE</strong>원본 데이터 검사와 피팅 모델 검사를 단계별로 확인합니다.<br><br>S2P · S4P 지원<br>파일당 10 MB / 20,001 points</div></aside>
 <main>
 <div class="hero"><div><div class="eyebrow">Signal integrity workspace</div><h1>S-parameter Modeler</h1><p>주파수 응답에서 회로 모델까지, 하나의 분석 흐름으로.</p></div><span class="pill">HFSS · 제조사 모델</span></div>
+<div class="notice warn">본 Model Extractor는 교육용입니다. 실무 사용을 위해서는 별도 문의 바랍니다.</div>
 <section class="panel" id="input"><div class="panel-head"><div><h2>01 / 원본 데이터 검사</h2><p>Touchstone 파일을 불러오고 S-parameter와 물리적 특성을 확인합니다.</p></div><span class="pill" id="inputBadge">대기</span></div><div class="body">
 <div class="upload"><div><strong id="fileName">S2P 또는 S4P 파일 선택</strong><small>2-port LC 네트워크 · 4-port 차동 네트워크</small><input id="file" aria-label="Touchstone 파일" type="file" accept=".s2p,.s4p"></div><div class="buttons"><button class="btn secondary" id="example">S2P 예제 실행</button><button class="btn" id="inspect">원본 검사</button></div></div>
 <div class="checks-select" id="inputOptions"><label><input type="checkbox" value="passivity" checked>Passivity</label><label><input type="checkbox" value="reciprocity" checked>Reciprocity</label><label><input type="checkbox" value="causality_heuristic" checked>Causality 경향</label><label><input type="checkbox" value="reference_impedance" checked>Reference Z0</label></div>

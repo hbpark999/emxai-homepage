@@ -25,10 +25,10 @@ export function HomeSolutions() {
             const isOpen = openIndex === index;
             const isEducationCard = card.title === "기업 교육·자문";
             const isExternalInquiry = card.inquiryHref.startsWith("http");
-            const imageClassName = "object-contain";
-            const imageAspectClass = isEducationCard
-              ? "aspect-[777/528]"
-              : "aspect-[739/338]";
+            const imageClassName = isEducationCard
+              ? "object-contain scale-90"
+              : "object-contain";
+            const imageAspectClass = "aspect-[777/528]";
 
             return (
               <article
