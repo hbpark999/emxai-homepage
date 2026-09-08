@@ -7,7 +7,8 @@ export function HomeHero() {
         <div className="mx-auto w-full max-w-[94vw] px-6 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
           <div className="mx-auto mb-3 max-w-7xl border-l-4 border-slate-200 pl-4 text-left sm:pl-6">
             <h1 className="text-2xl font-black leading-tight tracking-normal text-slate-900 sm:text-3xl lg:text-4xl">
-              AI-Connected EMI/SI Engineering Enablement
+              <span className="block">EMI/SI Problem Solving Services</span>
+              <span className="block">AI-Connected EMI/SI Engineering Enablement</span>
             </h1>
             <p className="mt-2 text-lg italic leading-snug text-slate-500 sm:text-xl lg:text-2xl">
               Enabling smarter EMI/SI engineering through education,
@@ -33,22 +34,6 @@ export function HomeHero() {
             <span className="absolute left-0 top-[82.1%] flex h-[7.8%] w-[9.8%] items-center bg-white pl-[1.1%] text-[clamp(0.65rem,1.33vw,1.625rem)] font-black leading-none text-zinc-500">
               After
             </span>
-          </div>
-          <div className="mx-auto mt-14 max-w-6xl text-center">
-            <p className="text-sm font-black tracking-normal text-[#4E95D9] sm:text-base lg:text-2xl">
-              EMxAI는 생성형 AI에 자체 개발 분석 도구와 기존 전자파 설계·분석 도구를 연결하여 EMI/SI/RF 업무
-              Workflow를 자동화·지능화합니다.
-            </p>
-          </div>
-          <div className="mx-auto mt-4 max-w-6xl px-4 py-2 text-base font-semibold leading-relaxed text-slate-600 sm:text-lg lg:text-xl">
-            <div className="hero-message-rotator relative grid min-h-[4.25rem] place-items-center overflow-hidden sm:min-h-[3rem]">
-              <p className="hero-rotating-message text-center">
-                <strong>AI-Connected&Integrated:</strong> Simulation Tool, 계측장비를 AI로 연결하여 측정, 분석, 보고서 작성 진행, AI연결 Tool개발
-              </p>
-              <p className="hero-rotating-message text-center">
-                <strong>Agentic</strong> — AI가 필요한 Tool을 선택·제어하고 분석·판단하여 Workflow 수행
-              </p>
-            </div>
           </div>
         </div>
       </div>
