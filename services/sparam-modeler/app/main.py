@@ -20,7 +20,7 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 app = FastAPI(
     title="EMxAI S-parameter Modeler",
-    version="0.3.0",
+    version="0.4.0",
     description="Touchstone validity checks and passive SPICE macromodel generation.",
 )
 
@@ -128,4 +128,3 @@ def example_touchstone() -> Response:
             row.extend([s.real, s.imag])
         lines.append(" ".join(f"{value:.12e}" for value in row))
     return Response("\n".join(lines), media_type="text/plain", headers={"Content-Disposition": 'attachment; filename="example_series_rl.s2p"'})
-
