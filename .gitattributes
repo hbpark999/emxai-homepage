@@ -1,0 +1,3 @@
+# Preserve the model validation/snapshot byte hashes across Windows checkouts.
+projects/ce-cmf-filter-pcb-sim/** -text whitespace=cr-at-eol
+services/cmc-surrogate/models/*.pkl binary

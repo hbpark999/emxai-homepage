@@ -1,0 +1,19 @@
+{
+  "ltspice_runs": 4,
+  "points": 60,
+  "max_s_difference_from_fit": 7.791361360319882e-16,
+  "max_s_difference_from_original": 0.00010606445349702812,
+  "modal": {
+    "cm": {
+      "max_magnitude_percent": 1.813444009136225,
+      "p90_magnitude_percent": 1.5378681940958037,
+      "max_phase_degree": 0.5550505010050278
+    },
+    "dm": {
+      "max_magnitude_percent": 0.05750167901021301,
+      "p90_magnitude_percent": 0.0017471152608564498,
+      "max_phase_degree": 0.09951114716695206
+    }
+  },
+  "modal_gate_pass": true
+}

@@ -1,0 +1,69 @@
+{
+  "source": "data\\cmc\\20260909_073554_d5b98f\\cmc.s4p",
+  "source_sha256": "ccd605143f403bdccdbcc470a1c2ea5441504d7d14f239616ffd61ecadc8aa45",
+  "points": 60,
+  "frequency_min_hz": 150000.0,
+  "frequency_max_hz": 29627875.0,
+  "rms_s_error": 0.00020042059897494883,
+  "input_checks": [
+    {
+      "name": "reciprocity",
+      "status": "pass",
+      "summary": "max |Sij-Sji| = 0",
+      "value": 0.0
+    },
+    {
+      "name": "passivity",
+      "status": "pass",
+      "summary": "최대 특이값 = 1.000000",
+      "value": 0.9999997340551713
+    },
+    {
+      "name": "causality_heuristic",
+      "status": "warning",
+      "summary": "음의 시간 에너지 비율을 이용한 보조 지표입니다.",
+      "value": 0.13266207705402552
+    },
+    {
+      "name": "reference_impedance",
+      "status": "pass",
+      "summary": "평균 Z0 = 50.000 Ω, 편차 = 0 Ω",
+      "value": 50.0
+    }
+  ],
+  "output_checks": [
+    {
+      "name": "pole_stability",
+      "status": "pass",
+      "summary": "모든 pole의 실수부가 0보다 작습니다.",
+      "value": true
+    },
+    {
+      "name": "fitted_passivity",
+      "status": "pass",
+      "summary": "Analytic passivity check after uniform S attenuation",
+      "value": true
+    },
+    {
+      "name": "fit_accuracy",
+      "status": "pass",
+      "summary": "Post-correction complex RMS 0.000200421; modal 5%/5 degree gate required separately",
+      "value": 0.00020042059897494883
+    }
+  ],
+  "warnings": [
+    "Causality 표시는 유한 대역 데이터에 대한 보조 지표이며 인증 시험이 아닙니다.",
+    "Mixed-mode 변환은 differential pair 1-3 / 2-4 포트 조합을 사용했습니다.",
+    "목표 오차와 수동성을 동시에 만족한 후보가 없습니다. 목표 오차 내 최소 차수의 안정 모델을 우선 선택하고, 해당 후보가 없으면 최소 오차를 사용합니다.",
+    "수동성 보정 결과가 수동성 또는 허용 오차 조건을 충족하지 못해 원래의 안정 피팅 모델을 유지합니다.",
+    "Fallback: 2 real + 3 complex pole pairs, S scaled by 0.9999; DC fidelity unverified"
+  ],
+  "ltspice_verified": false,
+  "scope": "Representative HFSS-derived fit, not a surrogate-generated complex network",
+  "port_map": {
+    "1": "p11",
+    "2": "p12",
+    "3": "p13",
+    "4": "p14"
+  }
+}

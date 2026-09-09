@@ -22,6 +22,12 @@ export default function SolutionPage() {
       <section className="bg-white">
         <div className="mx-auto w-full max-w-[92vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
           <div className="grid gap-8">
+            <Link href="/solution/ce-cmf-filter-pcb-sim" className="rounded-lg bg-[#14283f] p-8 text-white shadow-sm transition hover:bg-blue-900">
+              <p className="text-sm text-blue-200">ENGINEERING DEMO · CMC / SPICE / CE EMI</p>
+              <h2 className="mt-3 text-3xl font-bold">CE-CMF-Filter-PCB Sim</h2>
+              <p className="mt-3 text-slate-200">CMC 특성 예측과 대표 SPICE 모델, PCB·LISN 교육 예제를 확인하세요.</p>
+              <span className="mt-5 inline-block font-semibold">데모 열기 →</span>
+            </Link>
             {solutionCards.map((card) => (
               <article
                 key={card.title}
