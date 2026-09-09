@@ -16,12 +16,86 @@ const solutionAnchorByTitle: Record<string, string> = {
   "기업 교육·자문": "consulting-education",
 };
 
+const sParameterTool = knowledgeItems[0];
+
+const ceTool = {
+  title: "Conducted Emission (CE) Analysis",
+  body: "전원선의 전도성 방출(CE) 데이터를 분석하고 노이즈 주파수와 주요 원인을 확인하는 도구",
+  action: "준비 중",
+};
+
 export default function SolutionPage() {
   return (
     <main className="flex-1 bg-[#f6f9fc]">
       <section className="bg-white">
         <div className="mx-auto w-full max-w-[92vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
           <div className="grid gap-8">
+            <section
+              id="public-tools"
+              className="scroll-mt-28 rounded-lg border border-sky-200 bg-sky-50 p-5 sm:p-7"
+            >
+              <h1 className="text-4xl font-black text-sky-500">간단한 공개 Tools & Demos</h1>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <a
+                  href={sParameterTool.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
+                >
+                  <p className="text-xl font-black text-slate-950">
+                    S2P/S4P → SPICE Modeler
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{sParameterTool.body}</p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-sky-600">
+                    {sParameterTool.action} →
+                  </span>
+                </a>
+
+                <article className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6">
+                  <p className="text-xl font-black text-slate-950">{ceTool.title}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{ceTool.body}</p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-slate-400">
+                    {ceTool.action}
+                  </span>
+                </article>
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {knowledgeItems.slice(1).map((tool) => {
+                  const isExternal = tool.href.startsWith("http");
+
+                  return isExternal ? (
+                    <a
+                      key={tool.title}
+                      href={tool.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+                    >
+                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
+                      <span className="mt-3 inline-flex text-xs text-slate-500">
+                        {tool.action}
+                      </span>
+                    </a>
+                  ) : (
+                    <Link
+                      key={tool.title}
+                      href={tool.href}
+                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+                    >
+                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
+                      <span className="mt-3 inline-flex text-xs text-slate-500">
+                        {tool.action}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+
             {solutionCards.map((card) => (
               <article
                 key={card.title}
@@ -74,45 +148,6 @@ export default function SolutionPage() {
               </article>
             ))}
 
-            <section
-              id="public-tools"
-              className="scroll-mt-28 rounded-lg border border-slate-200 bg-slate-50 p-5"
-            >
-              <h2 className="text-4xl font-black text-sky-500">간단한 공개 Tools & Demos</h2>
-              <div className="mt-5 grid gap-3 md:grid-cols-2">
-                {knowledgeItems.map((tool) => {
-                  const isExternal = tool.href.startsWith("http");
-
-                  return isExternal ? (
-                    <a
-                      key={tool.title}
-                      href={tool.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
-                    >
-                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
-                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
-                      <span className="mt-3 inline-flex text-xs text-slate-500">
-                        {tool.action}
-                      </span>
-                    </a>
-                  ) : (
-                    <Link
-                      key={tool.title}
-                      href={tool.href}
-                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
-                    >
-                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
-                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
-                      <span className="mt-3 inline-flex text-xs text-slate-500">
-                        {tool.action}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
           </div>
         </div>
       </section>
