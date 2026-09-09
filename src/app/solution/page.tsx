@@ -18,12 +18,6 @@ const solutionAnchorByTitle: Record<string, string> = {
 
 const sParameterTool = knowledgeItems[0];
 
-const ceTool = {
-  title: "Conducted Emission (CE) Analysis",
-  body: "전원선의 전도성 방출(CE) 데이터를 분석하고 노이즈 주파수와 주요 원인을 확인하는 도구",
-  action: "준비 중",
-};
-
 export default function SolutionPage() {
   return (
     <main className="flex-1 bg-[#f6f9fc]">
@@ -43,22 +37,25 @@ export default function SolutionPage() {
                   rel="noopener noreferrer"
                   className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
                 >
-                  <p className="text-xl font-black text-slate-950">
-                    S2P/S4P → SPICE Modeler
-                  </p>
+                  <p className="text-xl font-black text-slate-950">S2P/S4P → SPICE Modeler</p>
                   <p className="mt-3 text-sm leading-6 text-slate-600">{sParameterTool.body}</p>
                   <span className="mt-auto pt-5 text-sm font-bold text-sky-600">
                     {sParameterTool.action} →
                   </span>
                 </a>
 
-                <article className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6">
-                  <p className="text-xl font-black text-slate-950">{ceTool.title}</p>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{ceTool.body}</p>
-                  <span className="mt-auto pt-5 text-sm font-bold text-slate-400">
-                    {ceTool.action}
+                <Link
+                  href="/solution/ce-cmf-filter-pcb-sim"
+                  className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
+                >
+                  <p className="text-xl font-black text-slate-950">CE-CMF-Filter-PCB Sim</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    CMC 특성 예측과 대표 SPICE 모델을 이용해 PCB·LISN의 Conducted Emission을 분석하는 교육용 시뮬레이션 도구
+                  </p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-sky-600">
+                    CE 시뮬레이션 열기 →
                   </span>
-                </article>
+                </Link>
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -75,9 +72,7 @@ export default function SolutionPage() {
                     >
                       <p className="text-sm font-bold text-slate-950">{tool.title}</p>
                       <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
-                      <span className="mt-3 inline-flex text-xs text-slate-500">
-                        {tool.action}
-                      </span>
+                      <span className="mt-3 inline-flex text-xs text-slate-500">{tool.action}</span>
                     </a>
                   ) : (
                     <Link
@@ -87,15 +82,12 @@ export default function SolutionPage() {
                     >
                       <p className="text-sm font-bold text-slate-950">{tool.title}</p>
                       <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
-                      <span className="mt-3 inline-flex text-xs text-slate-500">
-                        {tool.action}
-                      </span>
+                      <span className="mt-3 inline-flex text-xs text-slate-500">{tool.action}</span>
                     </Link>
                   );
                 })}
               </div>
             </section>
-
             {solutionCards.map((card) => (
               <article
                 key={card.title}

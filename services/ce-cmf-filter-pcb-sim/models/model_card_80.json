@@ -1,0 +1,104 @@
+{
+  "name": "CMC continuous impedance surrogate MVP",
+  "version": "80-case-2026-09-09",
+  "model_path": "models/cmc_curve_surrogate_80.pkl",
+  "algorithm": "gpr_pca8",
+  "inputs": [
+    "turns",
+    "core_inner_diameter_mm",
+    "core_outer_diameter_mm",
+    "core_height_mm",
+    "wire_diameter_mm",
+    "coil_pitch_degree"
+  ],
+  "input_ranges": {
+    "turns": [
+      6.0,
+      12.0
+    ],
+    "core_inner_diameter_mm": [
+      16.0,
+      24.0
+    ],
+    "core_outer_diameter_mm": [
+      28.0,
+      40.0
+    ],
+    "core_height_mm": [
+      6.0,
+      12.0
+    ],
+    "wire_diameter_mm": [
+      0.5,
+      1.1
+    ],
+    "coil_pitch_degree": [
+      2.1,
+      5.0
+    ]
+  },
+  "outputs": [
+    "ZCM magnitude curve",
+    "ZDM magnitude curve"
+  ],
+  "frequency_range_hz": [
+    150000.0,
+    30000000.0
+  ],
+  "frequency_points": 201,
+  "training_cases": 80,
+  "pre_release_training_cases": 64,
+  "locked_holdout_cases": 12,
+  "prospective_confirmation_cases": 4,
+  "validation": {
+    "locked_holdout": {
+      "db_rmse": 2.3332982077458078,
+      "mean_relative_error_percent": 16.624595893535073,
+      "median_relative_error_percent": 3.544793264126838,
+      "p90_relative_error_percent": 21.65538758189913,
+      "max_relative_error_percent": 352.26663120731445
+    },
+    "locked_holdout_fsv": {
+      "mean_adm": 0.034827219980322933,
+      "mean_fdm": 0.037973979418759025,
+      "mean_gdm": 0.05796917014175514,
+      "median_gdm": 0.02274370583242483,
+      "grade_counts": {
+        "Excellent": 20,
+        "Very good": 3,
+        "Good": 0,
+        "Fair": 1,
+        "Poor": 0,
+        "Very poor": 0
+      }
+    },
+    "confirmation_holdout": {
+      "db_rmse": 0.8664680780401816,
+      "mean_relative_error_percent": 5.478875675030205,
+      "median_relative_error_percent": 1.7227274154491892,
+      "p90_relative_error_percent": 21.431658315638586,
+      "max_relative_error_percent": 31.016264515972225
+    },
+    "confirmation_holdout_fsv": {
+      "mean_adm": 0.012643623356598757,
+      "mean_fdm": 0.013368126066872975,
+      "mean_gdm": 0.020952789858264886,
+      "median_gdm": 0.01502808658111331,
+      "grade_counts": {
+        "Excellent": 8,
+        "Very good": 0,
+        "Good": 0,
+        "Fair": 0,
+        "Poor": 0,
+        "Very poor": 0
+      }
+    }
+  },
+  "warnings": [
+    "MVP screening model trained against HFSS, not measurement.",
+    "Static AEDT library ferrite and zero DC bias/25 C assumptions apply.",
+    "HFSS corrected winding pitch in some infeasible geometries; requested-input model learns that deterministic workflow behavior.",
+    "Do not extrapolate outside the listed input ranges.",
+    "Legacy locked holdout FSV informed active-learning geometry selection; its later score is a fixed-case regression comparison, not fully independent final accuracy."
+  ]
+}

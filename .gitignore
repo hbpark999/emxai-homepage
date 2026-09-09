@@ -42,3 +42,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+__pycache__/
+*.pyc
+projects/ce-cmf-filter-pcb-sim/mvp/generated/cmc_spice_demo/runs/
+projects/ce-cmf-filter-pcb-sim/data/ltspice/
+projects/ce-cmf-filter-pcb-sim/reports/
+services/cmc-surrogate/.venv/

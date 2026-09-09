@@ -1,0 +1,61 @@
+* Editable PCB B2 passive RLC + filter example
+* CMC, LISN and virtual source are attached by the application.
+* ---------------- PCB: trace loop inductance (trace + PE return) ----
+L1 p1 n1 3.661742e-09
+R1 n1 p5 1.000000e-03    ; L_IN
+L2 p5 n2 1.433483e-08
+R2 n2 p11 1.000000e-03    ; L_IN
+L3 p2 n3 3.688895e-09
+R3 n3 p6 1.000000e-03    ; N_IN
+L4 p6 n4 6.706839e-09
+R4 n4 p13 1.000000e-03    ; N_IN
+L5 p3 n5 5.785482e-09
+R5 n5 p7 1.000000e-03    ; L_OUT
+L6 p7 n6 3.233796e-09
+R6 n6 p9 1.000000e-03    ; L_OUT
+L7 p9 n7 7.197949e-09
+R7 n7 p12 1.000000e-03    ; L_OUT
+L8 p4 n8 5.760197e-09
+R8 n8 p8 1.000000e-03    ; N_OUT
+L9 p8 n9 3.209134e-09
+R9 n9 p10 1.000000e-03    ; N_OUT
+L10 p10 n10 7.181081e-09
+R10 n10 p14 1.000000e-03    ; N_OUT
+
+* ---------------- PCB: capacitance to the PE plane ------------------
+Cg1 p1 0 8.903449e-13   ; L_IN
+Cg2 p2 0 9.141642e-13   ; N_IN
+Cg3 p3 0 7.570204e-13   ; L_OUT
+Cg4 p4 0 7.611491e-13   ; N_OUT
+Cg5 p5 0 8.903449e-13   ; L_IN
+Cg6 p6 0 9.141642e-13   ; N_IN
+Cg7 p7 0 7.570204e-13   ; L_OUT
+Cg8 p8 0 7.611491e-13   ; N_OUT
+Cg9 p9 0 7.570204e-13   ; L_OUT
+Cg10 p10 0 7.611491e-13   ; N_OUT
+Cg11 p11 0 8.903449e-13   ; L_IN
+Cg12 p12 0 7.570204e-13   ; L_OUT
+Cg13 p13 0 9.141642e-13   ; N_IN
+Cg14 p14 0 7.611491e-13   ; N_OUT
+* ---------------- PCB: net-to-net coupling --------------------------
+Cc1_2 p1 p2 1.315691e-14
+Cc1_3 p1 p3 6.728705e-15
+Cc1_4 p1 p4 4.033514e-15
+Cc2_3 p2 p3 3.856451e-15
+Cc2_4 p2 p4 6.796644e-15
+Cc3_4 p3 p4 1.250326e-14
+
+* ---------------- filter components ---------------------------------
+CX1 p5 nx1 4.700000e-06
+RX1 nx1 mx1 0.01
+LX1 mx1 p6 1.500000e-08
+CX2 p7 nx2 1.500000e-06
+RX2 nx2 mx2 0.015
+LX2 mx2 p8 1.200000e-08
+CY1 p9 ny1 1.000000e-07
+RY1 ny1 my1 0.05
+LY1 my1 0 8.000000e-09
+CY2 p10 ny2 1.000000e-07
+RY2 ny2 my2 0.05
+LY2 my2 0 8.000000e-09
+* common-mode choke: two coupled windings, specified by its CM inductance
