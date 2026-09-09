@@ -16,18 +16,78 @@ const solutionAnchorByTitle: Record<string, string> = {
   "기업 교육·자문": "consulting-education",
 };
 
+const sParameterTool = knowledgeItems[0];
+
 export default function SolutionPage() {
   return (
     <main className="flex-1 bg-[#f6f9fc]">
       <section className="bg-white">
         <div className="mx-auto w-full max-w-[92vw] px-6 py-16 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
           <div className="grid gap-8">
-            <Link href="/solution/ce-cmf-filter-pcb-sim" className="rounded-lg bg-[#14283f] p-8 text-white shadow-sm transition hover:bg-blue-900">
-              <p className="text-sm text-blue-200">ENGINEERING DEMO · CMC / SPICE / CE EMI</p>
-              <h2 className="mt-3 text-3xl font-bold">CE-CMF-Filter-PCB Sim</h2>
-              <p className="mt-3 text-slate-200">CMC 특성 예측과 대표 SPICE 모델, PCB·LISN 교육 예제를 확인하세요.</p>
-              <span className="mt-5 inline-block font-semibold">데모 열기 →</span>
-            </Link>
+            <section
+              id="public-tools"
+              className="scroll-mt-28 rounded-lg border border-sky-200 bg-sky-50 p-5 sm:p-7"
+            >
+              <h1 className="text-4xl font-black text-sky-500">간단한 공개 Tools & Demos</h1>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <a
+                  href={sParameterTool.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
+                >
+                  <p className="text-xl font-black text-slate-950">S2P/S4P → SPICE Modeler</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{sParameterTool.body}</p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-sky-600">
+                    {sParameterTool.action} →
+                  </span>
+                </a>
+
+                <Link
+                  href="/solution/ce-cmf-filter-pcb-sim"
+                  className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
+                >
+                  <p className="text-xl font-black text-slate-950">CE-CMF-Filter-PCB Sim</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    CMC 특성 예측과 대표 SPICE 모델을 이용해 PCB·LISN의 Conducted Emission을 분석하는 교육용 시뮬레이션 도구
+                  </p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-sky-600">
+                    CE 시뮬레이션 열기 →
+                  </span>
+                </Link>
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {knowledgeItems.slice(1).map((tool) => {
+                  const isExternal = tool.href.startsWith("http");
+
+                  return isExternal ? (
+                    <a
+                      key={tool.title}
+                      href={tool.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+                    >
+                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
+                      <span className="mt-3 inline-flex text-xs text-slate-500">{tool.action}</span>
+                    </a>
+                  ) : (
+                    <Link
+                      key={tool.title}
+                      href={tool.href}
+                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+                    >
+                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
+                      <span className="mt-3 inline-flex text-xs text-slate-500">{tool.action}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
             {solutionCards.map((card) => (
               <article
                 key={card.title}
@@ -80,45 +140,6 @@ export default function SolutionPage() {
               </article>
             ))}
 
-            <section
-              id="public-tools"
-              className="scroll-mt-28 rounded-lg border border-slate-200 bg-slate-50 p-5"
-            >
-              <h2 className="text-4xl font-black text-sky-500">간단한 공개 Tools & Demos</h2>
-              <div className="mt-5 grid gap-3 md:grid-cols-2">
-                {knowledgeItems.map((tool) => {
-                  const isExternal = tool.href.startsWith("http");
-
-                  return isExternal ? (
-                    <a
-                      key={tool.title}
-                      href={tool.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
-                    >
-                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
-                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
-                      <span className="mt-3 inline-flex text-xs text-slate-500">
-                        {tool.action}
-                      </span>
-                    </a>
-                  ) : (
-                    <Link
-                      key={tool.title}
-                      href={tool.href}
-                      className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
-                    >
-                      <p className="text-sm font-bold text-slate-950">{tool.title}</p>
-                      <p className="mt-2 text-xs leading-5 text-slate-600">{tool.body}</p>
-                      <span className="mt-3 inline-flex text-xs text-slate-500">
-                        {tool.action}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
           </div>
         </div>
       </section>

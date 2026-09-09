@@ -7,9 +7,9 @@
 | Solutions 페이지 | `src/app/solution/ce-cmf-filter-pcb-sim/page.tsx` |
 | 웹 입력·예측 그래프·SPICE 다운로드 | `src/components/web-tools/cmc-demo.tsx` |
 | Vercel → Cloud Run proxy | `src/app/api/cmc/predict/route.ts` |
-| Cloud Run FastAPI | `services/cmc-surrogate/main.py` |
-| 모델·모델 카드 | `services/cmc-surrogate/models/` |
-| 컨테이너 | `services/cmc-surrogate/Dockerfile`, `requirements.txt` |
+| Cloud Run FastAPI | `services/ce-cmf-filter-pcb-sim/main.py` |
+| 모델·모델 카드 | `services/ce-cmf-filter-pcb-sim/models/` |
+| 컨테이너 | `services/ce-cmf-filter-pcb-sim/Dockerfile`, `requirements.txt` |
 | 최신 데스크톱/회로 실행 snapshot | `projects/ce-cmf-filter-pcb-sim/` |
 | 대표 다운로드/회로도 | `public/ce-cmf/` |
 
@@ -29,7 +29,7 @@ npm run dev
 Python 3.13 환경에서:
 
 ```powershell
-cd services/cmc-surrogate
+cd services/ce-cmf-filter-pcb-sim
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements.txt
 .\.venv\Scripts\python -m uvicorn main:app --port 8080
@@ -39,10 +39,10 @@ python -m venv .venv
 
 ## Cloud Run / Vercel 연결 (다음 PC에서 실행)
 
-`services/cmc-surrogate`를 build context로 사용한다. 기본 python:3.13-slim과 학습 시 패키지 버전을 맞췄다. 첫 Docker build/Cloud Run 배포는 별도 검증이 필요하다.
+`services/ce-cmf-filter-pcb-sim`을 build context로 사용한다. 기존 S-parameter 서비스의 `services/sparam-modeler`와 같은 서비스 디렉터리 규칙을 따른다. 기본 python:3.13-slim과 학습 시 패키지 버전을 맞췄다. 첫 Docker build/Cloud Run 배포는 별도 검증이 필요하다.
 
 ```powershell
-gcloud run deploy ce-cmf-surrogate --source services/cmc-surrogate --region asia-northeast3 --allow-unauthenticated --memory 1Gi --cpu 1 --concurrency 4 --max-instances 2
+gcloud run deploy ce-cmf-filter-pcb-sim --source services/ce-cmf-filter-pcb-sim --region asia-northeast3 --allow-unauthenticated --memory 1Gi --cpu 1 --concurrency 4 --max-instances 2
 ```
 
 위 명령은 인증된 GCP 프로젝트 및 비용 설정 확인 후 실행한다. 예제는 공개 예측 API다. 운영에 접근 제한이 필요하면 private Cloud Run 인증과 Vercel 토큰 교환을 별도로 구현한다. API URL만 설정하는 현재 proxy는 private IAM 인증을 구현하지 않는다.
