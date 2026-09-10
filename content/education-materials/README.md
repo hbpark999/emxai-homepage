@@ -8,3 +8,4 @@ PDF 자료 첨부 위치입니다.
 - rapa-emi-si-design-genai-day2.pdf
 - rapa-em-analysis-design-genai-day2.pdf
 - tta-power-noise-genai-day2.pdf
+- univ-student-em-design-practice.pdf
