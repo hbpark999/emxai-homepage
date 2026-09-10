@@ -48,3 +48,6 @@ projects/ce-cmf-filter-pcb-sim/mvp/generated/cmc_spice_demo/runs/
 projects/ce-cmf-filter-pcb-sim/data/ltspice/
 projects/ce-cmf-filter-pcb-sim/reports/
 services/cmc-surrogate/.venv/
+
+# Publish education handouts as PDFs; keep large PowerPoint sources local.
+/content/education-materials/*.pptx
