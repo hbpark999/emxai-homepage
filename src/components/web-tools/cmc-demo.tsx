@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-type Prediction = { frequency_hz: number[]; zcm_ohm: number[]; zdm_ohm: number[]; version: string };
+type Quota = { used: number; limit: number; remaining: number; bonus: boolean };
+type Prediction = { frequency_hz: number[]; zcm_ohm: number[]; zdm_ohm: number[]; version: string; quota?: Quota };
 const families = ["16 / 28 / 6", "16 / 28 / 12", "20 / 32 / 8", "24 / 40 / 6", "24 / 40 / 12"];
 export default function CmcDemo() {
   const [design, setDesign] = useState({ turns: 8, family: 2, wire: 0.8, pitch: 3 });
@@ -11,11 +12,49 @@ export default function CmcDemo() {
   const [message, setMessage] = useState("입력을 선택하고 특성 예측을 실행하세요.");
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState("prediction");
+  const [quota, setQuota] = useState<Quota | null>(null);
+  const [showAccess, setShowAccess] = useState(false);
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [accessBusy, setAccessBusy] = useState(false);
+  const [accessMessage, setAccessMessage] = useState("");
+
+  useEffect(() => {
+    fetch("/api/cmc/quota", { cache: "no-store" }).then(async response => {
+      const result = await response.json();
+      if (response.ok) setQuota(result);
+    }).catch(() => undefined);
+  }, []);
+
+  async function requestCode() {
+    setAccessBusy(true); setAccessMessage("");
+    try {
+      const response = await fetch("/api/cmc/quota/request-code", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      setCodeSent(true); setAccessMessage(result.message);
+    } catch (error) { setAccessMessage(error instanceof Error ? error.message : "인증번호 발송에 실패했습니다."); }
+    finally { setAccessBusy(false); }
+  }
+
+  async function verifyCode() {
+    setAccessBusy(true); setAccessMessage("");
+    try {
+      const response = await fetch("/api/cmc/quota/verify-code", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      setQuota(result); setAccessMessage(result.message); setShowAccess(false);
+    } catch (error) { setAccessMessage(error instanceof Error ? error.message : "이메일 인증에 실패했습니다."); }
+    finally { setAccessBusy(false); }
+  }
   async function predict() {
     setBusy(true); setMessage("특성을 계산하고 있습니다."); setData(null);
     try {
       const response = await fetch("/api/cmc/predict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(design) });
       const result = await response.json();
+      if (result.quota) setQuota(result.quota);
+      if (response.status === 429 && !result.quota?.bonus) setShowAccess(true);
       if (!response.ok) throw new Error(result.error);
       setData(result); setMessage(`예측 완료 · ${result.version}`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "예측 실패"); }
@@ -44,7 +83,11 @@ export default function CmcDemo() {
           <label>선경 (mm)<input className="mt-2 w-full rounded border p-2" type="number" min={.5} max={1.1} step={.1} value={design.wire} onChange={e=>{setDesign({...design,wire:Number(e.target.value)});setData(null);}}/></label>
           <label>피치 (°)<input className="mt-2 w-full rounded border p-2" type="number" min={2.1} max={5} step={.1} value={design.pitch} onChange={e=>{setDesign({...design,pitch:Number(e.target.value)});setData(null);}}/></label>
         </div>
-        <button disabled={busy} onClick={predict} className="mt-6 rounded-lg bg-blue-700 px-7 py-3 font-semibold text-white disabled:opacity-50">{busy?'계산 중…':'특성 예측'}</button>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <button disabled={busy || quota?.remaining === 0} onClick={predict} className="rounded-lg bg-blue-700 px-7 py-3 font-semibold text-white disabled:opacity-50">{busy?'계산 중…':'특성 예측'}</button>
+          {quota && <p className="text-sm font-medium text-slate-600">오늘 {quota.used}/{quota.limit}회 사용 · {quota.remaining}회 남음</p>}
+          {quota && !quota.bonus && quota.remaining === 0 && <button onClick={() => setShowAccess(true)} className="rounded-lg border border-blue-600 px-5 py-3 font-semibold text-blue-700">이메일 인증으로 100회 추가</button>}
+        </div>
         <p role="status" className="mt-4 text-sm">{message}</p>
         {data && <svg viewBox="0 0 780 335" role="img" aria-label="주파수별 CM 및 DM 임피던스" className="mt-6 w-full">
           {[.1,1,10,100,1000,10000,100000,1000000].map(v=><g key={v}><line x1="65" x2="725" y1={285-Math.log10(v/.1)/7*250} y2={285-Math.log10(v/.1)/7*250} stroke="#e2e8f0"/><text x="58" y={289-Math.log10(v/.1)/7*250} textAnchor="end" fontSize="11">{v}</text></g>)}
@@ -64,5 +107,17 @@ export default function CmcDemo() {
       </section>}
       <p className="text-sm leading-6 text-slate-500">교육·데모용 모델입니다. 실측 검증 및 CE 인증 결과가 아닙니다. 후속 8–12건 해석·재학습·평가가 필요합니다.</p>
     </div>
+    {showAccess && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4" role="dialog" aria-modal="true" aria-labelledby="cmc-access-title">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="flex items-start justify-between gap-4"><div><h2 id="cmc-access-title" className="text-xl font-bold">오늘 100회 추가</h2><p className="mt-2 text-sm text-slate-600">이메일로 받은 6자리 인증번호를 입력하면 오늘 총 200회까지 사용할 수 있습니다.</p></div><button onClick={() => setShowAccess(false)} className="text-2xl text-slate-500" aria-label="닫기">×</button></div>
+        <label className="mt-5 block text-sm font-semibold">이메일<input type="email" value={email} onChange={event => setEmail(event.target.value)} disabled={codeSent} className="mt-2 w-full rounded-lg border p-3" placeholder="name@example.com" /></label>
+        {!codeSent ? <button onClick={requestCode} disabled={accessBusy || !email} className="mt-4 w-full rounded-lg bg-blue-700 px-5 py-3 font-semibold text-white disabled:opacity-50">{accessBusy ? '발송 중…' : '인증번호 받기'}</button> : <>
+          <label className="mt-4 block text-sm font-semibold">인증번호<input inputMode="numeric" maxLength={6} value={code} onChange={event => setCode(event.target.value.replace(/\D/g, ''))} className="mt-2 w-full rounded-lg border p-3 tracking-[0.35em]" placeholder="000000" /></label>
+          <button onClick={verifyCode} disabled={accessBusy || code.length !== 6} className="mt-4 w-full rounded-lg bg-blue-700 px-5 py-3 font-semibold text-white disabled:opacity-50">{accessBusy ? '확인 중…' : '인증하고 100회 추가'}</button>
+        </>}
+        {accessMessage && <p role="status" className="mt-3 text-sm text-slate-600">{accessMessage}</p>}
+        <p className="mt-4 text-xs leading-5 text-slate-500">이메일은 인증과 사용량 관리 목적으로만 처리됩니다. 추가 사용은 하루 한 번만 가능하며 자정에 초기화됩니다.</p>
+      </div>
+    </div>}
   </main>;
 }

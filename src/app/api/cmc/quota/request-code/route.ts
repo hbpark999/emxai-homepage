@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
     if (!validEmail(body.email)) return NextResponse.json({ error: "올바른 이메일 주소를 입력하세요." }, { status: 400 });
     const status = await quotaStatus(id);
     if (status.bonus) return NextResponse.json({ error: "오늘 추가 사용량을 이미 받았습니다." }, { status: 409 });
+    if (status.remaining > 0) return NextResponse.json({ error: `기본 사용량이 ${status.remaining}회 남아 있습니다.` }, { status: 409 });
     if (!await allowOtpRequest(id)) return NextResponse.json({ error: "인증번호 요청이 많습니다. 15분 후 다시 시도하세요." }, { status: 429 });
     const code = createOtp();
     await saveOtp(id, body.email, code);
