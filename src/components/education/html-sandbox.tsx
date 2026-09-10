@@ -79,6 +79,7 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
   // localStorage에서 지연 초기값으로 읽는다(마운트는 항상 클라이언트에서만 된다).
   const [isOwner, setIsOwner] = useState(() => window.localStorage.getItem(ownerStorageKey) === "1");
   const [error, setError] = useState<string | null>(null);
+  const [isForceReleasing, setIsForceReleasing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isFocusedRef = useRef(false);
   const saveTimerRef = useRef<number | null>(null);
@@ -237,6 +238,37 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
     }
   }
 
+  async function forceRelease() {
+    const password = window.prompt("관리자 비밀번호를 입력하세요.");
+    if (!password) {
+      return;
+    }
+
+    setIsForceReleasing(true);
+    try {
+      const response = await fetch("/api/board/html-slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slot, forceRelease: true, password }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; error?: string };
+
+      if (!payload.ok) {
+        setError(payload.error ?? "강제 해제하지 못했습니다.");
+        return;
+      }
+
+      setInUse(false);
+      setIsOwner(false);
+      window.localStorage.removeItem(ownerStorageKey);
+      setError(null);
+    } catch {
+      setError("연결을 확인해 주세요.");
+    } finally {
+      setIsForceReleasing(false);
+    }
+  }
+
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3">
@@ -247,22 +279,34 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
             결과와 다른 참가자 화면에 바로 반영됩니다.
           </p>
         </div>
-        <label
-          className={
-            isLockedByOther
-              ? "flex shrink-0 cursor-not-allowed items-center gap-2 rounded-md border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-400"
-              : "flex shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700"
-          }
-        >
-          <input
-            type="checkbox"
-            checked={inUse}
-            onChange={toggleInUse}
-            disabled={isLockedByOther}
-            className="size-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
-          />
-          사용 중
-        </label>
+        <div className="flex shrink-0 items-center gap-2">
+          {isLockedByOther ? (
+            <button
+              type="button"
+              onClick={forceRelease}
+              disabled={isForceReleasing}
+              className="rounded-md border border-rose-300 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 disabled:cursor-wait disabled:opacity-60"
+            >
+              {isForceReleasing ? "해제 중..." : "관리자 강제 해제"}
+            </button>
+          ) : null}
+          <label
+            className={
+              isLockedByOther
+                ? "flex cursor-not-allowed items-center gap-2 rounded-md border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-400"
+                : "flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700"
+            }
+          >
+            <input
+              type="checkbox"
+              checked={inUse}
+              onChange={toggleInUse}
+              disabled={isLockedByOther}
+              className="size-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
+            />
+            사용 중
+          </label>
+        </div>
       </div>
       <div className="flex flex-col">
         {isLockedByOther ? (
