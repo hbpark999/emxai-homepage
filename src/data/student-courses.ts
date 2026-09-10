@@ -73,7 +73,7 @@ export const studentCourses = [
     boardCourseNames: ["7기", "생성형 AI기반 전자파 설계 실습"],
     passwordEnv: "EDU_PASS_UNIV_STUDENT_EM_DESIGN_PRACTICE",
     pdfFile: "univ-student-em-design-practice.pdf",
-    pdfPageCount: 107,
+    pdfPageCount: 86,
   },
 ] satisfies StudentCourse[];
 
