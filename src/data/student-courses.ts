@@ -1,7 +1,7 @@
 export type StudentCourse = {
   slug: string;
   title: string;
-  organizer: "RAPA" | "TTA" | "동양미래대";
+  organizer: "RAPA" | "TTA" | "대학/대학원 실습 교육";
   dayLabel: string;
   boardCourseNames: string[];
   passwordEnv: string;
@@ -67,8 +67,8 @@ export const studentCourses = [
   },
   {
     slug: "univ-student-em-design-practice",
-    title: "동양미래대: 생성형 AI기반 전자파 설계 실습",
-    organizer: "동양미래대",
+    title: "대학/대학원 실습 교육: 생성형 AI기반 전자파 설계 실습",
+    organizer: "대학/대학원 실습 교육",
     dayLabel: "1일 차",
     boardCourseNames: ["7기", "생성형 AI기반 전자파 설계 실습"],
     passwordEnv: "EDU_PASS_UNIV_STUDENT_EM_DESIGN_PRACTICE",
