@@ -19,18 +19,52 @@ const validation: Validation = {
 
 function Geometry({ design }: { design: { turns: number; family: number; wire: number; pitch: number } }) {
   const [inner, outer, height] = families[design.family];
-  const loops = Array.from({ length: Math.min(12, Math.max(6, design.turns)) });
+  const [view,setView]=useState({azimuth:-55,elevation:28});
+  const [drag,setDrag]=useState<{x:number;y:number;azimuth:number;elevation:number}|null>(null);
+  type Point3=[number,number,number];
+  const limit=outer/2+3, az=view.azimuth*Math.PI/180, el=view.elevation*Math.PI/180;
+  const project=([x,y,z]:Point3) => {
+    const xr=Math.cos(az)*x-Math.sin(az)*y;
+    const yr=Math.sin(az)*x+Math.cos(az)*y;
+    return [260+xr/limit*185,165-(Math.cos(el)*z-Math.sin(el)*yr)/limit*185*.72] as const;
+  };
+  const depth=([x,y,z]:Point3)=>Math.cos(el)*(Math.sin(az)*x+Math.cos(az)*y)+Math.sin(el)*z;
+  const surfaces:{points:Point3[];fill:string;depth:number;order:number}[]=[];
+  const segments=72;
+  for(let i=0;i<segments;i++){
+    const a=i*2*Math.PI/segments,b=(i+1)*2*Math.PI/segments;
+    for(const radius of [inner/2,outer/2]){
+      const points:Point3[]=[[radius*Math.cos(a),radius*Math.sin(a),-height/2],[radius*Math.cos(b),radius*Math.sin(b),-height/2],[radius*Math.cos(b),radius*Math.sin(b),height/2],[radius*Math.cos(a),radius*Math.sin(a),height/2]];
+      surfaces.push({points,fill:"#555d68",depth:points.reduce((sum,point)=>sum+depth(point),0)/4,order:surfaces.length});
+    }
+    for(const z of [-height/2,height/2]){
+      const points:Point3[]=[[inner/2*Math.cos(a),inner/2*Math.sin(a),z],[outer/2*Math.cos(a),outer/2*Math.sin(a),z],[outer/2*Math.cos(b),outer/2*Math.sin(b),z],[inner/2*Math.cos(b),inner/2*Math.sin(b),z]];
+      surfaces.push({points,fill:"#67717c",depth:points.reduce((sum,point)=>sum+depth(point),0)/4,order:surfaces.length});
+    }
+  }
+  surfaces.sort((a,b)=>Math.abs(a.depth-b.depth)<1e-9?a.order-b.order:a.depth-b.depth);
+  const winding=(center:number) => {
+    const radii=[inner/2-design.wire,outer/2+design.wire,outer/2+design.wire,inner/2-design.wire,inner/2-design.wire];
+    const levels=[height/2+design.wire,height/2+design.wire,-height/2-design.wire,-height/2-design.wire,height/2+design.wire];
+    const points:Point3[]=[];
+    for(let n=0;n<Math.trunc(design.turns);n++)for(let k=0;k<4;k++)for(let j=0;j<10;j++){
+      const u=j/10, radius=radii[k]+u*(radii[k+1]-radii[k]);
+      const z=levels[k]+u*(levels[k+1]-levels[k]);
+      const angle=center+design.pitch*Math.PI/180*(n+(k+u)/4-design.turns/2);
+      points.push([radius*Math.cos(angle),radius*Math.sin(angle),z]);
+    }
+    return points.map(project).map(([x,y],i)=>`${i?"L":"M"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  };
   return <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-sky-50 p-4">
-    <div className="mb-2 flex items-center justify-between"><h3 className="font-bold">① 입력 기반 CMC 3D 형상</h3><span className="text-xs text-slate-500">개략 형상</span></div>
-    <svg viewBox="0 0 520 330" className="w-full" role="img" aria-label="토로이드 코어와 두 권선의 3D 개략 형상">
-      <defs><radialGradient id="core" cx="35%" cy="28%"><stop offset="0" stopColor="#64748b"/><stop offset=".62" stopColor="#27384b"/><stop offset="1" stopColor="#101d2c"/></radialGradient></defs>
-      <ellipse cx="260" cy="170" rx="177" ry="105" fill="url(#core)" stroke="#0f172a" strokeWidth="4"/>
-      <ellipse cx="260" cy="170" rx="76" ry="45" fill="#f1f5f9" stroke="#0f172a" strokeWidth="4"/>
-      {loops.map((_,i) => { const a=(-145+i*20)*Math.PI/180; const x=260+130*Math.cos(a), y=170+78*Math.sin(a); return <path key={`l${i}`} d={`M ${x-24} ${y-60} Q ${x-42} ${y} ${x-20} ${y+62}`} fill="none" stroke="#d96f32" strokeWidth={7+design.wire*2} strokeLinecap="round" opacity=".95"/>; })}
-      {loops.map((_,i) => { const a=(35+i*20)*Math.PI/180; const x=260+130*Math.cos(a), y=170+78*Math.sin(a); return <path key={`n${i}`} d={`M ${x+20} ${y-60} Q ${x+42} ${y} ${x+24} ${y+62}`} fill="none" stroke="#e6ad42" strokeWidth={7+design.wire*2} strokeLinecap="round" opacity=".95"/>; })}
-      <text x="20" y="300" fontSize="13" fill="#475569">ID {inner} · OD {outer} · H {height} mm / {design.turns} turns × 2 / wire {design.wire} mm / pitch {design.pitch}°</text>
+    <div className="mb-2 flex items-center justify-between"><h3 className="font-bold">① CMC 형상 미리보기</h3><button type="button" onClick={()=>setView({azimuth:-55,elevation:28})} className="text-xs font-semibold text-blue-700">기본 시점</button></div>
+    <svg viewBox="0 0 520 330" className="w-full cursor-grab touch-none active:cursor-grabbing" role="img" aria-label="Surrogate GUI와 동일한 요청 치수 기반 CMC 3D 형상" onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);setDrag({x:e.clientX,y:e.clientY,...view})}} onPointerMove={e=>{if(drag)setView({azimuth:drag.azimuth+(e.clientX-drag.x)*.45,elevation:Math.max(-75,Math.min(75,drag.elevation-(e.clientY-drag.y)*.35))})}} onPointerUp={()=>setDrag(null)} onPointerCancel={()=>setDrag(null)}>
+      <rect width="520" height="330" fill="#f8fafc"/>
+      <text x="260" y="22" textAnchor="middle" fontSize="13" fill="#1e293b">ID {inner} / OD {outer} / 높이 {height} mm</text><text x="260" y="40" textAnchor="middle" fontSize="12" fill="#475569">{design.turns} turns × 2 · 선경 {design.wire} mm · 피치 {design.pitch}°</text>
+      {surfaces.map((surface,i)=><polygon key={i} points={surface.points.map(project).map(p=>p.join(",")).join(" ")} fill={surface.fill} fillOpacity=".65" stroke="#47515d" strokeOpacity=".16" strokeWidth=".4"/>)}
+      <path d={winding(0)} fill="none" stroke="#cf762f" strokeWidth={2.5*design.wire} strokeLinejoin="round" strokeLinecap="round"/><path d={winding(Math.PI)} fill="none" stroke="#d6a34c" strokeWidth={2.5*design.wire} strokeLinejoin="round" strokeLinecap="round"/>
+      <g transform="translate(20 60)"><line x2="28" stroke="#cf762f" strokeWidth="4"/><text x="36" y="4" fontSize="11" fill="#334155">권선 L</text><line y1="18" x2="28" y2="18" stroke="#d6a34c" strokeWidth="4"/><text x="36" y="22" fontSize="11" fill="#334155">권선 N</text></g>
     </svg>
-    <p className="text-xs leading-5 text-slate-500">입력 치수 기반 교육용 미리보기이며 실제 CAD, 리드선, 절연 상세 및 HFSS 자동 보정 형상과 다를 수 있습니다.</p>
+    <p className="text-center text-xs leading-5 text-slate-500">입력 치수 기반 개략 형상 · 마우스 드래그로 회전<br/>HFSS 자동 보정 및 리드·절연 상세는 미포함</p>
   </div>;
 }
 
