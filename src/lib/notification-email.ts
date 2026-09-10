@@ -1,11 +1,12 @@
 type EmailParams = {
   subject: string;
   text: string;
+  to?: string;
 };
 
-export async function sendNotificationEmail({ subject, text }: EmailParams) {
+export async function sendNotificationEmail({ subject, text, to: recipient }: EmailParams) {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_TO_EMAIL ?? "hbpark@emxai.net";
+  const to = recipient ?? process.env.CONTACT_TO_EMAIL ?? "hbpark@emxai.net";
   const from = process.env.CONTACT_FROM_EMAIL ?? "EMxAI <no-reply@send.emxai.net>";
 
   if (!apiKey) {
