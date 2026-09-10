@@ -30,6 +30,15 @@ def predict(design:Design):
     x=np.array([[design.turns,*FAMILIES[design.family],design.wire,design.pitch]])
     db=MODEL['model'].predict(x)[0].reshape(tuple(MODEL['output_shape']))
     z=10**(db/20)
+    turns_grid,pitch_grid=np.meshgrid(np.arange(6,13),np.linspace(2.1,5,13))
+    surface_inputs=np.repeat(x,turns_grid.size,axis=0)
+    surface_inputs[:,0]=turns_grid.ravel()
+    surface_inputs[:,5]=pitch_grid.ravel()
+    surface_db=MODEL['model'].predict(surface_inputs).reshape(-1,2,201)
+    logf=np.log10(np.asarray(MODEL['frequency_hz']))
+    zcm_1mhz=np.asarray([10**(np.interp(6,logf,item[0])/20) for item in surface_db])
     return {'version':CARD['version'],'frequency_hz':np.asarray(MODEL['frequency_hz']).tolist(),
             'zcm_ohm':z[0].tolist(),'zdm_ohm':z[1].tolist(),
+            'validation':CARD['validation'],
+            'surface_1mhz':{'turns':turns_grid.tolist(),'pitch':pitch_grid.tolist(),'zcm_ohm':zcm_1mhz.reshape(turns_grid.shape).tolist()},
             'scope':'HFSS-based magnitude prediction; not a complex SPICE network'}
