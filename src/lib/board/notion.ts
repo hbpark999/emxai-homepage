@@ -18,7 +18,7 @@
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
-const CACHE_TTL_MS = 2_000;
+const CACHE_TTL_MS = 8_000;
 const PAGE_SIZE = 50;
 
 export type BoardPost = {
@@ -49,6 +49,7 @@ type NotionPage = {
 };
 
 let cache: { at: number; posts: BoardPost[] } | null = null;
+let cachePromise: Promise<BoardPost[]> | null = null;
 
 /** 같은 타입의 속성 중 첫 번째를 찾는다. 이름이 달라도 동작하게 하기 위함. */
 function findByType(properties: Record<string, NotionProperty>, type: string) {
@@ -179,6 +180,7 @@ export async function createBoardPost({
   }
 
   cache = null;
+  cachePromise = null;
 }
 
 /** 과정 게시판의 "작업완료" 카운터. 별도 Notion 페이지 하나의 두 숫자 속성을 그대로 쓴다.
@@ -439,31 +441,41 @@ export async function getBoardPosts(): Promise<BoardPost[]> {
     return cache.posts;
   }
 
-  const response = await fetch(`${NOTION_API}/databases/${databaseId}/query`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Notion-Version": NOTION_VERSION,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      page_size: PAGE_SIZE,
-      sorts: [{ timestamp: "created_time", direction: "descending" }],
-    }),
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    throw new Error(
-      `Notion 조회 실패 (${response.status}). 통합 연결과 데이터베이스 ID를 확인하세요. ${detail.slice(0, 300)}`,
-    );
+  if (cachePromise) {
+    return cachePromise;
   }
 
-  const payload = (await response.json()) as { results?: NotionPage[] };
-  const posts = (payload.results ?? []).filter(isVisible).map(toPost);
+  cachePromise = (async () => {
+    const response = await fetch(`${NOTION_API}/databases/${databaseId}/query`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Notion-Version": NOTION_VERSION,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        page_size: PAGE_SIZE,
+        sorts: [{ timestamp: "created_time", direction: "descending" }],
+      }),
+      cache: "no-store",
+    });
 
-  cache = { at: now, posts };
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      throw new Error(
+        `Notion 조회 실패 (${response.status}). 통합 연결과 데이터베이스 ID를 확인하세요. ${detail.slice(0, 300)}`,
+      );
+    }
 
-  return posts;
+    const payload = (await response.json()) as { results?: NotionPage[] };
+    const posts = (payload.results ?? []).filter(isVisible).map(toPost);
+    cache = { at: Date.now(), posts };
+    return posts;
+  })();
+
+  try {
+    return await cachePromise;
+  } finally {
+    cachePromise = null;
+  }
 }

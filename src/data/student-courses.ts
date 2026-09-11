@@ -68,17 +68,17 @@ export const studentCourses = [
   },
   {
     slug: "univ-student-em-design-practice",
-    title: "대학/대학원 실습 교육: 생성형 AI기반 전자파 설계 실습",
+    title: "대학/대학원 특강: 생성형 AI의 EMI/SI 분석 활용",
     organizer: "대학/대학원 실습 교육",
-    dayLabel: "1일 차",
-    boardCourseNames: ["7기", "생성형 AI기반 전자파 설계 실습"],
+    dayLabel: "특강",
+    boardCourseNames: ["7기", "생성형 AI의 EMI/SI 분석 활용", "동양미래대학교 특강"],
     passwordEnv: "EDU_PASS_UNIV_STUDENT_EM_DESIGN_PRACTICE",
-    pdfFile: "univ-student-em-design-practice.pdf",
-    pdfPageCount: 122,
-    pdfEnabled: false,
+    pdfFile: "동양미래대] 생성형AI의 EMI_SI분석 활용 20260911ver3.3_11일 특강.pdf",
+    pdfPageCount: 66,
+    pdfEnabled: true,
   },
 ] satisfies StudentCourse[];
 
-export function getStudentCourse(slug: string) {
+export function getStudentCourse(slug: string): StudentCourse | null {
   return studentCourses.find((course) => course.slug === slug) ?? null;
 }

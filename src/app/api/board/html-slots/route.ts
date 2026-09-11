@@ -7,7 +7,7 @@
 
 import { NextResponse } from "next/server";
 import { isValidAnalyticsPassword } from "@/lib/analytics/auth";
-import { getHtmlSlots, isCompleteCounterConfigured, setHtmlSlot } from "@/lib/board/notion";
+import { getHtmlSlots, isEducationLiveStoreConfigured, setHtmlSlot } from "@/lib/education/live-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,10 +18,11 @@ type UpdatePayload = {
   inUse?: boolean;
   forceRelease?: boolean;
   password?: string;
+  ownerId?: string;
 };
 
 export async function GET() {
-  if (!isCompleteCounterConfigured()) {
+  if (!isEducationLiveStoreConfigured()) {
     return NextResponse.json(
       {
         ok: false,
@@ -43,7 +44,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!isCompleteCounterConfigured()) {
+  if (!isEducationLiveStoreConfigured()) {
     return NextResponse.json(
       { ok: false, error: "실습 슬롯이 아직 설정되지 않았습니다." },
       { status: 503 },
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     try {
-      await setHtmlSlot(payload.slot, { inUse: false });
+      await setHtmlSlot(payload.slot, { inUse: false }, payload.ownerId ?? "admin", true);
       return NextResponse.json({ ok: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "강제 해제 중 오류가 발생했습니다.";
@@ -73,9 +74,17 @@ export async function POST(request: Request) {
     }
   }
 
+  if (!payload.ownerId || payload.ownerId.length > 100) {
+    return NextResponse.json({ ok: false, error: "사용자 식별 정보가 올바르지 않습니다." }, { status: 400 });
+  }
+
   try {
-    await setHtmlSlot(payload.slot, { code: payload.code, inUse: payload.inUse });
-    return NextResponse.json({ ok: true });
+    const state = await setHtmlSlot(
+      payload.slot,
+      { code: payload.code, inUse: payload.inUse },
+      payload.ownerId,
+    );
+    return NextResponse.json({ ok: true, state });
   } catch (error) {
     const message = error instanceof Error ? error.message : "알 수 없는 오류";
     return NextResponse.json({ ok: false, error: message }, { status: 500 });

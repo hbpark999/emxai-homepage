@@ -10,9 +10,10 @@ import { NextResponse } from "next/server";
 import {
   clearTimer,
   getTimerEndsAt,
-  isCompleteCounterConfigured,
+  isEducationLiveStoreConfigured,
   startTimer,
-} from "@/lib/board/notion";
+} from "@/lib/education/live-store";
+import { isValidAnalyticsPassword } from "@/lib/analytics/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,10 +21,11 @@ export const dynamic = "force-dynamic";
 type ActionPayload = {
   action?: "start" | "clear";
   minutes?: number;
+  password?: string;
 };
 
 export async function GET() {
-  if (!isCompleteCounterConfigured()) {
+  if (!isEducationLiveStoreConfigured()) {
     return NextResponse.json(
       { ok: false, error: "타이머가 아직 설정되지 않았습니다.", endsAt: null },
       { status: 200 },
@@ -40,7 +42,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!isCompleteCounterConfigured()) {
+  if (!isEducationLiveStoreConfigured()) {
     return NextResponse.json(
       { ok: false, error: "타이머가 아직 설정되지 않았습니다." },
       { status: 503 },
@@ -48,6 +50,10 @@ export async function POST(request: Request) {
   }
 
   const payload = (await request.json().catch(() => ({}))) as ActionPayload;
+
+  if (!isValidAnalyticsPassword(payload.password ?? "")) {
+    return NextResponse.json({ ok: false, error: "관리자 비밀번호가 올바르지 않습니다." }, { status: 401 });
+  }
 
   try {
     if (payload.action === "clear") {

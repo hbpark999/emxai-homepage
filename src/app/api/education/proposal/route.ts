@@ -26,13 +26,6 @@ export async function POST(request: Request) {
   const token = process.env.NOTION_TOKEN;
   const databaseId = process.env.NOTION_EDUCATION_INQUIRY_DB_ID;
 
-  if (!token || !databaseId) {
-    return NextResponse.json(
-      { ok: false, error: "교육 문의 저장소가 아직 설정되지 않았습니다." },
-      { status: 503 },
-    );
-  }
-
   const payload = (await request.json().catch(() => ({}))) as ProposalPayload;
   const name = trimText(payload.name);
   const email = trimText(payload.email);
@@ -55,58 +48,53 @@ export async function POST(request: Request) {
     summary,
   ].join("\n");
 
-  const response = await fetch(`${NOTION_API}/pages`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Notion-Version": NOTION_VERSION,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      parent: { database_id: databaseId },
-      properties: {
-        Name: {
-          title: richText(`[제안서 요청] ${company} - ${name}`),
+  const properties = {
+    Name: { title: richText(`[제안서 요청] ${company} - ${name}`) },
+    회사: { rich_text: richText(company) },
+    이메일: { email },
+    요청내용: { rich_text: richText(content) },
+    상태: { select: { name: "신규" } },
+  };
+  const notionTask = token && databaseId
+    ? fetch(`${NOTION_API}/pages`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Notion-Version": NOTION_VERSION,
+          "Content-Type": "application/json",
         },
-        회사: {
-          rich_text: richText(company),
-        },
-        이메일: {
-          email,
-        },
-        요청내용: {
-          rich_text: richText(content),
-        },
-        상태: {
-          select: { name: "신규" },
-        },
-      },
-    }),
-    cache: "no-store",
+        body: JSON.stringify({ parent: { database_id: databaseId }, properties }),
+        cache: "no-store",
+      }).then((response) => {
+        if (!response.ok) throw new Error(`Notion 저장 실패 (${response.status})`);
+        return true;
+      })
+    : Promise.reject(new Error("Notion 교육 문의 저장소가 설정되지 않았습니다."));
+
+  const emailTask = sendNotificationEmail({
+    subject: `[EMxAI 교육 제안서 요청] ${company} - ${name}`,
+    text: content,
+  }).then((result) => {
+    if (!result.sent) throw new Error(result.reason ?? "메일 설정이 없습니다.");
+    return true;
   });
 
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
+  const [notionResult, emailResult] = await Promise.allSettled([notionTask, emailTask]);
+  const notionSaved = notionResult.status === "fulfilled";
+  const emailSent = emailResult.status === "fulfilled";
+  if (!notionSaved) console.error("제안서 요청 Notion 저장 실패", notionResult.reason);
+  if (!emailSent) console.error("제안서 요청 이메일 발송 실패", emailResult.reason);
+
+  if (!notionSaved && !emailSent) {
     return NextResponse.json(
-      {
-        ok: false,
-        error: `접수 저장에 실패했습니다. ${detail.slice(0, 200)}`,
-      },
-      { status: 500 },
+      { ok: false, error: "요청 접수에 실패했습니다. 잠시 후 다시 시도해 주세요." },
+      { status: 503 },
     );
   }
-
-  let emailSent = false;
-  try {
-    const result = await sendNotificationEmail({
-      subject: `[EMxAI 교육 제안서 요청] ${company} - ${name}`,
-      text: content,
-    });
-    emailSent = result.sent;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "메일 발송 실패";
-    return NextResponse.json({ ok: true, emailSent: false, warning: message });
-  }
-
-  return NextResponse.json({ ok: true, emailSent });
+  return NextResponse.json({
+    ok: true,
+    notionSaved,
+    emailSent,
+    warning: notionSaved && emailSent ? undefined : "한 경로의 전달이 지연되고 있으나 요청은 접수되었습니다.",
+  });
 }

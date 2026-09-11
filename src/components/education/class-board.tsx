@@ -6,17 +6,21 @@
  * 용도 : 교육 중 강사가 Notion에 올린 링크·공지·코드를 수강생 화면에 실시간 표시한다.
  *
  * 동작
- *   - 2초마다 /api/board 를 호출해 목록을 갱신한다.
+ *   - 10초마다 /api/board 를 호출해 목록을 갱신한다.
  *   - 브라우저 탭이 백그라운드일 때는 호출하지 않는다(불필요한 트래픽 방지).
  *   - 과정(select 속성)이 여러 개면 상단에 필터 버튼이 나타난다.
  *
- * 수강생은 로그인 없이 주소만으로 열람한다. 글 작성은 Notion에서만 가능하다.
+ * 수강생은 로그인 없이 주소만으로 열람한다. 게시글은 Notion, 교육 실시간 상태는
+ * Supabase에 저장한다.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { BoardContent } from "./board-content";
+import { getEducationClientId } from "@/lib/education/client-id";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
-const REFRESH_MS = 2_000;
+const BOARD_REFRESH_MS = 10_000;
+const LIVE_FALLBACK_REFRESH_MS = 30_000;
 
 type BoardPost = {
   id: string;
@@ -74,6 +78,7 @@ function ChatBubble({ post }: { post: BoardPost }) {
 }
 
 function CompleteCounter({ storageKey }: { storageKey: string }) {
+  const [studentId] = useState(() => getEducationClientId());
   const [count, setCount] = useState<number | null>(null);
   const [round, setRound] = useState(0);
   // 마운트 시점(=비밀번호 통과 후, 클라이언트에서만 렌더되는 지점)에만 읽으면 되므로
@@ -101,7 +106,16 @@ function CompleteCounter({ storageKey }: { storageKey: string }) {
 
   useEffect(() => {
     const initialTimer = window.setTimeout(load, 0);
-    const timer = setInterval(load, REFRESH_MS);
+    const timer = setInterval(load, LIVE_FALLBACK_REFRESH_MS);
+    const supabase = getSupabaseBrowser();
+    const channel = supabase
+      ?.channel("education-complete-counter")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "education_live_state", filter: "id=eq.default" },
+        () => void load(),
+      )
+      .subscribe();
     const refreshNow = () => {
       if (document.visibilityState === "visible") {
         void load();
@@ -115,6 +129,7 @@ function CompleteCounter({ storageKey }: { storageKey: string }) {
     return () => {
       clearTimeout(initialTimer);
       clearInterval(timer);
+      if (channel && supabase) void supabase.removeChannel(channel);
       document.removeEventListener("visibilitychange", refreshNow);
       window.removeEventListener("focus", refreshNow);
       window.removeEventListener("online", refreshNow);
@@ -132,6 +147,9 @@ function CompleteCounter({ storageKey }: { storageKey: string }) {
       return;
     }
 
+    const password = action === "reset" ? window.prompt("관리자 비밀번호를 입력하세요.") : null;
+    if (action === "reset" && !password) return;
+
     setPending(true);
     setError(null);
 
@@ -139,7 +157,7 @@ function CompleteCounter({ storageKey }: { storageKey: string }) {
       const response = await fetch("/api/board/complete-count", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, studentId, password }),
       });
       const payload = (await response.json()) as {
         ok?: boolean;
@@ -315,7 +333,7 @@ export function ClassBoard({
   useEffect(() => {
     const initialTimer = window.setTimeout(load, 0);
 
-    const timer = setInterval(load, REFRESH_MS);
+    const timer = setInterval(load, BOARD_REFRESH_MS);
     const refreshNow = () => {
       if (document.visibilityState === "visible") {
         void load();

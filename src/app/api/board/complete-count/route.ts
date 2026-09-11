@@ -13,19 +13,22 @@ import { NextResponse } from "next/server";
 import {
   getCompleteCount,
   incrementCompleteCount,
-  isCompleteCounterConfigured,
+  isEducationLiveStoreConfigured,
   resetCompleteCount,
-} from "@/lib/board/notion";
+} from "@/lib/education/live-store";
+import { isValidAnalyticsPassword } from "@/lib/analytics/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type ActionPayload = {
   action?: "increment" | "reset";
+  studentId?: string;
+  password?: string;
 };
 
 export async function GET() {
-  if (!isCompleteCounterConfigured()) {
+  if (!isEducationLiveStoreConfigured()) {
     return NextResponse.json(
       { ok: false, error: "카운터가 아직 설정되지 않았습니다.", count: 0, round: 0 },
       { status: 200 },
@@ -42,7 +45,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!isCompleteCounterConfigured()) {
+  if (!isEducationLiveStoreConfigured()) {
     return NextResponse.json(
       { ok: false, error: "카운터가 아직 설정되지 않았습니다." },
       { status: 503 },
@@ -51,9 +54,18 @@ export async function POST(request: Request) {
 
   const payload = (await request.json().catch(() => ({}))) as ActionPayload;
 
+  if (payload.action === "reset" && !isValidAnalyticsPassword(payload.password ?? "")) {
+    return NextResponse.json({ ok: false, error: "관리자 비밀번호가 올바르지 않습니다." }, { status: 401 });
+  }
+  if (payload.action !== "reset" && (!payload.studentId || payload.studentId.length > 100)) {
+    return NextResponse.json({ ok: false, error: "학생 식별 정보가 올바르지 않습니다." }, { status: 400 });
+  }
+
   try {
     const state =
-      payload.action === "reset" ? await resetCompleteCount() : await incrementCompleteCount();
+      payload.action === "reset"
+        ? await resetCompleteCount()
+        : await incrementCompleteCount(payload.studentId!);
     return NextResponse.json({ ok: true, ...state });
   } catch (error) {
     const message = error instanceof Error ? error.message : "알 수 없는 오류";

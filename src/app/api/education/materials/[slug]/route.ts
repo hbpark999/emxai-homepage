@@ -35,6 +35,13 @@ export async function GET(
     return NextResponse.json({ error: "PDF 자료를 제공하지 않는 과정입니다." }, { status: 404 });
   }
 
+  if (request.nextUrl.searchParams.has("download")) {
+    return NextResponse.json(
+      { error: "이 자료는 브라우저 안에서만 열람할 수 있습니다." },
+      { status: 403 },
+    );
+  }
+
   const filePath = path.join(MATERIALS_DIR, course.pdfFile);
   const normalizedMaterialsDir = path.normalize(MATERIALS_DIR + path.sep);
   const normalizedFilePath = path.normalize(filePath);
@@ -57,7 +64,6 @@ export async function GET(
   }
 
   const stream = Readable.toWeb(createReadStream(normalizedFilePath));
-  const disposition = request.nextUrl.searchParams.get("download") === "1" ? "attachment" : "inline";
   // Content-Disposition의 filename은 ASCII만 허용되므로, 한글 등은 filename* (RFC 5987)로 인코딩해 전달한다.
   const asciiFallbackName = course.pdfFile.replace(/[^\x20-\x7e]/g, "_");
   const encodedName = encodeURIComponent(course.pdfFile);
@@ -66,8 +72,9 @@ export async function GET(
     headers: {
       "Content-Type": "application/pdf",
       "Content-Length": String(fileStat.size),
-      "Content-Disposition": `${disposition}; filename="${asciiFallbackName}"; filename*=UTF-8''${encodedName}`,
-      "Cache-Control": "private, no-store",
+      "Content-Disposition": `inline; filename="${asciiFallbackName}"; filename*=UTF-8''${encodedName}`,
+      "Cache-Control": "private, no-store, max-age=0, must-revalidate",
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }

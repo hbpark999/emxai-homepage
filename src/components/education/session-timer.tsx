@@ -4,8 +4,8 @@
  * 교시/휴식 타이머 — 모래시계(큰 글씨, 제목 옆) + 강사용 설정 컨트롤(작은 글씨, 아래)
  *
  * 강사가 "남은 시간(분)"을 입력하고 [설정]을 누르면, 그 시점 + N분을 종료 시각으로
- * Notion에 저장한다(완료 카운터와 같은 페이지의 날짜 속성). 모든 화면은 이 절대
- * 시각을 5초마다 다시 읽어와서, 각자 1초 단위로 카운트다운을 표시한다 — 그래서
+ * Supabase에 저장한다. 모든 화면은 Realtime으로 종료 시각 변경을 전달받고,
+ * 각자 1초 단위로 카운트다운을 표시한다 — 그래서
  * 모든 수강생이 같은 종료 시각을 보게 된다(브라우저별 상태가 아님).
  *
  * useSessionTimer 훅 하나로 상태를 공유하고, 배지(TimerBadge)와 설정 컨트롤
@@ -13,8 +13,9 @@
  */
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
-const POLL_MS = 5_000;
+const POLL_MS = 30_000;
 
 function formatRemaining(ms: number) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -56,20 +57,32 @@ export function useSessionTimer() {
     const initialTimer = window.setTimeout(load, 0);
     const pollTimer = setInterval(load, POLL_MS);
     const tickTimer = setInterval(() => setNow(Date.now()), 1_000);
+    const supabase = getSupabaseBrowser();
+    const channel = supabase
+      ?.channel("education-session-timer")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "education_live_state", filter: "id=eq.default" },
+        () => void load(),
+      )
+      .subscribe();
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(pollTimer);
       clearInterval(tickTimer);
+      if (channel && supabase) void supabase.removeChannel(channel);
     };
   }, [load]);
 
   async function act(action: "start" | "clear") {
+    const password = window.prompt("관리자 비밀번호를 입력하세요.");
+    if (!password) return;
     setPending(true);
     setError(null);
 
     try {
-      const body = action === "start" ? { action, minutes: Number(minutesInput) } : { action };
+      const body = action === "start" ? { action, minutes: Number(minutesInput), password } : { action, password };
       const response = await fetch("/api/board/timer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -8,13 +8,13 @@
  *        결과가 함께 반영된다. 강사 화면에서도 똑같이 보인다.
  *
  * 동작
- *   - 3초마다 서버(Notion)에서 슬롯 상태를 다시 읽어온다.
+ *   - Supabase Realtime으로 슬롯 변경을 전달받고, 연결 복구용으로 30초마다 다시 읽는다.
  *   - 타이핑 중(입력창에 포커스가 있는 동안)에는 서버 값으로 텍스트를 덮어쓰지 않는다
  *     — 다른 사람이 같은 슬롯을 동시에 건드리지만 않으면 내 타이핑이 끊기지 않는다.
- *   - 입력을 멈추고 700ms가 지나면 자동으로 서버에 저장된다(별도 "미리보기"/"공유"
+ *   - 입력을 멈추고 700ms가 지나면 자동으로 Supabase에 저장된다(별도 "미리보기"/"공유"
  *     버튼 없이 코드가 바로 렌더링되고 다른 사람에게도 전달된다).
- *   - "사용 중" 체크박스를 먼저 체크한 사람이 그 슬롯의 소유자가 된다(이 소유
- *     여부는 이 브라우저에만 저장되고 새로고침해도 유지된다). 다른 브라우저에서는
+ *   - "사용 중" 체크박스를 먼저 체크한 사람이 그 슬롯의 소유자가 된다. 소유권은
+ *     브라우저별 익명 ID와 10분 만료 시각으로 관리된다. 다른 브라우저에서는
  *     체크박스가 잠긴 채로 켜져 있고, 입력창 대신 "다른 곳에서 입력 중입니다"가
  *     표시되어 동시에 같은 슬롯에 타이핑해 서로 덮어쓰는 걸 막는다.
  *
@@ -23,8 +23,10 @@
 
 import { useCallback, useEffect, useRef, useState, type ClipboardEvent } from "react";
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import { getEducationClientId } from "@/lib/education/client-id";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
-const POLL_MS = 3_000;
+const POLL_MS = 30_000;
 const SAVE_DEBOUNCE_MS = 700;
 const PASTED_IMAGE_MAX_WIDTH = 900;
 const PASTED_IMAGE_QUALITY = 0.7;
@@ -72,12 +74,11 @@ type HtmlSandboxProps = {
 
 export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandboxProps) {
   const { ref: previewRef, isFullscreen, toggleFullscreen } = useFullscreen<HTMLDivElement>();
-  const ownerStorageKey = `emxai_html_slot_owner_${slot}`;
+  const [ownerId] = useState(() => getEducationClientId());
   const [code, setCode] = useState("");
   const [inUse, setInUse] = useState(false);
-  // 이 브라우저가 "사용 중"을 먼저 체크해 소유자가 됐는지. 새로고침해도 유지되도록
-  // localStorage에서 지연 초기값으로 읽는다(마운트는 항상 클라이언트에서만 된다).
-  const [isOwner, setIsOwner] = useState(() => window.localStorage.getItem(ownerStorageKey) === "1");
+  // 이 브라우저가 "사용 중"을 먼저 체크해 소유자가 됐는지 서버 owner_id와 비교한다.
+  const [isOwner, setIsOwner] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isForceReleasing, setIsForceReleasing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -95,8 +96,8 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
       const response = await fetch("/api/board/html-slots", { cache: "no-store" });
       const payload = (await response.json()) as {
         ok?: boolean;
-        slot1?: { code: string; inUse: boolean };
-        slot2?: { code: string; inUse: boolean };
+        slot1?: { code: string; inUse: boolean; ownerId: string | null };
+        slot2?: { code: string; inUse: boolean; ownerId: string | null };
         error?: string;
       };
 
@@ -110,11 +111,9 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
       }
 
       setInUse(remote.inUse);
-      // 서버에서 이미 해제됐는데 내가 소유자로 남아 있으면(다른 탭 등) 동기화해서 푼다.
-      if (!remote.inUse && isOwnerRef.current) {
-        setIsOwner(false);
-        window.localStorage.removeItem(ownerStorageKey);
-      }
+      const ownedByThisBrowser = remote.inUse && remote.ownerId === ownerId;
+      setIsOwner(ownedByThisBrowser);
+      isOwnerRef.current = ownedByThisBrowser;
       // 타이핑 중에는 내 입력을 서버 값으로 덮어쓰지 않는다. 다른 곳에서 입력 중이면
       // (내가 소유자가 아니면) 항상 서버 값을 그대로 보여준다.
       if (!isFocusedRef.current || (remote.inUse && !isOwnerRef.current)) {
@@ -123,24 +122,34 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
     } catch {
       // 폴링 중 일시적 오류는 무시하고 다음 주기에 재시도한다.
     }
-  }, [slot, ownerStorageKey]);
+  }, [slot, ownerId]);
 
   useEffect(() => {
     const initialTimer = window.setTimeout(load, 0);
     const pollTimer = setInterval(load, POLL_MS);
+    const supabase = getSupabaseBrowser();
+    const channel = supabase
+      ?.channel(`education-html-slot-${slot}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "education_html_slots", filter: `slot=eq.${slot}` },
+        () => void load(),
+      )
+      .subscribe();
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(pollTimer);
+      if (channel && supabase) void supabase.removeChannel(channel);
     };
-  }, [load]);
+  }, [load, slot]);
 
   async function saveCode(value: string) {
     try {
       const response = await fetch("/api/board/html-slots", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot, code: value }),
+        body: JSON.stringify({ slot, code: value, ownerId }),
       });
       const payload = (await response.json()) as { ok?: boolean; error?: string };
 
@@ -183,6 +192,18 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
     });
   }
 
+  async function uploadImage(file: Blob) {
+    const dataUrl = await resizeImageToDataUrl(file);
+    const resized = await fetch(dataUrl).then((response) => response.blob());
+    const form = new FormData();
+    form.append("file", resized, "capture.jpg");
+    form.append("studentId", ownerId);
+    const response = await fetch("/api/board/uploads", { method: "POST", body: form });
+    const payload = (await response.json()) as { ok?: boolean; url?: string; error?: string };
+    if (!payload.ok || !payload.url) throw new Error(payload.error ?? "이미지를 업로드하지 못했습니다.");
+    insertAtCursor(`<img src="${payload.url}" style="max-width:100%" alt="수강생 화면 캡처" />`);
+  }
+
   async function handlePaste(event: ClipboardEvent<HTMLTextAreaElement>) {
     const imageItem = Array.from(event.clipboardData?.items ?? []).find((item) =>
       item.type.startsWith("image/"),
@@ -199,10 +220,10 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
     }
 
     try {
-      const dataUrl = await resizeImageToDataUrl(file);
-      insertAtCursor(`<img src="${dataUrl}" style="max-width:100%" />`);
-    } catch {
-      setError("이미지를 붙여넣지 못했습니다.");
+      await uploadImage(file);
+      setError(null);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "이미지를 붙여넣지 못했습니다.");
     }
   }
 
@@ -216,23 +237,20 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
     setInUse(next);
     setIsOwner(next);
 
-    if (next) {
-      window.localStorage.setItem(ownerStorageKey, "1");
-    } else {
-      window.localStorage.removeItem(ownerStorageKey);
-    }
-
     try {
       const response = await fetch("/api/board/html-slots", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot, inUse: next }),
+        body: JSON.stringify({ slot, inUse: next, ownerId }),
       });
       const payload = (await response.json()) as { ok?: boolean; error?: string };
 
       if (!payload.ok) {
         setError(payload.error ?? "처리하지 못했습니다.");
+        await load();
+        return;
       }
+      setError(null);
     } catch {
       setError("연결을 확인해 주세요.");
     }
@@ -249,7 +267,7 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
       const response = await fetch("/api/board/html-slots", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot, forceRelease: true, password }),
+        body: JSON.stringify({ slot, forceRelease: true, password, ownerId }),
       });
       const payload = (await response.json()) as { ok?: boolean; error?: string };
 
@@ -260,7 +278,6 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
 
       setInUse(false);
       setIsOwner(false);
-      window.localStorage.removeItem(ownerStorageKey);
       setError(null);
     } catch {
       setError("연결을 확인해 주세요.");
@@ -275,11 +292,33 @@ export function HtmlSandbox({ slot, label = `HTML 실습 ${slot}` }: HtmlSandbox
         <div>
           <p className="text-sm font-black text-slate-950">{label}</p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            HTML 코드를 붙여넣거나 스크린 캡처 이미지를 그대로 붙여넣으면(Ctrl+V) 아래
+            HTML 코드를 붙여넣거나 스크린 캡처 이미지를 붙여넣으면(Ctrl+V) 아래
             결과와 다른 참가자 화면에 바로 반영됩니다.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          {!isLockedByOther ? (
+            <label className="cursor-pointer rounded-md border border-sky-300 bg-white px-3 py-1.5 text-xs font-bold text-sky-700 transition hover:bg-sky-50">
+              화면 이미지 올리기
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="sr-only"
+                onChange={async (event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    await uploadImage(file);
+                    setError(null);
+                  } catch (error) {
+                    setError(error instanceof Error ? error.message : "이미지를 올리지 못했습니다.");
+                  } finally {
+                    event.target.value = "";
+                  }
+                }}
+              />
+            </label>
+          ) : null}
           {isLockedByOther ? (
             <button
               type="button"
