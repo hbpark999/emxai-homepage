@@ -51,3 +51,6 @@ services/cmc-surrogate/.venv/
 
 # Publish education handouts as PDFs; keep large PowerPoint sources local.
 /content/education-materials/*.pptx
+
+# Local artifact validation output.
+/tmp/
