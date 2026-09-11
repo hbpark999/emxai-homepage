@@ -24,6 +24,7 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const pdfShellRef = useRef<HTMLDivElement>(null);
   const materialHref = `/api/education/materials/${course.slug}`;
+  const pdfEnabled = course.pdfEnabled !== false;
   const pdfViewerHref = `${materialHref}#page=${currentPdfPage}&toolbar=0&navpanes=${showPdfToc ? "1" : "0"}&pagemode=${
     showPdfToc ? "bookmarks" : "none"
   }&view=Fit`;
@@ -202,7 +203,10 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
             <div className="rounded-lg border border-slate-200 bg-white p-6">
               <p className="text-sm font-black text-slate-950">이 과정에서 제공되는 기능</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {["PDF 읽기", "과정별 게시판", "수강 중 공지 확인"].map((item) => (
+                {(pdfEnabled
+                  ? ["PDF 읽기", "과정별 게시판", "수강 중 공지 확인"]
+                  : ["과정별 게시판", "수강 중 공지 확인"]
+                ).map((item) => (
                   <div key={item} className="rounded-md border border-slate-200 px-4 py-3">
                     <p className="text-sm font-bold text-slate-700">{item}</p>
                   </div>
@@ -213,10 +217,11 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
         ) : (
           <div className="grid gap-6 py-10 xl:grid-cols-[minmax(0,1fr)_26rem]">
             <div className="flex flex-col gap-6">
-            <div
-              ref={pdfShellRef}
-              className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 fullscreen:rounded-none fullscreen:border-0"
-            >
+            {pdfEnabled ? (
+              <div
+                ref={pdfShellRef}
+                className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 fullscreen:rounded-none fullscreen:border-0"
+              >
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3">
                 <p className="text-sm font-black text-slate-950">수강생 자료</p>
                 <div className="flex flex-wrap items-center gap-2">
@@ -292,7 +297,8 @@ export function StudentCourseRoom({ course }: StudentCourseRoomProps) {
                   </div>
                 )}
               </div>
-            </div>
+              </div>
+            ) : null}
             <div className="grid gap-6 md:grid-cols-2">
               <HtmlSandbox slot={1} label="HTML 실습 1" />
               <HtmlSandbox slot={2} label="HTML 실습 2 (비교용)" />

@@ -69,8 +69,8 @@ export function EducationSamples() {
               </p>
             </div>
             <p className="mt-5 max-w-3xl text-base leading-7 text-slate-600">
-              아래 7개 과정은 각 과정별 비밀번호를 입력한 수강생만 PDF 자료를 읽고
-              다운로드할 수 있습니다. 과정 게시판도 전용 화면에서 함께 확인합니다.
+              아래 7개 과정은 각 과정별 비밀번호를 입력한 수강생만 제공 중인 수강 자료와
+              과정 게시판을 전용 화면에서 확인할 수 있습니다.
             </p>
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {studentCourses.map((course) => (

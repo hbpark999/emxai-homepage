@@ -27,6 +27,14 @@ export async function GET(
     return NextResponse.json({ error: "비밀번호 확인이 필요합니다." }, { status: 401 });
   }
 
+  if (request.nextUrl.searchParams.get("status") === "1" && course.pdfEnabled === false) {
+    return NextResponse.json({ ok: true, available: false });
+  }
+
+  if (course.pdfEnabled === false) {
+    return NextResponse.json({ error: "PDF 자료를 제공하지 않는 과정입니다." }, { status: 404 });
+  }
+
   const filePath = path.join(MATERIALS_DIR, course.pdfFile);
   const normalizedMaterialsDir = path.normalize(MATERIALS_DIR + path.sep);
   const normalizedFilePath = path.normalize(filePath);

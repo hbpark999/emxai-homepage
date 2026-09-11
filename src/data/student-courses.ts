@@ -7,6 +7,7 @@ export type StudentCourse = {
   passwordEnv: string;
   pdfFile: string;
   pdfPageCount?: number;
+  pdfEnabled?: boolean;
 };
 
 export const studentCourses = [
@@ -74,6 +75,7 @@ export const studentCourses = [
     passwordEnv: "EDU_PASS_UNIV_STUDENT_EM_DESIGN_PRACTICE",
     pdfFile: "univ-student-em-design-practice.pdf",
     pdfPageCount: 122,
+    pdfEnabled: false,
   },
 ] satisfies StudentCourse[];
 
