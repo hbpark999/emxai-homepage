@@ -9,6 +9,7 @@ const defaultCoursePasswords: Record<string, string> = {
   EDU_PASS_RAPA_EM_ANALYSIS_DESIGN_DAY2: "5678910",
   EDU_PASS_TTA_POWER_NOISE_DAY2: "678910",
   EDU_PASS_UNIV_STUDENT_EM_DESIGN_PRACTICE: "78910",
+  EDU_PASS_CORPORATE_CIRCUIT_GENAI: "8910",
 };
 
 export function getCoursePassword(course: StudentCourse) {

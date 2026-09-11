@@ -1,7 +1,7 @@
 export type StudentCourse = {
   slug: string;
   title: string;
-  organizer: "RAPA" | "TTA" | "대학/대학원 실습 교육";
+  organizer: "RAPA" | "TTA" | "대학/대학원 실습 교육" | "기업 교육";
   dayLabel: string;
   boardCourseNames: string[];
   passwordEnv: string;
@@ -76,6 +76,16 @@ export const studentCourses = [
     pdfFile: "동양미래대] 생성형AI의 EMI_SI분석 활용 20260911ver3.3_11일 특강.pdf",
     pdfPageCount: 66,
     pdfEnabled: true,
+  },
+  {
+    slug: "corporate-circuit-development-genai",
+    title: "기업 교육] 생성형 AI의 회로개발 활용",
+    organizer: "기업 교육",
+    dayLabel: "기업 특강",
+    boardCourseNames: ["8기", "생성형 AI의 회로개발 활용", "기업 교육"],
+    passwordEnv: "EDU_PASS_CORPORATE_CIRCUIT_GENAI",
+    pdfFile: "corporate-circuit-development-genai.pdf",
+    pdfEnabled: false,
   },
 ] satisfies StudentCourse[];
 
