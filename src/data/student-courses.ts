@@ -1,7 +1,7 @@
 export type StudentCourse = {
   slug: string;
   title: string;
-  organizer: "RAPA" | "TTA" | "대학/대학원 실습 교육" | "기업 교육";
+  organizer: "RAPA" | "TTA" | "대학생/대학원생 실습 교육" | "기업 교육";
   dayLabel: string;
   boardCourseNames: string[];
   passwordEnv: string;
@@ -68,8 +68,8 @@ export const studentCourses = [
   },
   {
     slug: "univ-student-em-design-practice",
-    title: "대학/대학원 특강: 생성형 AI의 EMI/SI 분석 활용",
-    organizer: "대학/대학원 실습 교육",
+    title: "대학생/대학원생 특강: 생성형 AI의 EMI/SI 분석 활용",
+    organizer: "대학생/대학원생 실습 교육",
     dayLabel: "특강",
     boardCourseNames: ["7기", "생성형 AI의 EMI/SI 분석 활용", "동양미래대학교 특강"],
     passwordEnv: "EDU_PASS_UNIV_STUDENT_EM_DESIGN_PRACTICE",
