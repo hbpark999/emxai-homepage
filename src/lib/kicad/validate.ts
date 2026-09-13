@@ -8,8 +8,11 @@
 
 import type { BoardSpec, Result } from "./types";
 import { getFootprint } from "./parts";
-import { isViaAllowed } from "./stackup";
-import { rectsOverlap } from "./units";
+import { isCopperLayerInStackup, isViaAllowed } from "./stackup";
+import { distanceMm, rectsOverlap, rotatePoint } from "./units";
+
+/** 두 점이 "닿았다"고 볼 여유 [mm]. 좌표 반올림 오차만 흡수할 정도로 작게 둔다. */
+const TOUCH_TOLERANCE_MM = 0.01;
 
 export function validateSpec(spec: BoardSpec): Result<true> {
   const errors: string[] = [];
@@ -38,7 +41,7 @@ export function validateSpec(spec: BoardSpec): Result<true> {
   // 부품 타입 존재 여부 + 핀 캐시(부품별 유효 핀 번호 집합)
   const validPinsByRef = new Map<string, Set<string>>();
   for (const part of spec.parts) {
-    const footprint = getFootprint(part.type, spec.stackup);
+    const footprint = getFootprint(part.type);
     if (!footprint) {
       errors.push(`부품 "${part.ref}"의 타입 "${part.type}"은 카탈로그에 없다.`);
       continue;
@@ -127,6 +130,111 @@ export function validateSpec(spec: BoardSpec): Result<true> {
       errors.push(`비아(넷 "${via.net}") 위치 (${via.x}, ${via.y})가 보드 밖이다.`);
     }
   }
+  for (const zone of spec.zones) {
+    for (const p of zone.outline ?? []) {
+      if (outOfBounds(p.x, p.y)) {
+        errors.push(`카퍼존(넷 "${zone.net}")의 외곽선 점 (${p.x}, ${p.y})가 보드(${w} x ${h}) 밖이다.`);
+      }
+    }
+    for (const slit of zone.slits ?? []) {
+      // 회전을 반영한 네 꼭짓점으로 판정한다. 축 정렬 사각형만 보면
+      // 45도 돌아간 슬릿이 보드를 삐져나가는 걸 놓친다.
+      const halfW = slit.w_mm / 2;
+      const halfH = slit.h_mm / 2;
+      const corners = [
+        { x: -halfW, y: -halfH },
+        { x: halfW, y: -halfH },
+        { x: halfW, y: halfH },
+        { x: -halfW, y: halfH },
+      ];
+      const outside = corners.some((c) => {
+        const r = rotatePoint({ x_mm: c.x, y_mm: c.y }, slit.rot ?? 0);
+        return outOfBounds(slit.x + r.x_mm, slit.y + r.y_mm);
+      });
+      if (outside) {
+        errors.push(
+          `카퍼존(넷 "${zone.net}")의 GND slit (중심 ${slit.x}, ${slit.y} / ${slit.w_mm}x${slit.h_mm}mm)이 보드(${w} x ${h}) 밖으로 나간다.`
+        );
+      }
+    }
+  }
+
+  // 스택업에 없는 구리층 참조. 4층에만 있는 In1.Cu를 2층 보드에 쓰면
+  // KiCad가 해당 요소를 조용히 버리므로 파일은 열리는데 내용이 사라진다.
+  for (const route of spec.routes) {
+    if (!isCopperLayerInStackup(spec.stackup, route.layer)) {
+      errors.push(`트레이스(넷 "${route.net}")가 ${spec.stackup} 스택업에 없는 레이어 "${route.layer}"를 쓴다.`);
+    }
+  }
+  for (const zone of spec.zones) {
+    if (!isCopperLayerInStackup(spec.stackup, zone.layer)) {
+      errors.push(`카퍼존(넷 "${zone.net}")이 ${spec.stackup} 스택업에 없는 레이어 "${zone.layer}"를 쓴다.`);
+    }
+  }
+  for (const via of spec.vias) {
+    for (const layer of [via.from_layer, via.to_layer]) {
+      if (!isCopperLayerInStackup(spec.stackup, layer)) {
+        errors.push(`비아(넷 "${via.net}")가 ${spec.stackup} 스택업에 없는 레이어 "${layer}"를 쓴다.`);
+      }
+    }
+  }
+
+  // 끊긴 트레이스 끝점. 트레이스 끝이 같은 넷의 패드/비아/다른 세그먼트
+  // 어디에도 닿지 않으면, 파일은 열리지만 실제로는 연결되지 않은 보드가
+  // 된다 (KiCad DRC의 track_dangling / unconnected_items와 같은 상황).
+  // 카퍼존으로 연결되는 넷은 채우기 전에는 판정할 수 없어 검사에서 뺀다.
+  const zoneNets = new Set(spec.zones.map((z) => z.net));
+  const pinNetMap = new Map<string, string>();
+  for (const net of spec.nets) {
+    for (const pin of net.pins) pinNetMap.set(pin, net.name);
+  }
+  const padsByNet = new Map<string, Array<{ x: number; y: number; reach: number }>>();
+  for (const part of spec.parts) {
+    const footprint = getFootprint(part.type);
+    if (!footprint) continue;
+    for (const pad of footprint.pads) {
+      const netName = pinNetMap.get(`${part.ref}.${pad.pinRef}`);
+      if (!netName) continue;
+      // KiCad는 footprint의 (at x y rot)으로 패드를 직접 회전시킨다. 실제
+      // KiCad 10에 파일을 넣어 확인한 결과, spec의 Y-up 좌표계에서는 이
+      // 회전이 표준 반시계(CCW)와 일치한다.
+      const r = rotatePoint({ x_mm: pad.x_mm, y_mm: pad.y_mm }, part.rot ?? 0);
+      const list = padsByNet.get(netName) ?? [];
+      list.push({
+        x: part.x + r.x_mm,
+        y: part.y + r.y_mm,
+        reach: Math.max(pad.w_mm, pad.h_mm) / 2 + TOUCH_TOLERANCE_MM,
+      });
+      padsByNet.set(netName, list);
+    }
+  }
+
+  for (const route of spec.routes) {
+    if (zoneNets.has(route.net)) continue;
+    const endpoints = [route.points[0], route.points[route.points.length - 1]];
+    for (const end of endpoints) {
+      if (!end) continue;
+
+      const onPad = (padsByNet.get(route.net) ?? []).some(
+        (pad) => distanceMm(end, pad) <= pad.reach
+      );
+      const onVia = spec.vias.some(
+        (v) => v.net === route.net && distanceMm(end, v) <= v.diameter_mm / 2 + TOUCH_TOLERANCE_MM
+      );
+      const onOtherSegment = spec.routes.some(
+        (other) =>
+          other !== route &&
+          other.net === route.net &&
+          other.points.some((p) => distanceMm(end, p) <= TOUCH_TOLERANCE_MM)
+      );
+
+      if (!onPad && !onVia && !onOtherSegment) {
+        errors.push(
+          `넷 "${route.net}"의 트레이스 끝점 (${end.x}, ${end.y})이 같은 넷의 패드·비아·다른 세그먼트 어디에도 닿지 않는다 (끊긴 배선).`
+        );
+      }
+    }
+  }
 
   // 패드끼리 겹침. 회전된 개별 패드의 정확한 교차 판정(OBB)까지는 하지
   // 않고, 부품 courtyard(bodySize_mm) 축 정렬 바운딩 박스로 보수적으로
@@ -134,7 +242,7 @@ export function validateSpec(spec: BoardSpec): Result<true> {
   type AbsBox = { ref: string; layer: string; cx: number; cy: number; w: number; h: number };
   const absBoxes: AbsBox[] = [];
   for (const part of spec.parts) {
-    const footprint = getFootprint(part.type, spec.stackup);
+    const footprint = getFootprint(part.type);
     if (!footprint) continue;
     const side = part.layer === "B" ? "B" : "F";
     absBoxes.push({

@@ -6,7 +6,7 @@
  * BoardSpecPart의 x,y,rot을 적용해 보드 좌표로 옮기고 .kicad_pcb로 직렬화한다.
  */
 
-import type { PadSpec, PartFootprint, StackupId } from "./types";
+import type { PadSpec, PartFootprint } from "./types";
 
 // ---- 상수 테이블 (매직넘버 금지) -------------------------------------------
 
@@ -188,15 +188,15 @@ export function buildQfpFootprint(def: QfpPresetDef): PartFootprint {
 // ---- SMA 엣지 런치 -----------------------------------------------------------
 
 /**
- * 시그널 패드 1개 + 양옆 GND 패드 2개. 4층 보드에서는 GND 패드 아래
- * via fence(스루비아)를 함께 생성해 F.Cu GND를 내층/배면 GND로 연결한다.
- * signalPadWidth_mm이 임피던스 튜닝 파라미터다.
+ * 시그널 패드 1개 + 양옆 GND 패드 2개, 그리고 GND 패드마다 스루비아
+ * fence. signalPadWidth_mm이 임피던스 튜닝 파라미터다.
+ *
+ * via fence는 2층/4층 모두에 넣는다. AGENTS.md는 4층 기준으로만 적어뒀지만,
+ * 2층에서 fence를 빼면 F.Cu의 GND 패드가 B.Cu GND 평면에 닿을 길이 없어
+ * 런치 접지가 뜬 채로 보드가 만들어진다 (KiCad 연결성 검사에서 실제로
+ * unconnected로 잡혔다). 스루비아라 4층에서는 In1/In2 GND에도 함께 물린다.
  */
-export function buildSmaLaunchFootprint(
-  id: string,
-  signalPadWidth_mm: number,
-  stackup: StackupId
-): PartFootprint {
+export function buildSmaLaunchFootprint(id: string, signalPadWidth_mm: number): PartFootprint {
   const d = SMA_DEFAULTS;
   const pads: PadSpec[] = [
     {
@@ -243,17 +243,14 @@ export function buildSmaLaunchFootprint(
     bodySize_mm: { w: d.signalPadLen_mm, h: 2 * d.gndOffsetY_mm + d.gndPadH_mm },
   };
 
-  if (stackup === "4L") {
-    const viaXs: number[] = [];
-    for (let i = 0; i < d.viaFenceCount; i++) {
-      const offset = (i - (d.viaFenceCount - 1) / 2) * d.viaFenceSpacing_mm;
-      viaXs.push(offset);
-    }
-    footprint.auxVias = viaXs.flatMap((vx) => [
-      { x_mm: vx, y_mm: d.gndOffsetY_mm, type: "through" as const, drill_mm: d.viaDrill_mm, diameter_mm: d.viaDiameter_mm },
-      { x_mm: vx, y_mm: -d.gndOffsetY_mm, type: "through" as const, drill_mm: d.viaDrill_mm, diameter_mm: d.viaDiameter_mm },
-    ]);
+  const viaXs: number[] = [];
+  for (let i = 0; i < d.viaFenceCount; i++) {
+    viaXs.push((i - (d.viaFenceCount - 1) / 2) * d.viaFenceSpacing_mm);
   }
+  footprint.auxVias = viaXs.flatMap((vx) => [
+    { x_mm: vx, y_mm: d.gndOffsetY_mm, type: "through" as const, drill_mm: d.viaDrill_mm, diameter_mm: d.viaDiameter_mm },
+    { x_mm: vx, y_mm: -d.gndOffsetY_mm, type: "through" as const, drill_mm: d.viaDrill_mm, diameter_mm: d.viaDiameter_mm },
+  ]);
 
   return footprint;
 }
@@ -268,25 +265,15 @@ function buildCatalog(): PartFootprint[] {
     PASSIVE_KINDS.map((kind) => buildPassiveFootprint(size, kind))
   );
   const qfps = QFP_PRESETS.map((def) => buildQfpFootprint(def));
-  const smas = Object.entries(SMA_LAUNCH_WIDTHS_MM).map(([id, w]) =>
-    buildSmaLaunchFootprint(id, w, "2L")
-  );
+  const smas = Object.entries(SMA_LAUNCH_WIDTHS_MM).map(([id, w]) => buildSmaLaunchFootprint(id, w));
   return [...passives, ...qfps, ...smas];
 }
 
 const PART_CATALOG: PartFootprint[] = buildCatalog();
 const PART_CATALOG_BY_ID = new Map(PART_CATALOG.map((p) => [p.id, p]));
 
-/**
- * BoardSpecPart.type → PartFootprint. SMA는 stackup에 따라 via fence 유무가
- * 달라지므로 카탈로그의 2L 버전을 베이스로 하되, 4층 요청 시 다시 생성한다.
- */
-export function getFootprint(typeId: string, stackup: StackupId): PartFootprint | undefined {
-  if (typeId.startsWith("SMA-EDGE-") && stackup === "4L") {
-    const width = SMA_LAUNCH_WIDTHS_MM[typeId];
-    if (width === undefined) return undefined;
-    return buildSmaLaunchFootprint(typeId, width, "4L");
-  }
+/** BoardSpecPart.type → PartFootprint. */
+export function getFootprint(typeId: string): PartFootprint | undefined {
   return PART_CATALOG_BY_ID.get(typeId);
 }
 

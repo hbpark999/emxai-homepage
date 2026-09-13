@@ -11,8 +11,13 @@ import type { BoardSpec, CouponSpec } from "@/lib/kicad/types";
 import { buildBoard, summarizeBoard } from "@/lib/kicad/board";
 import { buildCoupon2xThru } from "@/lib/kicad/coupon";
 import { listPartsCatalogSummary } from "@/lib/kicad/parts";
-import { listStackupPresets } from "@/lib/kicad/stackup";
+import { listStackupPresets, totalBoardThicknessMm } from "@/lib/kicad/stackup";
 import { validateSpec } from "@/lib/kicad/validate";
+import { checkAndIncrementDailyUsage } from "@/lib/mcp-rate-limit";
+
+/** 이 MCP 전체(툴 6개 합산) 하루 호출 한도. */
+const DAILY_LIMIT = 500;
+const ROUTE_NAME = "kicad";
 
 // ---- zod: BoardSpec ---------------------------------------------------------
 
@@ -98,8 +103,34 @@ type ToolServer = {
   ) => void;
 };
 
+type ToolConfig = { title: string; description: string; inputSchema?: z.ZodTypeAny };
+type ToolHandler = (args: unknown) => Promise<{ content: Array<{ type: "text"; text: string }> }>;
+
+/**
+ * server.registerTool을 대신해서 부르는 래퍼. 실제 핸들러를 돌리기 전에
+ * 하루 전체 호출 한도를 먼저 확인한다 - 6개 툴 전부 여기 하나만 거치므로
+ * 각 핸들러 안에 제한 로직을 반복해 넣지 않아도 된다.
+ */
+function registerLimitedTool(server: ToolServer, name: string, config: ToolConfig, handler: ToolHandler) {
+  server.registerTool(name, config, async (args) => {
+    const { allowed, count } = await checkAndIncrementDailyUsage(ROUTE_NAME, DAILY_LIMIT);
+    if (!allowed) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `이 MCP의 오늘 전체 호출 한도(${DAILY_LIMIT}회)를 넘었다 (누적 ${count}회). 내일 다시 시도해달라.`,
+          },
+        ],
+      };
+    }
+    return handler(args);
+  });
+}
+
 export function registerKicadTools(server: ToolServer) {
-  server.registerTool(
+  registerLimitedTool(
+    server,
     "pcb_list_parts",
     {
       title: "부품 카탈로그",
@@ -113,7 +144,8 @@ export function registerKicadTools(server: ToolServer) {
     }
   );
 
-  server.registerTool(
+  registerLimitedTool(
+    server,
     "pcb_stackup_presets",
     {
       title: "스택업 프리셋",
@@ -123,16 +155,21 @@ export function registerKicadTools(server: ToolServer) {
       const text = listStackupPresets()
         .map((preset) => {
           const layers = preset.layers
-            .map((l) => `  ${l.name} (${l.role}) 두께 ${l.thickness_mm}mm, εr ${l.er}`)
+            .map((l) =>
+              l.dielectricBelow_mm > 0
+                ? `  ${l.name} (${l.role}) → 아래 유전체 ${l.dielectricBelow_mm}mm, εr ${l.er}`
+                : `  ${l.name} (${l.role})`
+            )
             .join("\n");
-          return `${preset.id} - ${preset.label}\n${layers}\n  허용 via: ${preset.allowedVias.join(", ")}`;
+          return `${preset.id} - ${preset.label} (총 두께 ${totalBoardThicknessMm(preset)}mm)\n${layers}\n  허용 via: ${preset.allowedVias.join(", ")}`;
         })
         .join("\n\n");
       return { content: [{ type: "text", text }] };
     }
   );
 
-  server.registerTool(
+  registerLimitedTool(
+    server,
     "pcb_validate_spec",
     {
       title: "spec 검증",
@@ -150,7 +187,8 @@ export function registerKicadTools(server: ToolServer) {
     }
   );
 
-  server.registerTool(
+  registerLimitedTool(
+    server,
     "pcb_build_board",
     {
       title: "보드 생성",
@@ -177,7 +215,8 @@ export function registerKicadTools(server: ToolServer) {
     }
   );
 
-  server.registerTool(
+  registerLimitedTool(
+    server,
     "pcb_coupon_2xthru",
     {
       title: "2x-thru 쿠폰 생성",
@@ -223,7 +262,8 @@ export function registerKicadTools(server: ToolServer) {
     }
   );
 
-  server.registerTool(
+  registerLimitedTool(
+    server,
     "pcb_board_summary",
     {
       title: "보드 요약",

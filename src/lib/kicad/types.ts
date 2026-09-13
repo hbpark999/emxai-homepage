@@ -119,7 +119,9 @@ export type PartFootprint = {
 export type StackupLayerSpec = {
   name: CopperLayerName;
   role: "signal" | "ground";
-  thickness_mm: number;
+  /** 이 구리층 "바로 아래"의 유전체 두께 [mm]. 맨 아래 구리층은 0. */
+  dielectricBelow_mm: number;
+  /** 그 유전체의 비유전율. 맨 아래 구리층에서는 의미 없음. */
   er: number;
 };
 

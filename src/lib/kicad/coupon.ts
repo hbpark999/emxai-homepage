@@ -48,19 +48,24 @@ function buildCouponBoardSpec(spec: CouponSpec, dutLen_mm: number, boardName: st
         ];
 
   const gndLayer = spec.stackup === "4L" ? "In1.Cu" : "B.Cu";
-  const slits = spec.gnd_slit
-    ? [
-        {
-          // 트레이스와 수직으로 GND 평면을 가로질러 끊는 슬릿. w_mm은
-          // 트레이스 방향(X)의 좁은 틈 폭, 높이는 보드 전체를 가로지르게
-          // 잡아 회전 없이도 완전히 끊어지게 한다.
-          x: leftX + spec.gnd_slit.offset_from_launch_mm,
-          y: centerY,
-          w_mm: spec.gnd_slit.w_mm,
-          h_mm: BOARD_HEIGHT_MM,
-        },
-      ]
-    : undefined;
+
+  // GND slit은 DUT 구간의 특성이므로 FIX-DUT-FIX에만 넣는다. 2x-thru
+  // (dutLen_mm === 0)에 같이 넣으면 두 보드의 fixture가 서로 달라져
+  // de-embedding으로 빼내려던 fixture 응답 자체가 어긋난다.
+  const slits =
+    spec.gnd_slit && dutLen_mm > 0
+      ? [
+          {
+            // 트레이스와 수직으로 GND 평면을 가로질러 끊는 슬릿. w_mm은
+            // 트레이스 방향(X)의 좁은 틈 폭, 높이는 보드 전체를 가로지르게
+            // 잡아 회전 없이도 완전히 끊어지게 한다.
+            x: leftX + spec.gnd_slit.offset_from_launch_mm,
+            y: centerY,
+            w_mm: spec.gnd_slit.w_mm,
+            h_mm: BOARD_HEIGHT_MM,
+          },
+        ]
+      : undefined;
 
   return {
     name: boardName,
@@ -77,7 +82,48 @@ function buildCouponBoardSpec(spec: CouponSpec, dutLen_mm: number, boardName: st
   };
 }
 
+/**
+ * 쿠폰 파라미터 자체의 앞단 검증. 특히 GND slit이 fixture 구간에 걸치면
+ * 두 보드의 fixture가 달라져 de-embedding이 성립하지 않으므로 막는다.
+ */
+function validateCouponSpec(spec: CouponSpec): string[] {
+  const errors: string[] = [];
+
+  if (spec.fixture_len_mm <= 0) errors.push(`fixture_len_mm은 0보다 커야 한다: ${spec.fixture_len_mm}`);
+  if (spec.dut_len_mm < 0) errors.push(`dut_len_mm은 음수일 수 없다: ${spec.dut_len_mm}`);
+  if (spec.trace_width_mm <= 0) errors.push(`trace_width_mm은 0보다 커야 한다: ${spec.trace_width_mm}`);
+
+  if (spec.gnd_slit) {
+    const { w_mm, offset_from_launch_mm } = spec.gnd_slit;
+    if (w_mm <= 0) {
+      errors.push(`gnd_slit.w_mm은 0보다 커야 한다: ${w_mm}`);
+    }
+    if (spec.dut_len_mm <= 0) {
+      errors.push("gnd_slit은 DUT 구간에만 넣을 수 있는데 dut_len_mm이 0이다.");
+    } else {
+      const dutStart = spec.fixture_len_mm;
+      const dutEnd = spec.fixture_len_mm + spec.dut_len_mm;
+      const slitStart = offset_from_launch_mm - w_mm / 2;
+      const slitEnd = offset_from_launch_mm + w_mm / 2;
+      if (slitStart < dutStart || slitEnd > dutEnd) {
+        errors.push(
+          `gnd_slit이 DUT 구간(런치 기준 ${dutStart}~${dutEnd}mm)을 벗어난다 ` +
+            `(슬릿 ${slitStart}~${slitEnd}mm). fixture 구간에 걸치면 두 보드의 fixture가 달라져 ` +
+            `de-embedding이 틀어지므로, offset_from_launch_mm을 그 범위 안으로 잡아야 한다.`
+        );
+      }
+    }
+  }
+
+  return errors;
+}
+
 export function buildCoupon2xThru(spec: CouponSpec): Result<CouponResult> {
+  const specErrors = validateCouponSpec(spec);
+  if (specErrors.length > 0) {
+    return { ok: false, errors: specErrors };
+  }
+
   const fixtureDutFixtureSpec = buildCouponBoardSpec(spec, spec.dut_len_mm, `${spec.name}-FIX-DUT-FIX`);
   const twoXThruSpec = buildCouponBoardSpec(spec, 0, `${spec.name}-2xTHRU`);
 

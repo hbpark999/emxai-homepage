@@ -20,7 +20,7 @@ import {
 } from "./units";
 import { getFootprint } from "./parts";
 import { validateSpec } from "./validate";
-import { KICAD_PCB_FOOTER, KICAD_PCB_HEADER } from "./templates/header";
+import { KICAD_PCB_FOOTER, buildKicadPcbHeader } from "./templates/header";
 
 function escapeKicadString(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -28,6 +28,20 @@ function escapeKicadString(value: string): string {
 
 function quoteLayers(layers: string[]): string {
   return layers.map((l) => `"${l}"`).join(" ");
+}
+
+/**
+ * 뒷면(B) 실장 부품의 패드 레이어를 뒤집는다. parts.ts는 앞면 기준으로만
+ * 패드를 만들기 때문에, 이걸 거치지 않으면 footprint는 B.Cu에 있는데 패드는
+ * F.Cu에 남아 실제로는 연결되지 않는 보드가 나온다.
+ */
+function padLayersForSide(layers: string[], side: "F" | "B"): string[] {
+  if (side === "F") return layers;
+  return layers.map((layer) => {
+    if (layer.startsWith("F.")) return `B.${layer.slice(2)}`;
+    if (layer.startsWith("B.")) return `F.${layer.slice(2)}`;
+    return layer;
+  });
 }
 
 function viaTypeToken(type: ViaType): string {
@@ -98,9 +112,12 @@ export function serializeBoard(spec: BoardSpec): string {
 \t)`
     );
   }
+  // gr_text는 앵커를 기준으로 가운데 정렬되므로, 보드 왼쪽 끝에 두면 긴
+  // 이름이 외곽선을 넘어가 DRC의 silk_edge_clearance에 걸린다. 보드 가로
+  // 중앙에 놓는다.
   blocks.push(
     `\t(gr_text "${escapeKicadString(spec.name)}"
-\t\t(at 1 1.6 0)
+\t\t(at ${xy(boardWidth / 2, 2)} 0)
 \t\t(layer "F.SilkS")
 \t\t(uuid "${makeUuid()}")
 \t\t(effects
@@ -114,8 +131,7 @@ export function serializeBoard(spec: BoardSpec): string {
   // 부품 (풋프린트 + 패드), SMA 4층 via fence
   const auxViaBlocks: string[] = [];
   for (const part of spec.parts) {
-    const stackupForFootprint = part.type.startsWith("SMA-EDGE-") ? spec.stackup : "2L";
-    const footprint = getFootprint(part.type, stackupForFootprint);
+    const footprint = getFootprint(part.type);
     if (!footprint) {
       blocks.push(`\t; 알 수 없는 부품 타입 "${part.type}" (ref ${part.ref}) - 생성 생략`);
       continue;
@@ -145,7 +161,7 @@ export function serializeBoard(spec: BoardSpec): string {
 \t\t\t(at ${xy(pad.x_mm, localY)})
 \t\t\t(size ${formatMm(pad.w_mm)} ${formatMm(pad.h_mm)})
 \t\t\t(drill ${formatMm(pad.drill_mm ?? Math.min(pad.w_mm, pad.h_mm) * 0.6)})
-\t\t\t(layers ${quoteLayers(pad.layers)})
+\t\t\t(layers ${quoteLayers(padLayersForSide(pad.layers, side))})
 \t\t\t(remove_unused_layers no)${netClause}
 \t\t\t(uuid "${padUuid}")
 \t\t)`;
@@ -154,7 +170,7 @@ export function serializeBoard(spec: BoardSpec): string {
       return `\t\t(pad "${pad.number}" smd ${pad.shape}
 \t\t\t(at ${xy(pad.x_mm, localY)})
 \t\t\t(size ${formatMm(pad.w_mm)} ${formatMm(pad.h_mm)})
-\t\t\t(layers ${quoteLayers(pad.layers)})${netClause}
+\t\t\t(layers ${quoteLayers(padLayersForSide(pad.layers, side))})${netClause}
 \t\t\t(thermal_bridge_angle 45)
 \t\t\t(uuid "${padUuid}")
 \t\t)`;
@@ -334,7 +350,7 @@ ${padLines.join("\n")}
     }
   }
 
-  return `${KICAD_PCB_HEADER}\n${blocks.join("\n")}\n${KICAD_PCB_FOOTER}`;
+  return `${buildKicadPcbHeader(spec.stackup)}\n${blocks.join("\n")}\n${KICAD_PCB_FOOTER}`;
 }
 
 // ---- 요약 계산 ---------------------------------------------------------------
@@ -348,8 +364,7 @@ function computeSummary(spec: BoardSpec): BuildBoardResult["summary"] {
   }
   let viaCount = spec.vias.length;
   for (const part of spec.parts) {
-    const stackupForFootprint = part.type.startsWith("SMA-EDGE-") ? spec.stackup : "2L";
-    const footprint = getFootprint(part.type, stackupForFootprint);
+    const footprint = getFootprint(part.type);
     viaCount += footprint?.auxVias?.length ?? 0;
   }
   return {
