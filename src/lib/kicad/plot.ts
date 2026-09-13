@@ -10,6 +10,11 @@
 import type { BoardAnalysis, Pt } from "./types";
 
 const MARGIN_MM = 2;
+/** Y축 눈금 숫자가 들어갈 왼쪽 여백. */
+const LEFT_MARGIN_MM = 4;
+/** X축 눈금 숫자 + 범례가 들어갈 아래 여백. */
+const BOTTOM_LABEL_MM = 3;
+const LEGEND_ROW_MM = 3.2;
 const PX_PER_MM = 12;
 const GRID_STEP_MM = 5;
 
@@ -28,6 +33,11 @@ const TEXT_COLOR = "#404850";
 
 function layerColor(layer: string): string {
   return LAYER_COLORS[layer] ?? "#7a7a7a";
+}
+
+/** 레이어 이름을 SVG id로 쓸 수 있게 다듬는다 ("In1.Cu" → "In1-Cu"). */
+function hatchId(layer: string): string {
+  return layer.replace(/[^A-Za-z0-9]/g, "-");
 }
 
 function escapeXml(value: string): string {
@@ -56,12 +66,10 @@ export function plotBoardSvg(analysis: BoardAnalysis, options: PlotOptions = {})
 
   const boardW = analysis.outline.w_mm;
   const boardH = analysis.outline.h_mm;
-  const viewW = boardW + MARGIN_MM * 2;
-  const viewH = boardH + MARGIN_MM * 2;
 
   // BoardAnalysis(Y 위로) → SVG(Y 아래로). 텍스트가 뒤집히지 않도록
   // transform이 아니라 좌표 계산으로 뒤집는다.
-  const sx = (x: number) => x + MARGIN_MM;
+  const sx = (x: number) => x + LEFT_MARGIN_MM;
   const sy = (y: number) => boardH - y + MARGIN_MM;
   const pt = (p: Pt) => `${fmt(sx(p.x))},${fmt(sy(p.y))}`;
 
@@ -112,8 +120,13 @@ export function plotBoardSvg(analysis: BoardAnalysis, options: PlotOptions = {})
     if (!visible(plane.layer)) continue;
     const color = layerColor(plane.layer);
     if (plane.outline.length >= 3) {
+      // 평면은 "구리가 깔려 있다"가 한눈에 보여야 해서, 옅은 채움만으로는
+      // 배경과 구분이 안 된다. 채움 + 사선 해치를 함께 쓴다.
       planeParts.push(
-        `<polygon points="${plane.outline.map(pt).join(" ")}" fill="${color}" fill-opacity="0.12" stroke="${color}" stroke-width="0.1" stroke-dasharray="0.6 0.4"/>`
+        `<polygon points="${plane.outline.map(pt).join(" ")}" fill="${color}" fill-opacity="0.13" stroke="${color}" stroke-width="0.12" stroke-dasharray="0.6 0.4"/>`
+      );
+      planeParts.push(
+        `<polygon points="${plane.outline.map(pt).join(" ")}" fill="url(#hatch-${hatchId(plane.layer)})" stroke="none"/>`
       );
     }
     for (const hole of plane.holes) {
@@ -195,10 +208,12 @@ export function plotBoardSvg(analysis: BoardAnalysis, options: PlotOptions = {})
         slitParts.push(
           `<polygon points="${split.polygon.map(pt).join(" ")}" fill="${SLIT_COLOR}" fill-opacity="0.35" stroke="${SLIT_COLOR}" stroke-width="0.3" stroke-linejoin="round"/>`
         );
+        // 라벨은 슬릿 중심이 아니라 위쪽 끝 바깥에 둔다. 중심에 두면
+        // 슬릿을 가로지르는 트레이스와 글자가 겹쳐 둘 다 안 읽힌다.
         const cx = split.polygon.reduce((s, p) => s + p.x, 0) / split.polygon.length;
-        const cy = split.polygon.reduce((s, p) => s + p.y, 0) / split.polygon.length;
+        const topY = Math.max(...split.polygon.map((p) => p.y));
         slitParts.push(
-          `<text x="${fmt(sx(cx))}" y="${fmt(sy(cy) - 0.8)}" font-size="1.1" fill="${SLIT_COLOR}" text-anchor="middle" font-weight="bold">slit ${fmt(
+          `<text x="${fmt(sx(cx))}" y="${fmt(sy(topY) - 0.6)}" font-size="1.1" fill="${SLIT_COLOR}" text-anchor="middle" font-weight="bold">slit ${fmt(
             split.width_mm
           )}mm</text>`
         );
@@ -219,33 +234,43 @@ export function plotBoardSvg(analysis: BoardAnalysis, options: PlotOptions = {})
   if (highlight_slits && slitCount > 0) {
     legendEntries.push({ label: `GND slit x${slitCount}`, color: SLIT_COLOR });
   }
-  const legendW = 13;
-  const legendH = legendEntries.length * 1.8 + 1.2;
-  const legendX = MARGIN_MM + 0.4;
-  const legendY = MARGIN_MM + 0.4;
-  const legend: string[] = [
-    `<rect x="${fmt(legendX)}" y="${fmt(legendY)}" width="${fmt(legendW)}" height="${fmt(
-      legendH
-    )}" fill="#ffffff" fill-opacity="0.88" stroke="#c9ced4" stroke-width="0.08" rx="0.4"/>`,
-  ];
-  legendEntries.forEach((entry, index) => {
-    const ly = legendY + 1.4 + index * 1.8;
+  // 범례는 보드 아래에 가로로 깐다. 보드 안에 겹쳐 놓으면 정작 봐야 할
+  // 배선을 가린다.
+  const legendY = sy(0) + BOTTOM_LABEL_MM + LEGEND_ROW_MM / 2;
+  const legend: string[] = [];
+  let legendX = sx(0);
+  for (const entry of legendEntries) {
     legend.push(
-      `<rect x="${fmt(legendX + 0.6)}" y="${fmt(ly - 0.85)}" width="${fmt(1.6)}" height="${fmt(
-        1.1
-      )}" fill="${entry.color}"/>`
+      `<rect x="${fmt(legendX)}" y="${fmt(legendY - 0.85)}" width="1.6" height="1.1" fill="${entry.color}"/>`
     );
     legend.push(
-      `<text x="${fmt(legendX + 2.8)}" y="${fmt(ly)}" font-size="1.1" fill="${TEXT_COLOR}">${escapeXml(
+      `<text x="${fmt(legendX + 2.1)}" y="${fmt(legendY)}" font-size="1.1" fill="${TEXT_COLOR}">${escapeXml(
         entry.label
       )}</text>`
     );
-  });
+    legendX += 2.1 + entry.label.length * 0.65 + 2.2;
+  }
   parts.push(`<g id="legend">${legend.join("")}</g>`);
+
+  const viewW = Math.max(boardW + LEFT_MARGIN_MM + MARGIN_MM, legendX + MARGIN_MM);
+  const viewH = boardH + MARGIN_MM + BOTTOM_LABEL_MM + LEGEND_ROW_MM;
+
+  // 평면 해치 패턴 정의 (레이어별 색)
+  const hatchLayers = Array.from(new Set(analysis.planes.map((p) => p.layer))).filter(visible);
+  const defs = hatchLayers
+    .map(
+      (layer) =>
+        // 간격을 넓게, 농도를 낮게 잡는다. 촘촘하면 평면이 배선과 눈금을
+        // 덮어버려서, "구리가 깔려 있다"는 신호가 오히려 방해가 된다.
+        `<pattern id="hatch-${hatchId(layer)}" width="2.4" height="2.4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">` +
+        `<line x1="0" y1="0" x2="0" y2="2.4" stroke="${layerColor(layer)}" stroke-width="0.14" stroke-opacity="0.34"/></pattern>`
+    )
+    .join("");
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${fmt(viewW * PX_PER_MM)}" height="${fmt(
     viewH * PX_PER_MM
   )}" viewBox="0 0 ${fmt(viewW)} ${fmt(viewH)}" font-family="sans-serif">
+<defs>${defs}</defs>
 <rect width="${fmt(viewW)}" height="${fmt(viewH)}" fill="#ffffff"/>
 ${parts.join("\n")}
 </svg>`;

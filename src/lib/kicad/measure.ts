@@ -16,7 +16,11 @@ import type {
   SlitCrossing,
 } from "./types";
 
-/** clearance 결과가 토큰을 잡아먹지 않도록 가까운 순으로 이만큼만 남긴다. */
+/**
+ * clearance는 가까운 순으로 이만큼만 남긴다. 토큰 때문이 아니라(전체를
+ * 실어도 3KB 남짓이다) 멀리 떨어진 쌍까지 나열하면 정작 봐야 할 가장
+ * 가까운 지점이 묻히기 때문이다.
+ */
 const MAX_CLEARANCE_ENTRIES = 30;
 
 // ---- 기하 헬퍼 --------------------------------------------------------------
@@ -164,6 +168,8 @@ type ClearanceItem = {
   net: string;
   layer: string;
   edges: Array<[Pt, Pt]>;
+  /** 패드라면 소속 부품 참조번호. 같은 부품 안의 패드끼리는 측정하지 않는다. */
+  ownerRef?: string;
 };
 
 function collectClearanceItems(analysis: BoardAnalysis): ClearanceItem[] {
@@ -184,6 +190,7 @@ function collectClearanceItems(analysis: BoardAnalysis): ClearanceItem[] {
       net: pad.net,
       layer: pad.layer,
       edges: rectEdges(pad.pos, pad.size_mm.w, pad.size_mm.h),
+      ownerRef: pad.ref,
     });
   }
 
@@ -210,6 +217,11 @@ function measureClearances(analysis: BoardAnalysis): BoardMeasurements["clearanc
       const b = items[j];
       if (a.layer !== b.layer) continue;
       if (a.net === b.net) continue; // 같은 넷은 붙어 있는 게 정상
+      // 같은 부품 안의 패드 간격은 풋프린트가 고정하는 값이라 레이아웃
+      // 검토 대상이 아니다. 빼지 않으면 QFP 인접핀 쌍(수백~수천 개)이
+      // 가까운 순 목록을 독차지해 정작 봐야 할 트레이스·평면 간격이 밀린다.
+      // (부품끼리 겹치는지는 validate.ts가 따로 본다.)
+      if (a.ownerRef !== undefined && a.ownerRef === b.ownerRef) continue;
 
       let best: { d: number; at: Pt } | undefined;
       for (const [a1, a2] of a.edges) {
