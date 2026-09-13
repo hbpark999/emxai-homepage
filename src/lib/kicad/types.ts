@@ -133,14 +133,6 @@ export type StackupPreset = {
   copperLayerOrder: CopperLayerName[]; // KiCad 레이어 스택 순서 (F → B)
 };
 
-// ---- pcb_board_summary 입력/출력 -------------------------------------------
-
-export type BoardSummary = {
-  nets: string[];
-  traces: Array<{ net: string; layer: string; length_mm: number; width_mm: number }>;
-  vias: Record<ViaType, number>;
-};
-
 // ---- pcb_coupon_2xthru ------------------------------------------------------
 
 export type SmaLaunchKind = "edge-sma-2.92mm" | "edge-sma-sub-mini";
@@ -174,4 +166,128 @@ export type BuildBoardResult = {
     totalTraceLength_mm: number;
     viaCount: number;
   };
+};
+
+// ---- BoardAnalysis (parse.ts / measure.ts) ----------------------------------
+// 좌표는 전부 mm, 보드 좌하단 기준(Y 위로 증가)이다. KiCad 파일의 Y-down
+// 좌표는 parse.ts가 읽어들이면서 이 좌표계로 변환한다.
+
+export type Pt = { x: number; y: number };
+
+export type AnalysisStackupLayer = {
+  layer: string; // "F.Cu", "dielectric1", "In1.Cu" ...
+  kind: "copper" | "dielectric";
+  thickness_mm: number;
+  er?: number;
+  loss_tangent?: number;
+};
+
+export type TraceSegment = {
+  start: Pt;
+  end: Pt;
+  width_mm: number;
+  len_mm: number;
+  arc?: { center: Pt; radius_mm: number; angle_deg: number };
+};
+
+export type AnalysisTrace = {
+  net: string;
+  layer: string;
+  segments: TraceSegment[];
+  total_len_mm: number;
+  /** 시작점부터의 누적 거리별 폭. 폭이 바뀌는 지점마다 한 항목. */
+  width_profile: Array<{ at_mm: number; width_mm: number }>;
+};
+
+export type AnalysisVia = {
+  net: string;
+  pos: Pt;
+  type: "through" | "micro" | "blind" | "buried";
+  drill_mm: number;
+  diameter_mm: number;
+  annular_ring_mm: number;
+  from_layer: string;
+  to_layer: string;
+  /** 신호가 실제로 쓰지 않는 구간 길이 [mm]. 계산 불가하면 undefined. */
+  stub_len_mm?: number;
+  /** 트레이스에 닿지 않고 평면만 꿰매는 비아인지. */
+  is_stitching: boolean;
+};
+
+export type PlaneSplit = {
+  polygon: Pt[];
+  width_mm: number; // 짧은 쪽
+  length_mm: number; // 긴 쪽
+};
+
+export type AnalysisPlane = {
+  net: string;
+  layer: string;
+  outline: Pt[];
+  holes: Pt[][];
+  area_mm2: number;
+  splits: PlaneSplit[];
+};
+
+export type AnalysisPad = {
+  ref: string;
+  pin: string;
+  net: string;
+  layer: string;
+  pos: Pt;
+  size_mm: { w: number; h: number };
+  shape: string;
+};
+
+export type SlitCrossing = {
+  at: Pt;
+  slit_width_mm: number;
+  /** 트레이스 진행 방향과 슬릿 장축이 이루는 각. 90°면 슬릿을 직각으로 가로지른다. */
+  crossing_angle_deg: number;
+};
+
+export type BoardMeasurements = {
+  clearances: Array<{ a: string; b: string; layer: string; min_mm: number; at: Pt }>;
+  trace_to_edge: Array<{ net: string; layer: string; min_mm: number; at: Pt }>;
+  return_path: Array<{
+    net: string;
+    layer: string;
+    ref_layer: string;
+    ref_gap_mm: number;
+    ref_continuous: boolean;
+    slit_crossings: SlitCrossing[];
+    nearest_gnd_via_mm: number;
+  }>;
+  layer_transitions: Array<{
+    net: string;
+    via_pos: Pt;
+    from_layer: string;
+    to_layer: string;
+    ref_change: boolean;
+  }>;
+  /** 2단계 예정. 지금은 항상 빈 배열. */
+  diff_pairs: Array<{
+    p_net: string;
+    n_net: string;
+    length_skew_mm: number;
+    gap_mm: { min: number; max: number; nominal: number };
+  }>;
+};
+
+export type BoardAnalysis = {
+  source: {
+    kicad_version: string;
+    /** (stackup) 블록이 없어 stackup.ts 프리셋으로 채웠는가. */
+    stackup_estimated: boolean;
+    /** filled_polygons가 없어 zone 외곽선 기준으로 계산했는가. */
+    zones_unfilled: boolean;
+  };
+  outline: { polygon: Pt[]; w_mm: number; h_mm: number };
+  stackup: AnalysisStackupLayer[];
+  nets: Array<{ name: string; code: number }>;
+  traces: AnalysisTrace[];
+  vias: AnalysisVia[];
+  planes: AnalysisPlane[];
+  pads: AnalysisPad[];
+  measurements: BoardMeasurements;
 };

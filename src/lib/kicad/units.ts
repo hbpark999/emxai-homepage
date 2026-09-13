@@ -91,6 +91,17 @@ export function makeUuid(): string {
   ).join("")}-a${Array.from({ length: 3 }, rand).join("")}-${Array.from({ length: 12 }, rand).join("")}`;
 }
 
+/** 다각형 넓이 [mm²]. 신발끈 공식이라 부호는 방향에 따라 바뀐다. */
+export function polygonArea(points: Array<{ x: number; y: number }>): number {
+  let sum = 0;
+  for (let i = 0; i < points.length; i++) {
+    const a = points[i];
+    const b = points[(i + 1) % points.length];
+    sum += a.x * b.y - b.x * a.y;
+  }
+  return sum / 2;
+}
+
 /** 사각형 두 개가 겹치는지 (축 정렬 기준, mm). 패드 겹침 검사에 사용. */
 export function rectsOverlap(
   a: { cx: number; cy: number; w: number; h: number },

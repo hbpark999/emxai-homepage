@@ -4,11 +4,9 @@
  * 넷 테이블 조립 → 외곽선 → 부품(풋프린트+패드) → 트레이스(segment) → 비아
  * → 카퍼존/GND slit 순으로 블록을 이어붙인다. buildBoard()는 직렬화 전에
  * validate.ts를 돌려, 치명적 오류가 있으면 파일을 만들지 않고 오류만 낸다.
- * summarizeBoard()는 반대 방향으로, .kicad_pcb 텍스트를 정규식으로 훑어
- * 넷/트레이스/비아 요약을 뽑아낸다(pcb_board_summary 툴이 사용).
  */
 
-import type { BoardSpec, BoardSummary, BuildBoardResult, Result, ViaType } from "./types";
+import type { BoardSpec, BuildBoardResult, Result, ViaType } from "./types";
 import {
   boardYToKicadY,
   distanceMm,
@@ -386,56 +384,4 @@ export function buildBoard(spec: BoardSpec): Result<BuildBoardResult> {
   }
   const kicad_pcb = serializeBoard(spec);
   return { ok: true, value: { kicad_pcb, summary: computeSummary(spec) } };
-}
-
-// ---- pcb_board_summary --------------------------------------------------------
-
-/**
- * .kicad_pcb 텍스트를 정규식으로 훑어 넷/트레이스/비아를 요약한다.
- * 전체 S-expression을 파싱하지 않는 가벼운 방식이라, 극단적으로 변형된
- * 포맷(줄바꿈이 전혀 다르거나 값 순서가 바뀐 경우)에는 취약할 수 있다.
- */
-export function summarizeBoard(kicadPcbText: string): Result<BoardSummary> {
-  if (!kicadPcbText.includes("(kicad_pcb")) {
-    return { ok: false, errors: ['입력이 .kicad_pcb 형식이 아닌 것 같다 ("(kicad_pcb" 토큰을 찾지 못함).'] };
-  }
-
-  const netNameByNumber = new Map<number, string>();
-  const netRe = /\(net\s+(\d+)\s+"((?:[^"\\]|\\.)*)"\)/g;
-  let m: RegExpExecArray | null;
-  while ((m = netRe.exec(kicadPcbText))) {
-    const num = Number(m[1]);
-    const name = m[2].replace(/\\"/g, '"').replace(/\\\\/g, "\\");
-    if (!netNameByNumber.has(num)) netNameByNumber.set(num, name);
-  }
-
-  const traces: BoardSummary["traces"] = [];
-  const segRe =
-    /\(segment\s+\(start\s+([-\d.]+)\s+([-\d.]+)\)\s+\(end\s+([-\d.]+)\s+([-\d.]+)\)\s+\(width\s+([-\d.]+)\)\s+\(layer\s+"([^"]+)"\)\s+\(net\s+(\d+)\)/g;
-  while ((m = segRe.exec(kicadPcbText))) {
-    const [, sx, sy, ex, ey, widthStr, layer, netNumStr] = m;
-    const length_mm = Math.hypot(Number(ex) - Number(sx), Number(ey) - Number(sy));
-    const netNum = Number(netNumStr);
-    traces.push({
-      net: netNameByNumber.get(netNum) ?? `#${netNum}`,
-      layer,
-      length_mm: Math.round(length_mm * 1000) / 1000,
-      width_mm: Number(widthStr),
-    });
-  }
-
-  const vias: Record<ViaType, number> = { through: 0, micro: 0, blind: 0 };
-  const viaRe = /\(via\s+(micro|blind_buried)?\s*\(at/g;
-  while ((m = viaRe.exec(kicadPcbText))) {
-    if (m[1] === "micro") vias.micro++;
-    else if (m[1] === "blind_buried") vias.blind++;
-    else vias.through++;
-  }
-
-  const nets = Array.from(netNameByNumber.entries())
-    .sort((a, b) => a[0] - b[0])
-    .map(([, name]) => name)
-    .filter((name) => name.length > 0);
-
-  return { ok: true, value: { nets, traces, vias } };
 }

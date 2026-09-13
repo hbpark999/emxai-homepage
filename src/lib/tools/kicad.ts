@@ -7,13 +7,86 @@
  */
 
 import { z } from "zod";
-import type { BoardSpec, CouponSpec } from "@/lib/kicad/types";
-import { buildBoard, summarizeBoard } from "@/lib/kicad/board";
+import type { BoardAnalysis, BoardSpec, CouponSpec, Pt } from "@/lib/kicad/types";
+import { buildBoard } from "@/lib/kicad/board";
 import { buildCoupon2xThru } from "@/lib/kicad/coupon";
+import { measureBoard } from "@/lib/kicad/measure";
+import { parseKicadPcb } from "@/lib/kicad/parse";
 import { listPartsCatalogSummary } from "@/lib/kicad/parts";
+import { plotBoardSvg } from "@/lib/kicad/plot";
 import { listStackupPresets, totalBoardThicknessMm } from "@/lib/kicad/stackup";
 import { validateSpec } from "@/lib/kicad/validate";
 import { checkAndIncrementDailyUsage } from "@/lib/mcp-rate-limit";
+
+/** 트레이스 세그먼트를 이 개수까지만 싣고 나머지는 개수로 요약한다(토큰 폭발 방지). */
+const MAX_SEGMENTS_IN_OUTPUT = 20;
+
+function boundingBox(points: Pt[]): { min: Pt; max: Pt } | null {
+  if (points.length === 0) return null;
+  const xs = points.map((p) => p.x);
+  const ys = points.map((p) => p.y);
+  return {
+    min: { x: Math.min(...xs), y: Math.min(...ys) },
+    max: { x: Math.max(...xs), y: Math.max(...ys) },
+  };
+}
+
+/**
+ * BoardAnalysis를 MCP 응답에 실을 형태로 줄인다.
+ * 형상 중 부피가 큰 것(세그먼트 목록, 평면 외곽선 좌표)만 요약하고
+ * measurements는 분석의 본체이므로 항상 통째로 싣는다.
+ */
+function shapeAnalysisForOutput(
+  analysis: BoardAnalysis,
+  detail: "shape" | "full",
+  includeGeometry: boolean
+) {
+  const traces = analysis.traces.map((t) => ({
+    net: t.net,
+    layer: t.layer,
+    total_len_mm: t.total_len_mm,
+    width_profile: t.width_profile,
+    segment_count: t.segments.length,
+    segments: t.segments.slice(0, MAX_SEGMENTS_IN_OUTPUT),
+    segments_omitted: Math.max(0, t.segments.length - MAX_SEGMENTS_IN_OUTPUT),
+  }));
+
+  const planes = analysis.planes.map((p) => ({
+    net: p.net,
+    layer: p.layer,
+    area_mm2: p.area_mm2,
+    outline_point_count: p.outline.length,
+    outline_bbox: boundingBox(p.outline),
+    hole_count: p.holes.length,
+    splits: p.splits.map((s) => ({
+      width_mm: s.width_mm,
+      length_mm: s.length_mm,
+      bbox: boundingBox(s.polygon),
+      ...(includeGeometry ? { polygon: s.polygon } : {}),
+    })),
+    ...(includeGeometry ? { outline: p.outline, holes: p.holes } : {}),
+  }));
+
+  const base = {
+    source: analysis.source,
+    outline: includeGeometry
+      ? analysis.outline
+      : {
+          w_mm: analysis.outline.w_mm,
+          h_mm: analysis.outline.h_mm,
+          polygon_point_count: analysis.outline.polygon.length,
+        },
+    stackup: analysis.stackup,
+    nets: analysis.nets,
+    traces,
+    vias: analysis.vias,
+    planes,
+    pads: analysis.pads,
+  };
+
+  if (detail === "shape") return base;
+  return { ...base, measurements: analysis.measurements };
+}
 
 /** 이 MCP 전체(툴 6개 합산) 하루 호출 한도. */
 const DAILY_LIMIT = 500;
@@ -267,24 +340,133 @@ export function registerKicadTools(server: ToolServer) {
     "pcb_board_summary",
     {
       title: "보드 요약",
-      description: ".kicad_pcb 텍스트를 넣으면 넷 목록, 트레이스별 길이·폭·층, 비아 종류별 개수를 요약한다",
+      description:
+        ".kicad_pcb 텍스트를 넣으면 넷 목록, 트레이스별 길이·폭·층, 비아 종류별 개수를 짧게 요약한다. 자세한 형상·측정값은 pcb_parse_file을 쓴다",
       inputSchema: z.object({ kicad_pcb: z.string().describe(".kicad_pcb 파일 전체 텍스트") }),
     },
     async (args) => {
       const { kicad_pcb } = args as { kicad_pcb: string };
-      const result = summarizeBoard(kicad_pcb);
-      if (!result.ok) {
-        return { content: [{ type: "text", text: numberedList(result.errors) }] };
+      const parsed = parseKicadPcb(kicad_pcb);
+      if (!parsed.ok) {
+        return { content: [{ type: "text", text: numberedList(parsed.errors) }] };
       }
-      const { nets, traces, vias } = result.value;
-      const traceLines = traces
-        .map((t) => `  ${t.net} (${t.layer}): ${t.length_mm}mm, 폭 ${t.width_mm}mm`)
+      const a = parsed.value;
+      const netNames = a.nets.filter((n) => n.name).map((n) => n.name);
+      const traceLines = a.traces
+        .map((t) => {
+          const widths = t.width_profile.map((w) => `${w.width_mm}mm`).join("→");
+          return `  ${t.net} (${t.layer}): ${t.total_len_mm}mm, 폭 ${widths}, 세그먼트 ${t.segments.length}개`;
+        })
         .join("\n");
-      const text = `넷 (${nets.length}개): ${nets.join(", ")}
-트레이스 (${traces.length}개):
+      const viaCounts = a.vias.reduce<Record<string, number>>((acc, v) => {
+        acc[v.type] = (acc[v.type] ?? 0) + 1;
+        return acc;
+      }, {});
+      const viaText =
+        Object.entries(viaCounts)
+          .map(([k, v]) => `${k} ${v}`)
+          .join(" / ") || "없음";
+      const slitCount = a.planes.reduce((sum, p) => sum + p.splits.length, 0);
+
+      const text = `보드 ${a.outline.w_mm} x ${a.outline.h_mm}mm / KiCad ${a.source.kicad_version}
+넷 (${netNames.length}개): ${netNames.join(", ") || "없음"}
+트레이스 (${a.traces.length}개):
 ${traceLines || "  없음"}
-비아: through ${vias.through} / micro ${vias.micro} / blind ${vias.blind}`;
+비아: ${viaText} (스티칭 ${a.vias.filter((v) => v.is_stitching).length}개)
+평면: ${a.planes.map((p) => `${p.net}@${p.layer} ${p.area_mm2}mm²`).join(", ") || "없음"}
+GND slit: ${slitCount}개${a.source.zones_unfilled ? " / zone 미채움(외곽선 기준 면적)" : ""}${
+        a.source.stackup_estimated ? "\n주의: (stackup) 블록이 없어 프리셋으로 추정한 스택업이다." : ""
+      }`;
       return { content: [{ type: "text", text }] };
+    }
+  );
+
+  registerLimitedTool(
+    server,
+    "pcb_parse_file",
+    {
+      title: "보드 파싱/측정",
+      description:
+        ".kicad_pcb를 파싱해 형상(BoardAnalysis)과 SI/EMI 측정값을 낸다. 합격 여부는 판정하지 않고 숫자만 주므로, 판정은 설계 규칙 문서를 근거로 직접 하면 된다. detail=full이면 return_path(슬릿 교차 포함) 등 측정값 전부를 포함한다",
+      inputSchema: z.object({
+        kicad_pcb: z.string().describe(".kicad_pcb 파일 전체 텍스트"),
+        detail: z
+          .enum(["shape", "full"])
+          .default("full")
+          .describe("shape=형상만, full=형상+측정값(clearance/return_path 등)"),
+        include_geometry: z
+          .boolean()
+          .default(false)
+          .describe("true면 평면 외곽선/슬릿의 전체 좌표까지 포함한다. 기본은 점 개수와 바운딩 박스만"),
+      }),
+    },
+    async (args) => {
+      const { kicad_pcb, detail, include_geometry } = args as {
+        kicad_pcb: string;
+        detail?: "shape" | "full";
+        include_geometry?: boolean;
+      };
+      const parsed = parseKicadPcb(kicad_pcb);
+      if (!parsed.ok) {
+        return { content: [{ type: "text", text: numberedList(parsed.errors) }] };
+      }
+      const analysis = (detail ?? "full") === "full" ? measureBoard(parsed.value) : parsed.value;
+      const payload = shapeAnalysisForOutput(analysis, detail ?? "full", include_geometry ?? false);
+      return { content: [{ type: "text", text: JSON.stringify(payload, null, 1) }] };
+    }
+  );
+
+  registerLimitedTool(
+    server,
+    "pcb_plot",
+    {
+      title: "보드 SVG 플롯",
+      description:
+        "보드를 SVG로 그려서 돌려준다. KiCad를 열지 않고도 배치를 확인할 수 있다. kicad_pcb 텍스트 또는 spec 중 하나를 준다",
+      inputSchema: z.object({
+        kicad_pcb: z.string().optional().describe(".kicad_pcb 전체 텍스트. spec을 주면 생략 가능"),
+        spec: zBoardSpec.optional().describe("BoardSpec. 주면 내부에서 보드를 만든 뒤 그린다"),
+        layers: z
+          .array(z.string())
+          .optional()
+          .describe('그릴 구리층. 예: ["F.Cu","In1.Cu"]. 생략하면 전부'),
+        show_nets: z.boolean().default(false).describe("트레이스 옆에 넷 이름 표기"),
+        highlight_slits: z.boolean().default(true).describe("GND 슬릿을 대비색 굵은 외곽선으로 강조"),
+      }),
+    },
+    async (args) => {
+      const a = args as {
+        kicad_pcb?: string;
+        spec?: BoardSpec;
+        layers?: string[];
+        show_nets?: boolean;
+        highlight_slits?: boolean;
+      };
+
+      let text = a.kicad_pcb;
+      if (!text && a.spec) {
+        const built = buildBoard(a.spec);
+        if (!built.ok) {
+          return {
+            content: [{ type: "text", text: `spec으로 보드를 만들지 못했다:\n${numberedList(built.errors)}` }],
+          };
+        }
+        text = built.value.kicad_pcb;
+      }
+      if (!text) {
+        return { content: [{ type: "text", text: "kicad_pcb 텍스트나 spec 중 하나는 있어야 한다." }] };
+      }
+
+      const parsed = parseKicadPcb(text);
+      if (!parsed.ok) {
+        return { content: [{ type: "text", text: numberedList(parsed.errors) }] };
+      }
+      const svg = plotBoardSvg(parsed.value, {
+        layers: a.layers,
+        show_nets: a.show_nets ?? false,
+        highlight_slits: a.highlight_slits ?? true,
+      });
+      return { content: [{ type: "text", text: svg }] };
     }
   );
 }
