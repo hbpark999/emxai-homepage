@@ -3,6 +3,7 @@ type EducationScheduleItem = {
   startDate: string;
   href?: string;
   highlight?: boolean;
+  recommended?: boolean;
 };
 
 type EducationScheduleGroup = {
@@ -45,6 +46,7 @@ export const educationSchedule: EducationScheduleGroup[] = [
         title: "[RAPA] PCB 전자파 (EMI/SI) 설계/분석을 위한 Agentic AI 활용 실습과정 (11/16~17)",
         startDate: "2026-11-16",
         highlight: true,
+        recommended: true,
       },
       {
         title: "[AI특화] DRC 및 AI기반 PCB검증 (11/18~20)",

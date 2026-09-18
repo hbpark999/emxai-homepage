@@ -131,6 +131,11 @@ export function HomeUpdates() {
                         }
                       >
                         ·{" "}
+                        {item.recommended ? (
+                          <span className="mr-2 inline-flex rounded bg-red-600 px-1.5 py-0.5 text-sm font-bold leading-none text-white">
+                            추천과정
+                          </span>
+                        ) : null}
                         {item.href ? (
                           <a
                             href={item.href}
