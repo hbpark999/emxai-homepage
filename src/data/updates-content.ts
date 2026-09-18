@@ -30,27 +30,6 @@ type KnowledgeArticle = {
 
 export const educationSchedule: EducationScheduleGroup[] = [
   {
-    month: "'26년 8월",
-    items: [
-      {
-        title: "[TTA] 전원노이즈 저감 설계와 생성형 AI 실습 (8/26~27)",
-        startDate: "2026-08-26",
-        href: "https://champ.tta.or.kr/usr/EgovUsrEduAppDetail.do?idx=538&baseUsrMenuNo=3&imgNum=1&pageIndex=1",
-      },
-    ],
-  },
-  {
-    month: "'26년 9월",
-    items: [
-      {
-        title: "[AI특화] 전자제품 EMC설계와 생성형 AI활용 (9/21~23)",
-        startDate: "2026-09-21",
-        href: "https://champ.rapa.or.kr/web/course/courseView.do?eduCd=K000000001202606190008&eduCertifiedYn=N&category1=",
-        highlight: true,
-      },
-    ],
-  },
-  {
     month: "'26년 10월",
     items: [
       {
@@ -62,6 +41,11 @@ export const educationSchedule: EducationScheduleGroup[] = [
   {
     month: "'26년 11월",
     items: [
+      {
+        title: "[RAPA] PCB 전자파 (EMI/SI) 설계/분석을 위한 Agentic AI 활용 실습과정 (11/16~17)",
+        startDate: "2026-11-16",
+        highlight: true,
+      },
       {
         title: "[AI특화] DRC 및 AI기반 PCB검증 (11/18~20)",
         startDate: "2026-11-18",
