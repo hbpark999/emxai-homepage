@@ -19,6 +19,13 @@ type RelatedEventItem = {
   href: string;
 };
 
+type PostOrToolItem = {
+  title: string;
+  action: string;
+  href: string;
+  date?: string;
+};
+
 type KnowledgeArticle = {
   title: string;
   abstract: string[];
@@ -64,6 +71,8 @@ export const educationSchedule: EducationScheduleGroup[] = [
       {
         title: "[RAPA] 전자파 분석 및 설계 과정 - 2차 (12/10~11)",
         startDate: "2026-12-10",
+        highlight: true,
+        recommended: true,
       },
       {
         title: "[AI특화] AI기반 전자파분석 및 시뮬레이션기술 (12/16~18)",
@@ -104,26 +113,34 @@ export const relatedEventItems: RelatedEventItem[] = [
   },
 ];
 
-export const postsAndTools = [
+export const postsAndTools: PostOrToolItem[] = [
+  {
+    title: "CE-CMF-Filter-PCB Sim: CMC 예측 + Conducted Emission 분석 데모",
+    date: "'26.9.10 공개",
+    action: "데모 실행하기",
+    href: "/solution/ce-cmf-filter-pcb-sim",
+  },
+  {
+    title: "S2P/S4P → SPICE Modeler (Vector Fitting Cloud 도구)",
+    date: "'26.9.8 공개",
+    action: "Cloud 도구 실행하기",
+    href: "https://emxai-sparam-modeler-612006724841.asia-northeast3.run.app/",
+  },
+  {
+    title: "주파수별 Dk 반영 Microstrip Z0 계산기 · S-parameter Plot Viewer",
+    date: "'26.8.12 공개",
+    action: "계산기 실행하기",
+    href: "/web-tools",
+  },
   {
     title: "Z0 Design → HFSS Simulation → TDR Plot Automation",
     action: "영상 재생하기",
     href: "https://www.youtube.com/watch?v=-RSqOqZr3uU",
   },
   {
-    title: "주파수 별 Dk를 고려한 Z0 계산",
-    action: "계산기 실행하기",
-    href: "/web-tools",
-  },
-  {
     title: "Gemini를 이용한 S-parameter + PCB 형상 분석",
     action: "영상 재생하기",
     href: "https://www.youtube.com/watch?v=V-Iv6-RgEwo",
-  },
-  {
-    title: "Trace Width, Dk Z0 영향 표시 Microstrip Z0 계산기",
-    action: "계산기 바로가기",
-    href: "/web-tools",
   },
 ];
 
@@ -263,6 +280,12 @@ export const updateActivities = [
 
 export const newsItems = [
   {
+    title: "한국전자파학회 전자파AI연구반 설립 ('26.7)",
+    body: "한국전자파학회에 전자파 분야의 AI 활용을 다루는 전자파AI연구반이 설립됐습니다. EMxAI 대표가 위원장으로 참여하며, 전자파 해석·설계·측정 업무에 Surrogate Model과 생성형 AI를 적용하는 사례와 연구 주제를 학계·산업계가 함께 발굴합니다.",
+    note: "",
+    href: "",
+  },
+  {
     title: "삼성전자, ChatGPT·Gemini·Claude 전면 도입으로 AX 본격화 ('26.6)",
     body: "삼성전자 DX부문은 임직원이 ChatGPT, Gemini, Claude를 업무 특성에 맞게 선택해 쓰도록 외부 생성형 AI 3종을 공식 도입했습니다. 약 2,500명 대상 실효성 검증 후 문서 작성, 정보 분석, 코드 작성, 의사결정 속도 향상을 목표로 AX를 추진합니다.",
     note: "삼성 뉴스룸 기사 보기 →",
@@ -309,6 +332,18 @@ export const newsItems = [
     body: "서로 다른 플랫폼의 AI agent가 작업을 주고받는 표준으로 A2A Protocol이 주목받고 있습니다. MCP와 함께 브라우저, 문서, 코드, 업무 시스템을 연결하는 agentic workflow 인프라의 기반 기술로 볼 수 있습니다.",
     note: "A2A Protocol 보기 →",
     href: "https://a2a-protocol.org/v1.0.0/",
+  },
+  {
+    title: "OpenAI, GPT-6 Astra 공개 ('26.9.3)",
+    body: "OpenAI가 computer use, browsing, software engineering, 과학·전문 업무에서 최고 성능을 표방한 GPT-6 Astra를 공개했습니다. 목표만 주면 도구를 직접 조작해 결과까지 만드는 agent 성격이 강화되어, 시뮬레이션 설정부터 데이터 정리와 보고서 작성까지 이어지는 EMI/SI 실무 자동화 범위가 넓어지는 흐름입니다.",
+    note: "OpenAI 발표 보기 →",
+    href: "https://openai.com/index/gpt-6-astra/",
+  },
+  {
+    title: "GPT-6 Astra 공개 이후 HBM·고성능 반도체 수요 전망 확대 ('26.9.7)",
+    body: "Astra 공개 직후 AI 인프라 수요 기대가 커지며 국내 반도체 관련 종목이 강세를 보였습니다. HBM과 고용량 DRAM, 광 인터커넥트 수요 증가는 고속 디지털 회로의 전원 무결성(PI)과 신호 무결성(SI) 설계 난도를 함께 높이는 요인입니다.",
+    note: "파이낸셜뉴스 기사 보기 →",
+    href: "https://www.fnnews.com/news/202609071445188718",
   },
 ];
 

@@ -159,21 +159,28 @@ export function HomeUpdates() {
           <section className="flex h-[24rem] flex-col rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
             <ColumnTitle label="NEW" title="최신 게시물 & 도구" />
             <div className="mt-7 min-h-0 flex-1 space-y-6 overflow-y-auto pr-2">
-              {postsAndTools.map((post) => (
-                <article key={post.title}>
-                  <h4 className="text-xl font-normal leading-7 text-slate-950">
-                    {post.title}
-                  </h4>
-                  <a
-                    href={post.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-flex text-sm font-normal leading-5 text-slate-500 underline-offset-4 transition hover:text-[#2563eb] hover:underline"
-                  >
-                    {post.action}
-                  </a>
-                </article>
-              ))}
+              {postsAndTools.map((post) => {
+                const isExternal = post.href.startsWith("http");
+
+                return (
+                  <article key={post.title}>
+                    {post.date ? (
+                      <p className="text-sm font-bold text-[#2d95ff]">{post.date}</p>
+                    ) : null}
+                    <h4 className="mt-1 text-xl font-normal leading-7 text-slate-950">
+                      {post.title}
+                    </h4>
+                    <a
+                      href={post.href}
+                      target={isExternal ? "_blank" : undefined}
+                      rel={isExternal ? "noopener noreferrer" : undefined}
+                      className="mt-2 inline-flex text-sm font-normal leading-5 text-slate-500 underline-offset-4 transition hover:text-[#2563eb] hover:underline"
+                    >
+                      {post.action}
+                    </a>
+                  </article>
+                );
+              })}
             </div>
           </section>
 
