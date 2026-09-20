@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 type SParamPoint = {
@@ -116,6 +117,20 @@ export function EngineeringTools() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
+      <Link
+        href="/web-tools/pdn-decap"
+        className="group rounded-lg border border-sky-200 bg-gradient-to-r from-sky-50 to-white p-6 shadow-sm transition hover:border-sky-400 hover:shadow-md lg:col-span-2"
+      >
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-500">
+          HFSS-trained PDN Surrogate
+        </p>
+        <h2 className="mt-3 text-2xl font-medium text-slate-950 group-hover:text-sky-700">
+          형상 · De-cap Z(f) · IC 핀 Z(f) 가로 비교
+        </h2>
+        <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-600">
+          거리 d를 포함한 Lpath 교육 모델과 HFSS 복소 S-parameter 기반 IC 입력 임피던스를 한 화면에서 확인합니다.
+        </p>
+      </Link>
       <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-500">
           Calculator

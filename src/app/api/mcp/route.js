@@ -15,6 +15,7 @@ import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 import { calcZ0, solveWidth, sweepZ0 } from "@/lib/z0";
 import { buildDiagramSvg } from "@/lib/z0-diagram";
+import { registerPdnTools } from "@/lib/tools/pdn";
 
 /** 단면도+수식 SVG를 PNG로 변환해 MCP 이미지 콘텐츠 블록으로 만든다. */
 async function diagramImageContent(structure, params, result) {
@@ -36,6 +37,8 @@ const geometry = {
 };
 
 const handler = createMcpHandler((server) => {
+  registerPdnTools(server);
+
   server.registerTool(
     "calc_z0",
     {

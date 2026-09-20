@@ -34,3 +34,23 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Remote MCP and PDN surrogate
+
+The Vercel application exposes the remote MCP endpoint at:
+
+```text
+https://www.emxai.net/api/mcp
+```
+
+PDN tools use a separate Cloud Run inference service in
+`services/pdn-decap-surrogate`. Configure these server-only Vercel variables:
+
+```text
+PDN_SURROGATE_API_URL=https://YOUR-CLOUD-RUN-URL
+PDN_SURROGATE_API_TOKEN=<shared Cloud Run application token>
+```
+
+The browser-only training GUI is available at `/web-tools/pdn-decap`; students
+do not need Python. Deployment and model-definition details are in
+`services/pdn-decap-surrogate/README.md`.
