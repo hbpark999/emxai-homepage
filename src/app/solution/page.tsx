@@ -31,6 +31,22 @@ export default function SolutionPage() {
               <h1 className="text-4xl font-black text-sky-500">간단한 공개 Tools & Demos</h1>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <Link
+                  href="/web-tools/pdn-decap"
+                  className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
+                >
+                  <p className="text-xl font-black text-slate-950">
+                    PDN De-cap Mounting &amp; IC Z(f) Surrogate
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    HFSS 복소 S-parameter로 학습한 surrogate를 이용해 형상 변화, Lpath를
+                    포함한 De-cap Z(f), IC 핀에서 본 Z(f)를 한 화면에서 비교하는 교육용 도구
+                  </p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-sky-600">
+                    PDN Surrogate 열기 →
+                  </span>
+                </Link>
+
                 <a
                   href={sParameterTool.href}
                   target="_blank"
