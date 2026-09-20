@@ -14,6 +14,18 @@ The two displayed impedances have different definitions:
 The model covers 100 kHz to 1 GHz and is an interpolation of completed HFSS
 cases. An API prediction is not a new HFSS solve.
 
+## Current Cloud Run deployment
+
+- Project: `emxai-sparam-mvp`
+- Region: `asia-northeast3`
+- Service: `pdn-decap-surrogate`
+- URL: `https://pdn-decap-surrogate-612006724841.asia-northeast3.run.app`
+- Secret Manager secret: `pdn-api-token`
+
+`GET /health` and `GET /v1/model-info` are public. Prediction routes require
+the bearer token stored in Secret Manager and the matching Vercel environment
+variable.
+
 ## Local run
 
 ```powershell
