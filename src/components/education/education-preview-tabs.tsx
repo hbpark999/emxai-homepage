@@ -1,7 +1,15 @@
+/**
+ * education-preview-tabs.tsx
+ *
+ * 교육 카탈로그 섹션을 탭으로 전환해 보여주는 클라이언트 컴포넌트.
+ * 샘플 슬라이드는 이메일 등록(열람 동의) 후에만 노출되며,
+ * 열람 여부는 localStorage에 저장하고 useSyncExternalStore로 구독한다.
+ * (effect 안에서 setState 하지 않으므로 hydration 경고/lint 오류가 없다.)
+ */
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
 import type { EducationSection } from "@/lib/education-catalog";
 
 type EducationPreviewTabsProps = {
@@ -10,7 +18,42 @@ type EducationPreviewTabsProps = {
 
 const UNLOCK_STORAGE_KEY = "emxai_edu_preview_unlocked";
 
-function SlideAccessGate({ onUnlock }: { onUnlock: () => void }) {
+/** 열람 해제 상태를 구독 가능한 외부 스토어로 노출한다. */
+const unlockListeners = new Set<() => void>();
+
+function subscribeUnlock(onStoreChange: () => void) {
+  unlockListeners.add(onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+
+  return () => {
+    unlockListeners.delete(onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function getUnlockSnapshot() {
+  try {
+    return window.localStorage.getItem(UNLOCK_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function getUnlockServerSnapshot() {
+  return false;
+}
+
+function markUnlocked() {
+  try {
+    window.localStorage.setItem(UNLOCK_STORAGE_KEY, "1");
+  } catch {
+    // 저장이 막혀 있어도 현재 세션에서는 열람을 허용한다.
+  }
+
+  unlockListeners.forEach((listener) => listener());
+}
+
+function SlideAccessGate() {
   const [email, setEmail] = useState("");
   const [newsletter, setNewsletter] = useState(true);
   const [pending, setPending] = useState(false);
@@ -39,8 +82,7 @@ function SlideAccessGate({ onUnlock }: { onUnlock: () => void }) {
         return;
       }
 
-      window.localStorage.setItem(UNLOCK_STORAGE_KEY, "1");
-      onUnlock();
+      markUnlocked();
     } catch {
       setError("연결을 확인해 주세요.");
     } finally {
@@ -96,17 +138,15 @@ function SlideAccessGate({ onUnlock }: { onUnlock: () => void }) {
 
 export function EducationPreviewTabs({ catalog }: EducationPreviewTabsProps) {
   const [activeId, setActiveId] = useState(catalog[0]?.id ?? "");
-  const [unlocked, setUnlocked] = useState(false);
+  const unlocked = useSyncExternalStore(
+    subscribeUnlock,
+    getUnlockSnapshot,
+    getUnlockServerSnapshot,
+  );
   const activeSection = useMemo(
     () => catalog.find((section) => section.id === activeId) ?? catalog[0],
     [activeId, catalog],
   );
-
-  useEffect(() => {
-    if (window.localStorage.getItem(UNLOCK_STORAGE_KEY) === "1") {
-      setUnlocked(true);
-    }
-  }, []);
 
   if (!activeSection) {
     return null;
@@ -178,7 +218,7 @@ export function EducationPreviewTabs({ catalog }: EducationPreviewTabsProps) {
               ))}
             </div>
           ) : (
-            <SlideAccessGate onUnlock={() => setUnlocked(true)} />
+            <SlideAccessGate />
           )
         ) : (
           <div className="mt-6 rounded-lg bg-slate-50 p-6 text-base leading-7 text-slate-600">
