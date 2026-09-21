@@ -18,6 +18,27 @@ const visibleEducationSchedule = educationSchedule.filter((group) =>
   visibleEducationMonths.has(group.month),
 );
 
+/** 고정 항목을 먼저 두고, 나머지는 게시일 최신순으로 정렬한다. */
+const sortedNewsItems = [...newsItems].sort((a, b) => {
+  if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
+  return b.date.localeCompare(a.date);
+});
+
+/**
+ * 가장 최근 게시일로부터 30일 이내에 올라온 항목에 NEW를 붙인다.
+ * 빌드 시점이 아니라 데이터 기준이므로 새 소식을 추가하면 표시가 자동으로 넘어간다.
+ */
+const NEW_BADGE_WINDOW_DAYS = 30;
+const latestNewsDate = sortedNewsItems.reduce(
+  (latest, item) => (item.date > latest ? item.date : latest),
+  "",
+);
+const newBadgeThreshold = new Date(
+  Date.parse(latestNewsDate) - NEW_BADGE_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+)
+  .toISOString()
+  .slice(0, 10);
+
 export default function NewsEventPage() {
   return (
     <main className="flex-1 bg-[#f6f9fc]">
@@ -26,11 +47,19 @@ export default function NewsEventPage() {
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-5">
             <h2 className="text-4xl font-black text-sky-500">News</h2>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {newsItems.map((item) => {
+              {sortedNewsItems.map((item) => {
                 const isExternal = item.href.startsWith("http");
+                const isNew = !item.pinned && item.date >= newBadgeThreshold;
                 const content = (
                   <>
-                    <p className="text-sm font-medium text-slate-950">{item.title}</p>
+                    <p className="text-sm font-medium text-slate-950">
+                      {isNew ? (
+                        <span className="mr-2 inline-flex rounded bg-sky-500 px-1.5 py-0.5 align-[1px] text-[11px] font-black leading-none text-white">
+                          NEW
+                        </span>
+                      ) : null}
+                      {item.title}
+                    </p>
                     <p className="mt-2 text-xs leading-5 text-slate-600">{item.body}</p>
                     {item.note ? (
                       <span className="mt-3 inline-flex text-xs text-slate-500">{item.note}</span>

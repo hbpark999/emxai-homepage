@@ -19,6 +19,17 @@ type RelatedEventItem = {
   href: string;
 };
 
+type NewsItem = {
+  title: string;
+  body: string;
+  note: string;
+  href: string;
+  /** 정렬 기준 게시일. 월 단위로만 알려진 항목은 해당 월 1일로 둔다. */
+  date: string;
+  /** 목록 최상단에 고정한다. 정렬과 NEW 표시에서 제외된다. */
+  pinned?: boolean;
+};
+
 type PostOrToolItem = {
   title: string;
   action: string;
@@ -278,72 +289,84 @@ export const updateActivities = [
   },
 ];
 
-export const newsItems = [
+export const newsItems: NewsItem[] = [
   {
     title: "한국전자파학회 전자파AI연구반 설립 ('26.7)",
     body: "한국전자파학회에 전자파 분야의 AI 활용을 다루는 전자파AI연구반이 설립됐습니다. EMxAI 대표가 위원장으로 참여하며, 전자파 해석·설계·측정 업무에 Surrogate Model과 생성형 AI를 적용하는 사례와 연구 주제를 학계·산업계가 함께 발굴합니다.",
     note: "",
     href: "",
+    date: "2026-07-01",
+    pinned: true,
   },
   {
     title: "삼성전자, ChatGPT·Gemini·Claude 전면 도입으로 AX 본격화 ('26.6)",
     body: "삼성전자 DX부문은 임직원이 ChatGPT, Gemini, Claude를 업무 특성에 맞게 선택해 쓰도록 외부 생성형 AI 3종을 공식 도입했습니다. 약 2,500명 대상 실효성 검증 후 문서 작성, 정보 분석, 코드 작성, 의사결정 속도 향상을 목표로 AX를 추진합니다.",
     note: "삼성 뉴스룸 기사 보기 →",
     href: "https://news.samsung.com/kr/%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90-%EC%99%B8%EB%B6%80-%EC%83%9D%EC%84%B1%ED%98%95-ai-%EB%8F%84%EC%9E%85%EC%9C%BC%EB%A1%9C-ax-%EB%B3%B8%EA%B2%A9%ED%99%94",
+    date: "2026-06-01",
   },
   {
     title: "OpenAI, 삼성전자에 ChatGPT Enterprise·Codex 대규모 배포 발표 ('26.6.21)",
     body: "OpenAI는 삼성전자 한국 임직원과 글로벌 DX부문 임직원에게 ChatGPT Enterprise와 Codex를 제공한다고 발표했습니다. R&D, 제조, 마케팅, 제품 개발 등 기술·비기술 업무 전반에서 아이디어를 실행 가능한 소프트웨어와 자동화 workflow로 전환하는 사례로 볼 수 있습니다.",
     note: "OpenAI 발표 보기 →",
     href: "https://openai.com/index/samsung-electronics-chatgpt-codex-deployment/",
+    date: "2026-06-21",
   },
   {
     title: "RAPA, 2026년도 AI 특화 공동훈련센터 선정",
     body: "한국산업인력공단 공고에서 한국전파진흥협회(RAPA)가 AI 특화 공동훈련센터 운영기관으로 선정됐습니다. RAPA는 목동 교육장을 기반으로 전자파·RF/EMC·AX 실무 교육을 운영하며, 생성형 AI와 전자파 분석·시뮬레이션을 결합한 재직자 교육 흐름을 강화하고 있습니다.",
     note: "선정 결과 공고 보기 →",
     href: "https://www.hrdkorea.or.kr/3/1/1?k=55584",
+    date: "2026-03-01",
   },
   {
     title: "AI 특화 공동훈련센터, 전국 20개 기관으로 확산",
     body: "2026년 AI 특화 공동훈련센터는 총 20개소가 선정됐습니다. RAPA 외에도 KOSA, 이대서울병원·글로벌소프트웨어캠퍼스, KAIST·한국산업단지공단, 현대차·기아·KMAC 등이 참여해 산업별 AX 교육 거점이 확대되고 있습니다.",
     note: "AI 특화 공동훈련센터 현황 보기 →",
     href: "https://www.hrd4u.or.kr/champ/bbs/view/B0001207/4506.do?menuNo=0303",
+    date: "2026-03-01",
   },
   {
     title: "서울시립대, AI 분야 첨단산업 인재양성 부트캠프 선정",
     body: "서울시립대는 교육부·KIAT의 AI 분야 첨단산업 인재양성 부트캠프 사업에 선정되어 5년간 약 71.25억 원 지원을 받습니다. 1년 이내 단기 집중 교육으로 도메인 전문성과 AI를 결합한 실무형 인재 양성을 추진합니다.",
     note: "서울시립대 산학협력단 소식 보기 →",
     href: "https://research.uos.ac.kr/node/8550",
+    date: "2026-03-01",
   },
   {
     title: "OpenAI, ChatGPT Work 공개 ('26.7.9)",
     body: "연결된 앱과 파일을 다루며 문서·스프레드시트·프레젠테이션까지 만드는 장기 작업용 agent를 공개했습니다. 기업 업무에서 자료 조사, 문서 작성, 데이터 정리, 실행 파일 생성까지 이어지는 end-to-end 작업 흐름을 보여주는 사례입니다.",
     note: "ChatGPT release notes 보기 →",
     href: "https://help.openai.com/en/articles/6825453-release-notes",
+    date: "2026-07-09",
   },
   {
     title: "Anthropic, Claude Opus 5 출시 ('26.7.24)",
     body: "Claude Opus 5는 1M context, 128k max output, thinking 기본 적용 등 장문 문서·코딩·agentic workflow에 필요한 기능을 강화했습니다. 기술 문서 분석, 대규모 코드 검토, 복잡한 실무 자동화에 영향을 줄 수 있는 신모델 흐름입니다.",
     note: "Claude Platform release notes 보기 →",
     href: "https://platform.claude.com/docs/en/release-notes/overview",
+    date: "2026-07-24",
   },
   {
     title: "A2A Protocol, AI agent 상호운용 표준으로 주목 ('26.8)",
     body: "서로 다른 플랫폼의 AI agent가 작업을 주고받는 표준으로 A2A Protocol이 주목받고 있습니다. MCP와 함께 브라우저, 문서, 코드, 업무 시스템을 연결하는 agentic workflow 인프라의 기반 기술로 볼 수 있습니다.",
     note: "A2A Protocol 보기 →",
     href: "https://a2a-protocol.org/v1.0.0/",
+    date: "2026-08-01",
   },
   {
     title: "OpenAI, GPT-6 Astra 공개 ('26.9.3)",
     body: "OpenAI가 computer use, browsing, software engineering, 과학·전문 업무에서 최고 성능을 표방한 GPT-6 Astra를 공개했습니다. 목표만 주면 도구를 직접 조작해 결과까지 만드는 agent 성격이 강화되어, 시뮬레이션 설정부터 데이터 정리와 보고서 작성까지 이어지는 EMI/SI 실무 자동화 범위가 넓어지는 흐름입니다.",
     note: "OpenAI 발표 보기 →",
     href: "https://openai.com/index/gpt-6-astra/",
+    date: "2026-09-03",
   },
   {
     title: "GPT-6 Astra 공개 이후 HBM·고성능 반도체 수요 전망 확대 ('26.9.7)",
     body: "Astra 공개 직후 AI 인프라 수요 기대가 커지며 국내 반도체 관련 종목이 강세를 보였습니다. HBM과 고용량 DRAM, 광 인터커넥트 수요 증가는 고속 디지털 회로의 전원 무결성(PI)과 신호 무결성(SI) 설계 난도를 함께 높이는 요인입니다.",
     note: "파이낸셜뉴스 기사 보기 →",
     href: "https://www.fnnews.com/news/202609071445188718",
+    date: "2026-09-07",
   },
 ];
 
