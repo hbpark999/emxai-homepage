@@ -5,7 +5,8 @@
  * 용도   : Claude가 Z0 계산 엔진(lib/z0.js)을 직접 호출하도록 도구 3종을 노출
  * 도구   : calc_z0(정방향) / solve_width(역산) / sweep_z0(민감도)
  *          + pdn_*  (HFSS surrogate, Cloud Run 호출)
- *          + decap_*(De-cap 병렬 합성, Vercel 내장 즉시 계산)
+ * 구분   : De-cap 병렬 합성 decap_* 도구는 /api/decap/mcp에 따로 두었다.
+ *          수강생은 그 주소만 연결해 도구 4종만 보게 한다.
  * 단위   : 모든 길이 mm, 임피던스 ohm
  * 의존   : npm i mcp-handler @modelcontextprotocol/server zod
  *          (mcp-handler 2.x는 registerTool + z.object() 입력 스키마를 사용한다.
@@ -18,7 +19,6 @@ import { z } from "zod";
 import { calcZ0, solveWidth, sweepZ0 } from "@/lib/z0";
 import { buildDiagramSvg } from "@/lib/z0-diagram";
 import { registerPdnTools } from "@/lib/tools/pdn";
-import { registerDecapTools } from "@/lib/tools/decap";
 
 /** 단면도+수식 SVG를 PNG로 변환해 MCP 이미지 콘텐츠 블록으로 만든다. */
 async function diagramImageContent(structure, params, result) {
@@ -41,7 +41,6 @@ const geometry = {
 
 const handler = createMcpHandler((server) => {
   registerPdnTools(server);
-  registerDecapTools(server);
 
   server.registerTool(
     "calc_z0",
@@ -124,6 +123,8 @@ Z0 = ${r.z0.toFixed(2)}옴${zd}
       return { content: [{ type: "text", text: table }] };
     }
   );
+}, {
+  serverInfo: { name: "EMxAI 전자파 도구 (Z0·PDN)", version: "1.0.0" },
 });
 
 export { handler as GET, handler as POST, handler as DELETE };

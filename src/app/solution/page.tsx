@@ -61,6 +61,22 @@ export default function SolutionPage() {
                 </a>
 
                 <Link
+                  href="/web-tools/parallel-decap"
+                  className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
+                >
+                  <p className="text-xl font-black text-slate-950">
+                    De-cap 병렬 임피던스 계산기
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    용량·개수·VCC/GND 실장 배선 길이를 바꾸며 De-cap 병렬 합성 Z(f)와 SRF,
+                    반공진을 확인하는 교육용 계산기. 실장 인덕턴스를 켜고 끄며 비교한다
+                  </p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-sky-600">
+                    병렬 계산기 열기 →
+                  </span>
+                </Link>
+
+                <Link
                   href="/solution/ce-cmf-filter-pcb-sim"
                   className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
                 >

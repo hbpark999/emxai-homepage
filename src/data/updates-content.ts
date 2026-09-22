@@ -126,6 +126,12 @@ export const relatedEventItems: RelatedEventItem[] = [
 
 export const postsAndTools: PostOrToolItem[] = [
   {
+    title: "De-cap 병렬 임피던스 계산기: 합성 Z(f)·SRF·반공진",
+    date: "'26.9.22 공개",
+    action: "계산기 실행하기",
+    href: "/web-tools/parallel-decap",
+  },
+  {
     title: "CE-CMF-Filter-PCB Sim: CMC 예측 + Conducted Emission 분석 데모",
     date: "'26.9.10 공개",
     action: "데모 실행하기",
