@@ -22,6 +22,14 @@ import {
   type SolveVariable,
   type SweepVariable,
 } from "@/lib/diffpair";
+import { diffMicrostripZ0 } from "@/lib/z0";
+import {
+  crossSectionAt,
+  resolveLocation,
+  summarizeBoard,
+  type BoardJson,
+  type LocationRequest,
+} from "@/lib/board-geometry";
 
 type TextResult = { content: Array<{ type: "text"; text: string }> };
 type ToolServer = {
@@ -218,5 +226,118 @@ export function registerDiffPairTools(server: ToolServer) {
           },
         })
       ),
+  );
+
+  server.registerTool(
+    "diffpair_board_summary",
+    {
+      title: "PCB 형상 JSON 요약 (Vercel 내장)",
+      description:
+        "PCB 형상 JSON에 들어 있는 차동 쌍, AC Capacitor, design_rules, 신호층과 기준면 목록을 돌려준다. " +
+        "diffpair_from_board로 어느 쌍과 어느 위치를 계산할지 고르기 전에 쓴다.",
+      inputSchema: z.object({
+        board: z.object({}).passthrough().describe("KiCad에서 내보낸 PCB 형상 JSON 전체"),
+      }),
+    },
+    async (args) =>
+      limited(async () => {
+        const a = args as { board: BoardJson };
+        return asText({ engine: "vercel-inline", ...summarizeBoard(a.board) });
+      })
+  );
+
+  server.registerTool(
+    "diffpair_from_board",
+    {
+      title: "PCB 형상 JSON에서 단면을 뽑아 Zdiff 계산 (Vercel 내장 · 즉시 계산)",
+      description:
+        "PCB 형상 JSON(stackup·traces·components·design_rules)에서 지정한 위치의 차동 쌍 단면을 측정해 " +
+        "선폭 W, 간격 S, 기준면까지 높이 H, 동박 두께 T, 유전율 er을 뽑고 그대로 Zdiff를 계산한다. " +
+        "위치를 주지 않으면 AC Capacitor에서 부품(IC)쪽으로 1 mm 떨어진 지점을 기본으로 쓴다. " +
+        "at.x_mm/at.y_mm으로 좌표를 주거나 at.ref·at.offset_mm·at.side로 기준 부품과 거리를 바꿀 수 있다. " +
+        "design_rules의 diff_width/diff_gap으로 계산한 값도 함께 돌려주어 팬아웃 구간의 차이를 비교할 수 있다.",
+      inputSchema: z.object({
+        board: z.object({}).passthrough().describe("KiCad에서 내보낸 PCB 형상 JSON 전체"),
+        at: z
+          .object({
+            ref: z.string().optional().describe("기준 부품 ref. 기본은 첫 번째 AC Capacitor"),
+            offset_mm: z.number().min(0).max(50).optional().describe("기준 부품 패드에서 떨어진 거리 [mm]. 기본 1"),
+            side: z.enum(["ic", "connector"]).optional().describe("ic=부품쪽(기본), connector=커넥터쪽"),
+            x_mm: z.number().optional().describe("좌표로 직접 지정할 때의 x [mm]"),
+            y_mm: z.number().optional().describe("좌표로 직접 지정할 때의 y [mm]"),
+            pair: z.string().optional().describe("차동 쌍 이름(diff_pairs[].name) 또는 네트 이름"),
+          })
+          .optional()
+          .describe("측정 위치. 생략하면 AC Cap에서 부품쪽 1 mm"),
+        freq_ghz: z.number().positive().optional().describe("파장·지연 계산용 주파수 [GHz]"),
+      }),
+    },
+    async (args) =>
+      limited(async () => {
+        const a = args as { board: BoardJson; at?: LocationRequest; freq_ghz?: number };
+        const loc = resolveLocation(a.board, a.at ?? {});
+        if ("error" in loc) return asText({ error: loc.error });
+
+        const cs = crossSectionAt(a.board, loc, a.freq_ghz);
+        if ("error" in cs) return asText({ error: cs.error, location: loc.description });
+
+        const invalid = validate(cs.input);
+        if (invalid) return asText({ error: invalid, cross_section: cs.input, location: loc.description });
+
+        const dr = a.board.design_rules ?? {};
+        const byRule =
+          dr.diff_width && dr.diff_gap
+            ? pack({ ...cs.input, w_mm: dr.diff_width, s_mm: dr.diff_gap })
+            : null;
+
+        const out = pack(cs.input);
+        return asText({
+          engine: "vercel-inline IPC-2141 approximation (no external solver)",
+          board: a.board.meta?.name ?? null,
+          location: {
+            description: loc.description,
+            point_mm: cs.point,
+            layer: cs.layer,
+            reference_layer: cs.reference_layer,
+            nets: { p: cs.net_p, n: cs.net_n },
+          },
+          measured_cross_section: {
+            ...cs.input,
+            center_to_center_mm: cs.center_to_center_mm,
+            width_n_mm: cs.width_n_mm,
+            dielectric: cs.dielectric,
+          },
+          ...out,
+          ...(dr.target_Zdiff_ohm ? { target: compareToTarget(out.zdiff_ohm, dr.target_Zdiff_ohm) } : {}),
+          cross_check_hammerstad_jensen: (() => {
+            const hj = diffMicrostripZ0({
+              w: cs.input.w_mm,
+              h: cs.input.h_mm,
+              t: cs.input.t_um / 1000,
+              s: cs.input.s_mm,
+              er: cs.input.er,
+            });
+            return {
+              zdiff_ohm: round(hj.zdiff, 2),
+              z0_ohm: round(hj.z0, 2),
+              note:
+                "같은 단면을 /api/mcp의 calc_z0(structure='diff')와 같은 Hammerstad-Jensen 모델로 계산한 값. " +
+                "근사식이 다르므로 IPC 결과와 몇 % 차이가 나는 것이 정상이다. 형상 JSON의 target_Zdiff_ohm이 " +
+                "이 모델로 정해졌다면 이 값과 비교한다.",
+            };
+          })(),
+          ...(byRule
+            ? {
+                design_rule_reference: {
+                  diff_width_mm: dr.diff_width,
+                  diff_gap_mm: dr.diff_gap,
+                  zdiff_ohm: byRule.zdiff_ohm,
+                  note: "등간격 구간(design_rules 기준)에서의 값. 측정값과 다르면 그 지점이 팬아웃·불연속 구간이다.",
+                },
+              }
+            : {}),
+          notes: cs.notes,
+        });
+      })
   );
 }
