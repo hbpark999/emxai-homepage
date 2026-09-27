@@ -253,7 +253,9 @@ export function registerDiffPairTools(server: ToolServer) {
       description:
         "PCB 형상 JSON(stackup·traces·components·design_rules)에서 지정한 위치의 차동 쌍 단면을 측정해 " +
         "선폭 W, 간격 S, 기준면까지 높이 H, 동박 두께 T, 유전율 er을 뽑고 그대로 Zdiff를 계산한다. " +
-        "위치를 주지 않으면 AC Capacitor에서 부품(IC)쪽으로 1 mm 떨어진 지점을 기본으로 쓴다. " +
+        "위치를 주지 않으면 AC Capacitor에서 부품(IC)쪽으로 걸어 들어가 팬아웃이 끝나고 간격이 " +
+        "안정되는 첫 지점(등간격 구간)을 자동으로 찾아 쓴다. 팬아웃 구간은 국부 불연속이라 쌍의 " +
+        "대표 Zdiff로 읽으면 안 되기 때문이다. 패드 근처를 보려면 at.offset_mm으로 거리를 지정한다. " +
         "at.x_mm/at.y_mm으로 좌표를 주거나 at.ref·at.offset_mm·at.side로 기준 부품과 거리를 바꿀 수 있다. " +
         "design_rules의 diff_width/diff_gap으로 계산한 값도 함께 돌려주어 팬아웃 구간의 차이를 비교할 수 있다.",
       inputSchema: z.object({
@@ -261,14 +263,19 @@ export function registerDiffPairTools(server: ToolServer) {
         at: z
           .object({
             ref: z.string().optional().describe("기준 부품 ref. 기본은 첫 번째 AC Capacitor"),
-            offset_mm: z.number().min(0).max(50).optional().describe("기준 부품 패드에서 떨어진 거리 [mm]. 기본 1"),
+            offset_mm: z
+              .number()
+              .min(0)
+              .max(50)
+              .optional()
+              .describe("기준 부품 패드에서 떨어진 거리 [mm]. 주면 등간격 자동 탐색 대신 이 거리에서 측정한다."),
             side: z.enum(["ic", "connector"]).optional().describe("ic=부품쪽(기본), connector=커넥터쪽"),
             x_mm: z.number().optional().describe("좌표로 직접 지정할 때의 x [mm]"),
             y_mm: z.number().optional().describe("좌표로 직접 지정할 때의 y [mm]"),
             pair: z.string().optional().describe("차동 쌍 이름(diff_pairs[].name) 또는 네트 이름"),
           })
           .optional()
-          .describe("측정 위치. 생략하면 AC Cap에서 부품쪽 1 mm"),
+          .describe("측정 위치. 생략하면 AC Cap에서 부품쪽으로 팬아웃이 끝나는 등간격 구간"),
         freq_ghz: z.number().positive().optional().describe("파장·지연 계산용 주파수 [GHz]"),
       }),
     },

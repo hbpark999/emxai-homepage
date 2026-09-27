@@ -5,8 +5,10 @@
  *        특정 위치에서의 선폭 W, 간격 S, 기준면까지 높이 H, 동박 두께 T, 유전율 er을 구한다.
  *        결과는 src/lib/diffpair.ts의 Zdiff 계산기로 그대로 넘긴다.
  *
- * 기본 위치 : AC Capacitor에서 부품(IC)쪽으로 1 mm 떨어진 지점.
- *             호출자가 위치를 지정하면 그 지점에서 단면을 뽑는다.
+ * 기본 위치 : AC Capacitor에서 부품(IC)쪽으로 걸어 들어가 팬아웃이 끝나고
+ *             간격이 안정되는 첫 지점(등간격 구간). 팬아웃은 국부 불연속이라
+ *             쌍의 대표 Zdiff로 읽으면 오해가 생기기 때문이다.
+ *             at.offset_mm이나 좌표를 주면 그 지점에서 뽑는다.
  *
  * 주의 : 좌표는 JSON 그대로 mm 단위이며 y는 아래쪽이 +(KiCad 좌표)다.
  *        단면은 해당 지점의 실제 배선에서 측정하므로, 팬아웃 구간에서는
@@ -62,7 +64,7 @@ export type BoardJson = {
 export type LocationRequest = {
   /** 기준으로 삼을 부품 ref (기본: 첫 번째 AC Cap) */
   ref?: string;
-  /** 기준 부품에서 떨어진 거리 [mm] (기본 1) */
+  /** 기준 부품에서 떨어진 거리 [mm]. 주면 등간격 자동 탐색 대신 이 거리를 쓴다. */
   offset_mm?: number;
   /** ic = 부품(IC)쪽, connector = 커넥터쪽 (기본 ic) */
   side?: "ic" | "connector";
@@ -257,6 +259,59 @@ function padPosition(board: BoardJson, ref: string, net: string): Pt | null {
   return (pad?.position as Pt) ?? null;
 }
 
+/** 한 지점에서 짝 네트까지의 edge-to-edge 간격. 짝을 못 찾으면 null. */
+function spacingAt(board: BoardJson, point: Pt, layer: string, netN: string, widthP: number): number | null {
+  const sameLayer = tracesOf(board, netN, layer);
+  const pool = sameLayer.length ? sameLayer : tracesOf(board, netN);
+  if (!pool.length) return null;
+  let best: { d: number; w: number } | null = null;
+  for (const t of pool) {
+    const near = nearestOnPolyline(t.points, point);
+    if (!best || near.distance < best.d) best = { d: near.distance, w: t.width };
+  }
+  if (!best) return null;
+  return best.d - (widthP / 2 + best.w / 2);
+}
+
+/**
+ * 패드에서 배선을 따라 들어가며 간격이 안정되는 첫 지점을 찾는다.
+ * design_rules.diff_gap이 있으면 그 값에 수렴하는 지점을, 없으면 간격 변화가
+ * 멈추는 지점을 등간격 구간의 시작으로 본다. 팬아웃 구간을 건너뛰는 것이 목적이다.
+ */
+function findUniformStart(
+  board: BoardJson,
+  trace: BoardTrace,
+  fromStart: boolean,
+  netN: string,
+  maxWalk = 30,
+): { distance: number; point: Pt; spacing: number } | null {
+  const total = polylineLength(trace.points);
+  const limit = Math.min(total, maxWalk);
+  const step = 0.05;
+  const hold = 0.4; // 이 거리만큼 더 가도 같은 간격이어야 안정으로 본다
+  const target = board.design_rules?.diff_gap;
+
+  const sample = (d: number) => {
+    const w = walkAlong(trace.points, fromStart, d);
+    const s = spacingAt(board, w.point, trace.layer, netN, trace.width);
+    return s === null ? null : { point: w.point, spacing: s };
+  };
+
+  for (let d = step; d <= limit; d += step) {
+    const here = sample(d);
+    if (!here) continue;
+    const ahead = sample(Math.min(d + hold, limit));
+    if (!ahead) continue;
+
+    const stable = Math.abs(ahead.spacing - here.spacing) <= 0.005;
+    const onTarget = target === undefined ? true : Math.abs(here.spacing - target) <= Math.max(0.01, target * 0.1);
+    if (stable && onTarget) {
+      return { distance: Number(d.toFixed(3)), point: here.point, spacing: here.spacing };
+    }
+  }
+  return null;
+}
+
 export type ResolvedPoint = {
   point: Pt;
   net_p: string;
@@ -347,7 +402,6 @@ export function resolveLocation(board: BoardJson, req: LocationRequest = {}): Re
   }
 
   // 3) AC Cap 패드에서 offset만큼 걸어 들어간 지점
-  const offset = req.offset_mm ?? 1;
   const pad = padPosition(board, capRef ?? "", netP) ?? (cap?.center as Pt | undefined);
   if (!pad) return { error: `${capRef}의 ${netP} 패드 위치를 찾지 못했습니다.` };
 
@@ -365,6 +419,33 @@ export function resolveLocation(board: BoardJson, req: LocationRequest = {}): Re
   if (!chosen) return { error: `${netP}의 배선 끝점을 찾지 못했습니다.` };
   if (chosen.d > 0.2) notes.push(`패드와 배선 끝점이 ${chosen.d.toFixed(3)} mm 떨어져 있습니다.`);
 
+  const sideLabel = req.side === "connector" ? "커넥터" : "부품(IC)";
+  const netN = partnerNet(board, netP);
+
+  // 거리를 지정하지 않으면 팬아웃을 지나 등간격이 되는 첫 지점을 찾는다.
+  if (req.offset_mm === undefined && netN) {
+    const uniform = findUniformStart(board, chosen.t, chosen.fromStart, netN);
+    if (uniform) {
+      notes.push(
+        `팬아웃 구간 약 ${uniform.distance.toFixed(2)} mm를 지나 간격이 ` +
+          `${uniform.spacing.toFixed(3)} mm로 안정되는 지점에서 측정했습니다. ` +
+          "패드 근처를 보려면 at.offset_mm으로 거리를 지정하세요.",
+      );
+      return {
+        point: uniform.point,
+        net_p: netP,
+        layer: chosen.t.layer,
+        width_p: chosen.t.width,
+        description:
+          `${capRef}(${cap?.value ?? ""}) 패드에서 ${sideLabel}쪽 ${uniform.distance.toFixed(2)} mm — ` +
+          "팬아웃이 끝나고 등간격이 시작되는 지점",
+        notes,
+      };
+    }
+    notes.push("등간격 구간을 찾지 못해 패드에서 1 mm 지점으로 대신 측정했습니다.");
+  }
+
+  const offset = req.offset_mm ?? 1;
   const walk = walkAlong(chosen.t.points, chosen.fromStart, offset);
   if (walk.clamped) {
     notes.push(`이 배선 구간이 ${polylineLength(chosen.t.points).toFixed(3)} mm로 짧아 끝점에서 측정했습니다.`);
@@ -375,7 +456,7 @@ export function resolveLocation(board: BoardJson, req: LocationRequest = {}): Re
     net_p: netP,
     layer: chosen.t.layer,
     width_p: chosen.t.width,
-    description: `${capRef}(${cap?.value ?? ""}) 패드에서 ${req.side === "connector" ? "커넥터" : "부품(IC)"}쪽으로 ${offset} mm 지점`,
+    description: `${capRef}(${cap?.value ?? ""}) 패드에서 ${sideLabel}쪽으로 ${offset} mm 지점`,
     notes,
   };
 }
