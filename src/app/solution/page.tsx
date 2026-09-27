@@ -77,6 +77,22 @@ export default function SolutionPage() {
                 </Link>
 
                 <Link
+                  href="/web-tools/diff-pair"
+                  className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
+                >
+                  <p className="text-xl font-black text-slate-950">
+                    Microstrip 차동 쌍 Zdiff 계산기
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    선폭 W, 간격 S, 기판 높이 H, 동박 두께 T를 바꾸며 edge-coupled microstrip의
+                    차동 임피던스와 단면 형상을 함께 확인하는 근사식 계산기
+                  </p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-sky-600">
+                    Zdiff 계산기 열기 →
+                  </span>
+                </Link>
+
+                <Link
                   href="/solution/ce-cmf-filter-pcb-sim"
                   className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
                 >

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Microstrip Differential Pair 근사식 계산기</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #17365d;
+      --blue: #2f75b5;
+      --cyan: #37b9e9;
+      --ink: #1f2937;
+      --muted: #667085;
+      --line: #c8d5e5;
+      --panel: #ffffff;
+      --surface: #f4f8fc;
+      --substrate: #d8ebd5;
+      --copper: #d9822b;
+      --ground: #87601f;
+      --good: #16865a;
+      --warn: #a15c00;
+      --bad: #c7342d;
+      --shadow: 0 12px 30px rgba(23, 54, 93, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: #eef4fa;
+      color: var(--ink);
+      font-family: Arial, "Malgun Gothic", sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      padding: 26px clamp(18px, 4vw, 54px);
+      color: #fff;
+      background: linear-gradient(120deg, #17365d, #2f75b5 72%, #37b9e9);
+    }
+    header h1 { margin: 0 0 5px; font-size: clamp(24px, 3vw, 38px); font-weight: 700; }
+    header p { margin: 0; color: #dcecff; font-size: 15px; }
+    main { max-width: 1440px; margin: 0 auto; padding: 22px; }
+    .workspace { display: grid; grid-template-columns: minmax(290px, 390px) minmax(0, 1fr); gap: 20px; align-items: start; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+    .panel-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { margin: 0; color: var(--navy); font-size: 20px; }
+    .panel-head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .controls { padding: 16px 20px 20px; display: grid; gap: 14px; }
+    .parameter { display: grid; grid-template-columns: 1fr 112px; gap: 8px 12px; align-items: center; }
+    .parameter label { font-size: 14px; font-weight: 700; color: var(--navy); }
+    .parameter small { display: block; font-weight: 400; color: var(--muted); }
+    input[type="number"] {
+      width: 100%; padding: 8px 9px; border: 1px solid #aebfd3; border-radius: 7px;
+      color: var(--ink); background: #fff; font: inherit; text-align: right;
+    }
+    input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--blue); }
+    input:focus { outline: 3px solid rgba(55, 185, 233, .25); border-color: var(--blue); }
+    .compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 4px; }
+    .compact-grid label { color: var(--navy); font-size: 13px; font-weight: 700; }
+    .compact-grid input { margin-top: 5px; }
+    .diagram-area { padding: 18px; }
+    #crossSection { display: block; width: 100%; height: auto; min-height: 330px; background: linear-gradient(#edf7ff 0 44%, #f8fbfd 44%); border-radius: 10px; }
+    .results { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 10px; margin-top: 14px; }
+    .metric { padding: 13px 14px; background: var(--surface); border-radius: 9px; min-height: 82px; }
+    .metric span { display: block; color: var(--muted); font-size: 12px; }
+    .metric strong { display: block; margin-top: 3px; color: var(--navy); font-size: 23px; font-variant-numeric: tabular-nums; }
+    .metric.primary { background: #e7f4ff; }
+    .metric.primary strong { color: var(--blue); font-size: 30px; }
+    .target-status { margin-top: 12px; padding: 11px 14px; border-left: 5px solid var(--blue); background: #f3f7fb; border-radius: 6px; font-size: 14px; }
+    .target-status.good { border-color: var(--good); background: #e8f6ef; color: #0c6845; }
+    .target-status.warn { border-color: var(--warn); background: #fff4da; color: #794700; }
+    .target-status.bad { border-color: var(--bad); background: #fdeceb; color: #982720; }
+    .notice { margin-top: 14px; color: var(--muted); font-size: 13px; }
+    .notice strong { color: var(--warn); }
+    details { margin-top: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+    summary { padding: 15px 18px; color: var(--navy); font-weight: 700; cursor: pointer; }
+    .details-body { padding: 0 20px 20px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+    .formula { margin: 7px 0; padding: 10px 12px; background: #f5f7fa; border-radius: 6px; font-family: Consolas, monospace; overflow-wrap: anywhere; }
+    .details-body h3 { color: var(--navy); font-size: 16px; margin: 10px 0 5px; }
+    .details-body p, .details-body li { font-size: 13px; color: #445268; }
+    .details-body ul { margin: 6px 0; padding-left: 20px; }
+    a { color: var(--blue); }
+    .error { padding: 12px 14px; margin: 12px 18px 0; border-radius: 7px; background: #fdeceb; color: var(--bad); display: none; }
+    footer { max-width: 1440px; margin: 0 auto; padding: 0 22px 24px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns: 1fr; }
+      .results { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
+    }
+    @media (max-width: 580px) {
+      main { padding: 12px; }
+      header { padding: 22px 16px; }
+      .results { grid-template-columns: 1fr 1fr; }
+      .details-body { grid-template-columns: 1fr; }
+      .compact-grid { grid-template-columns: 1fr; }
+      #crossSection { min-height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Microstrip Differential Pair 근사식 계산기</h1>
+    <p>Edge-coupled surface microstrip · IPC-2141 계열 근사식 · 입력값에 따라 단면도가 실시간으로 변합니다.</p>
+  </header>
+
+  <main>
+    <div class="workspace">
+      <section class="panel" aria-labelledby="inputTitle">
+        <div class="panel-head">
+          <h2 id="inputTitle">단면 파라미터</h2>
+          <p>W, S, H, T는 제조사 완성 동박 기준으로 입력합니다.</p>
+        </div>
+        <div class="controls">
+          <div class="parameter">
+            <label for="er">상대 유전율 εr<small>Dielectric constant</small></label>
+            <input id="er" type="number" min="2" max="12" step="0.05" value="4.2">
+            <input id="erRange" type="range" min="2" max="12" step="0.05" value="4.2" aria-label="상대 유전율">
+          </div>
+          <div class="parameter">
+            <label for="h">기판 높이 H (mm)<small>Trace 아래 기준면까지</small></label>
+            <input id="h" type="number" min="0.03" max="1.5" step="0.005" value="0.15">
+            <input id="hRange" type="range" min="0.03" max="1.5" step="0.005" value="0.15" aria-label="기판 높이">
+          </div>
+          <div class="parameter">
+            <label for="w">Trace 폭 W (mm)<small>한 개 선로의 폭</small></label>
+            <input id="w" type="number" min="0.03" max="1.5" step="0.005" value="0.25">
+            <input id="wRange" type="range" min="0.03" max="1.5" step="0.005" value="0.25" aria-label="Trace 폭">
+          </div>
+          <div class="parameter">
+            <label for="s">Edge 간격 S (mm)<small>Copper edge-to-edge gap</small></label>
+            <input id="s" type="number" min="0.03" max="1.5" step="0.005" value="0.25">
+            <input id="sRange" type="range" min="0.03" max="1.5" step="0.005" value="0.25" aria-label="Trace 간격">
+          </div>
+          <div class="parameter">
+            <label for="t">동박 두께 T (µm)<small>예: 1 oz ≈ 35 µm</small></label>
+            <input id="t" type="number" min="5" max="105" step="1" value="35">
+            <input id="tRange" type="range" min="5" max="105" step="1" value="35" aria-label="동박 두께">
+          </div>
+          <div class="compact-grid">
+            <label for="freq">주파수 (GHz)
+              <input id="freq" type="number" min="0.01" max="100" step="0.1" value="5">
+            </label>
+            <label for="target">목표 Zdiff (Ω)
+              <input id="target" type="number" min="20" max="200" step="1" value="90">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="diagramTitle">
+        <div class="panel-head">
+          <h2 id="diagramTitle">동적 단면도와 계산 결과</h2>
+          <p>단면은 W:S:H 비율을 반영합니다. 매우 얇은 동박은 식별을 위해 최소 두께로 표시합니다.</p>
+        </div>
+        <div id="error" class="error" role="alert"></div>
+        <div class="diagram-area">
+          <svg id="crossSection" viewBox="0 0 760 350" role="img" aria-labelledby="svgTitle svgDesc">
+            <title id="svgTitle">Edge-coupled microstrip differential pair 단면도</title>
+            <desc id="svgDesc">두 개의 상부 동박 선로, 유전체 기판과 하부 기준면을 표시합니다.</desc>
+          </svg>
+
+          <div class="results" aria-live="polite">
+            <div class="metric primary"><span>차동 임피던스 Zdiff</span><strong id="zdiff">—</strong></div>
+            <div class="metric"><span>단일 선로 Z0</span><strong id="z0">—</strong></div>
+            <div class="metric"><span>Odd-mode Zodd</span><strong id="zodd">—</strong></div>
+            <div class="metric"><span>유효 유전율 εeff</span><strong id="eeff">—</strong></div>
+            <div class="metric"><span>결합에 의한 감소</span><strong id="coupling">—</strong></div>
+            <div class="metric"><span>전파 지연</span><strong id="delay">—</strong></div>
+            <div class="metric"><span>유도 파장 λg</span><strong id="lambda">—</strong></div>
+            <div class="metric"><span>W/H · S/H</span><strong id="ratios">—</strong></div>
+          </div>
+          <div id="targetStatus" class="target-status" aria-live="polite">목표 임피던스와 비교합니다.</div>
+          <div id="validity" class="notice"></div>
+        </div>
+      </section>
+    </div>
+
+    <details>
+      <summary>근사식, 가정 및 적용 한계 보기</summary>
+      <div class="details-body">
+        <div>
+          <h3>계산식</h3>
+          <div class="formula">Z0 = 87 / √(εr + 1.41) · ln[5.98H / (0.8W + T)]</div>
+          <div class="formula">Zdiff = 2Z0 · [1 − 0.48 · exp(−0.96S/H)]</div>
+          <div class="formula">εeff ≈ 0.475εr + 0.67</div>
+          <p>W, S, H, T는 같은 길이 단위로 계산됩니다. 화면에서는 mm를 사용하고 T 입력값을 µm에서 mm로 변환합니다.</p>
+        </div>
+        <div>
+          <h3>가정과 주의사항</h3>
+          <ul>
+            <li>외층 edge-coupled microstrip과 연속된 단일 기준면을 가정합니다.</li>
+            <li>솔더마스크, 동박 표면 거칠기, 에칭 단면, 유리섬유 직조 및 주파수 분산을 포함하지 않습니다.</li>
+            <li>W/H가 약 0.1–2 범위를 벗어나면 경향 확인용으로만 사용합니다.</li>
+            <li>제조 데이터는 PCB 업체의 stackup 계산과 2D/3D field solver로 확인해야 합니다.</li>
+          </ul>
+          <p>참고: <a href="https://www.ipc.org/ipc-design-standards" target="_blank" rel="noreferrer">IPC design standards</a>, <a href="https://cir.nii.ac.jp/crid/1571698600106064768?lang=en" target="_blank" rel="noreferrer">Hammerstad &amp; Jensen, Accurate Models for Microstrip Computer-Aided Design</a></p>
+        </div>
+      </div>
+    </details>
+  </main>
+
+  <footer>교육용 근사 계산기입니다. Controlled impedance 제작값으로 직접 사용하지 말고 실제 stackup과 제조 공차를 반영해 재검증하십시오.</footer>
+
+  <script>
+    "use strict";
+
+    const ids = ["er", "h", "w", "s", "t"];
+    const defaults = { er: 4.2, h: 0.15, w: 0.25, s: 0.25, t: 35, freq: 5, target: 90 };
+    const $ = id => document.getElementById(id);
+
+    function number(id) { return Number($(id).value); }
+    function fixed(value, digits = 2) { return Number.isFinite(value) ? value.toFixed(digits) : "—"; }
+
+    function syncInputs() {
+      ids.forEach(id => {
+        const input = $(id);
+        const range = $(`${id}Range`);
+        input.addEventListener("input", () => { range.value = input.value; calculate(); });
+        range.addEventListener("input", () => { input.value = range.value; calculate(); });
+      });
+      ["freq", "target"].forEach(id => $(id).addEventListener("input", calculate));
+    }
+
+    function getValues() {
+      return { er: number("er"), h: number("h"), w: number("w"), s: number("s"), tUm: number("t"), freq: number("freq"), target: number("target") };
+    }
+
+    function validate(v) {
+      if (![v.er, v.h, v.w, v.s, v.tUm, v.freq, v.target].every(Number.isFinite)) return "모든 입력값을 숫자로 입력하세요.";
+      if (v.er <= 1 || v.h <= 0 || v.w <= 0 || v.s <= 0 || v.tUm <= 0 || v.freq <= 0 || v.target <= 0) return "모든 치수와 주파수는 0보다 커야 하며 εr은 1보다 커야 합니다.";
+      const t = v.tUm / 1000;
+      if (5.98 * v.h <= 0.8 * v.w + t) return "현재 W/H 조합에서는 IPC 근사식의 로그 항이 유효하지 않습니다. W를 줄이거나 H를 늘리세요.";
+      return "";
+    }
+
+    function calculate() {
+      const v = getValues();
+      const error = validate(v);
+      $("error").style.display = error ? "block" : "none";
+      $("error").textContent = error;
+      if (error) {
+        ["zdiff", "z0", "zodd", "eeff", "coupling", "delay", "lambda", "ratios"].forEach(id => $(id).textContent = "—");
+        return;
+      }
+
+      const t = v.tUm / 1000;
+      const z0 = 87 / Math.sqrt(v.er + 1.41) * Math.log(5.98 * v.h / (0.8 * v.w + t));
+      const couplingFactor = 0.48 * Math.exp(-0.96 * v.s / v.h);
+      const zdiff = 2 * z0 * (1 - couplingFactor);
+      const zodd = zdiff / 2;
+      const eeff = 0.475 * v.er + 0.67;
+      const delay = 3.335640952 * Math.sqrt(eeff);
+      const lambda = 299.792458 / (v.freq * Math.sqrt(eeff));
+      const wh = v.w / v.h;
+      const sh = v.s / v.h;
+      const delta = zdiff - v.target;
+      const percent = Math.abs(delta) / v.target * 100;
+
+      $("zdiff").textContent = `${fixed(zdiff)} Ω`;
+      $("z0").textContent = `${fixed(z0)} Ω`;
+      $("zodd").textContent = `${fixed(zodd)} Ω`;
+      $("eeff").textContent = fixed(eeff, 3);
+      $("coupling").textContent = `${fixed(couplingFactor * 100, 1)} %`;
+      $("delay").textContent = `${fixed(delay, 2)} ps/mm`;
+      $("lambda").textContent = `${fixed(lambda, 2)} mm`;
+      $("ratios").textContent = `${fixed(wh, 2)} · ${fixed(sh, 2)}`;
+
+      const status = $("targetStatus");
+      status.className = `target-status ${percent <= 5 ? "good" : percent <= 10 ? "warn" : "bad"}`;
+      status.textContent = `목표 ${fixed(v.target, 1)} Ω 대비 ${delta >= 0 ? "+" : ""}${fixed(delta)} Ω (${fixed(percent, 1)}%). ${percent <= 5 ? "±5% 범위입니다." : percent <= 10 ? "±10% 범위입니다." : "폭·간격·높이 조정이 필요합니다."}`;
+
+      const cautions = [];
+      if (wh < 0.1 || wh > 2) cautions.push(`W/H=${fixed(wh, 2)}는 권장 근사 범위 0.1–2 밖입니다.`);
+      if (sh < 0.1 || sh > 3) cautions.push(`S/H=${fixed(sh, 2)}에서는 결합 근사 오차가 커질 수 있습니다.`);
+      $("validity").innerHTML = cautions.length ? `<strong>주의:</strong> ${cautions.join(" ")}` : "근사식의 일반적인 기하 범위 안에 있습니다. 제조 전 field solver와 PCB 업체 계산으로 확인하세요.";
+      renderDiagram(v, zdiff);
+    }
+
+    function renderDiagram(v, zdiff) {
+      const svg = $("crossSection");
+      const total = 2 * v.w + v.s;
+      const scale = Math.min(500 / Math.max(total, 0.01), 165 / Math.max(v.h, 0.01));
+      const traceW = v.w * scale;
+      const gap = v.s * scale;
+      const copperH = Math.max((v.tUm / 1000) * scale, 6);
+      const substrateH = Math.max(v.h * scale, 18);
+      const pairW = traceW * 2 + gap;
+      const x1 = 380 - pairW / 2;
+      const x2 = x1 + traceW + gap;
+      const traceY = 72;
+      const substrateY = traceY + copperH;
+      const groundY = substrateY + substrateH;
+      const substrateX = Math.max(60, x1 - 80);
+      const substrateWidth = Math.min(600, pairW + 160);
+      const heightLineX = Math.min(690, substrateX + substrateWidth + 24);
+      const dimY = traceY - 22;
+
+      svg.innerHTML = `
+        <title>Edge-coupled microstrip differential pair 단면도</title>
+        <desc>W ${fixed(v.w, 3)} mm, S ${fixed(v.s, 3)} mm, H ${fixed(v.h, 3)} mm, T ${fixed(v.tUm, 0)} micrometre, differential impedance ${fixed(zdiff)} ohm</desc>
+        <rect x="${substrateX}" y="${substrateY}" width="${substrateWidth}" height="${substrateH}" rx="4" fill="#d8ebd5" stroke="#8eb48a" stroke-width="1.5"/>
+        <rect x="${substrateX}" y="${groundY}" width="${substrateWidth}" height="14" fill="#87601f"/>
+        <rect x="${x1}" y="${traceY}" width="${traceW}" height="${copperH}" rx="2" fill="#d9822b" stroke="#9a5418" stroke-width="1.2"/>
+        <rect x="${x2}" y="${traceY}" width="${traceW}" height="${copperH}" rx="2" fill="#d9822b" stroke="#9a5418" stroke-width="1.2"/>
+
+        <line x1="${x1}" y1="${dimY}" x2="${x1 + traceW}" y2="${dimY}" stroke="#17365d" stroke-width="1.5"/>
+        <line x1="${x1}" y1="${dimY - 6}" x2="${x1}" y2="${traceY}" stroke="#17365d"/>
+        <line x1="${x1 + traceW}" y1="${dimY - 6}" x2="${x1 + traceW}" y2="${traceY}" stroke="#17365d"/>
+        <text x="${x1 + traceW / 2}" y="${dimY - 7}" text-anchor="middle" fill="#17365d" font-size="14" font-weight="700">W ${fixed(v.w, 3)} mm</text>
+
+        <line x1="${x1 + traceW}" y1="${dimY}" x2="${x2}" y2="${dimY}" stroke="#2f75b5" stroke-width="1.5"/>
+        <line x1="${x2}" y1="${dimY - 6}" x2="${x2}" y2="${traceY}" stroke="#2f75b5"/>
+        <text x="${x1 + traceW + gap / 2}" y="${dimY - 7}" text-anchor="middle" fill="#2f75b5" font-size="14" font-weight="700">S ${fixed(v.s, 3)} mm</text>
+
+        <line x1="${heightLineX}" y1="${substrateY}" x2="${heightLineX}" y2="${groundY}" stroke="#17365d" stroke-width="1.5"/>
+        <line x1="${heightLineX - 6}" y1="${substrateY}" x2="${heightLineX + 6}" y2="${substrateY}" stroke="#17365d"/>
+        <line x1="${heightLineX - 6}" y1="${groundY}" x2="${heightLineX + 6}" y2="${groundY}" stroke="#17365d"/>
+        <text x="${heightLineX + 10}" y="${(substrateY + groundY) / 2}" fill="#17365d" font-size="14" font-weight="700">H ${fixed(v.h, 3)} mm</text>
+
+        <text x="${substrateX + 14}" y="${substrateY + 24}" fill="#356438" font-size="14">Dielectric εr = ${fixed(v.er, 2)}</text>
+        <text x="${substrateX + 14}" y="${groundY + 31}" fill="#6c4a15" font-size="13">Continuous reference plane</text>
+        <text x="${x2 + traceW + 12}" y="${traceY + copperH}" fill="#9a5418" font-size="13">T ${fixed(v.tUm, 0)} µm</text>
+        <text x="380" y="${Math.min(groundY + 74, 334)}" text-anchor="middle" fill="#667085" font-size="13">단면 비율 표시 · 동박 두께는 식별을 위해 최소 6 px</text>
+      `;
+    }
+
+    syncInputs();
+    calculate();
+  </script>
+</body>
+</html>

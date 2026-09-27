@@ -126,6 +126,12 @@ export const relatedEventItems: RelatedEventItem[] = [
 
 export const postsAndTools: PostOrToolItem[] = [
   {
+    title: "Microstrip 차동 쌍 Zdiff 계산기: W·S·H·T와 단면 형상",
+    date: "'26.9.27 공개",
+    action: "계산기 실행하기",
+    href: "/web-tools/diff-pair",
+  },
+  {
     title: "De-cap 병렬 임피던스 계산기: 합성 Z(f)·SRF·반공진",
     date: "'26.9.22 공개",
     action: "계산기 실행하기",
