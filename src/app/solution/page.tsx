@@ -32,6 +32,18 @@ export default function SolutionPage() {
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <Link
+                  href="/web-tools/usb-ac-pad"
+                  className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
+                >
+                  <p className="text-xs font-bold text-amber-700">교육용 · 최종 독립 검증 전</p>
+                  <p className="mt-2 text-xl font-black text-slate-950">USB AC Coupling Pad 분석</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    HFSS 기반 서로게이트로 차동 배선과 개별 Ground Void의 영향을 비교합니다.
+                    부품 S2P·수동 RLC SPICE를 연결해 S-parameter, Step TDR, Band-pass impulse를 확인하세요.
+                  </p>
+                  <span className="mt-auto pt-5 text-sm font-bold text-sky-600">웹 데모 실행 →</span>
+                </Link>
+                <Link
                   href="/web-tools/pdn-decap"
                   className="flex min-h-52 flex-col rounded-lg border border-sky-200 bg-white p-6 transition hover:border-sky-400 hover:shadow-md"
                 >
