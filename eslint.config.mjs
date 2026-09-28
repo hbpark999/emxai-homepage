@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Generated artifact validation output (not source).
     ".artifacts/**",
+    // 브라우저 데모에서 그대로 복사한 계산 모듈(CommonJS). 수정 없이 쓰는 것이 목적이다.
+    "src/lib/usb-ac-pad/**",
   ]),
 ]);
 

@@ -23,7 +23,6 @@ export default function UsbAcPadPage() {
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <a href="/tools/usb-ac-pad/index.html" target="_blank" rel="noopener noreferrer" className="rounded-md bg-sky-500 px-5 py-3 text-sm font-bold text-white">큰 화면으로 실행 ↗</a>
-            <a href="/tools/usb-ac-pad/index.html" download="USB_AC_PAD.html" className="rounded-md border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700">오프라인 HTML 다운로드 (약 29 MB)</a>
           </div>
           <p className="mt-3 text-xs text-slate-500">최초 로딩에 시간이 걸릴 수 있습니다. PC의 Chrome/Edge 사용을 권장합니다. Python 설치가 필요 없습니다.</p>
         </div>
