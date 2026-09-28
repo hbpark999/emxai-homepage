@@ -227,7 +227,7 @@ export function HomeSolutions() {
               <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
                 <ul className="space-y-3 text-sm leading-6 text-slate-700">
                   {openCard.exampleSteps.map((step) => (
-                    <li key={step} className="border-l-3 border-sky-400 pl-4">
+                    <li key={step}>
                       {step}
                     </li>
                   ))}

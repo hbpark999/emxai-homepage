@@ -19,14 +19,13 @@ function ColumnTitle({ label, title }: { label: string; title: string }) {
 
 function HistoryList() {
   return (
-    <div className="h-full overflow-y-auto border-l-2 border-lime-300 pl-5 pr-2">
+    <div className="h-full overflow-y-auto pr-2">
       <div className="flex min-h-full flex-col-reverse justify-start gap-2.5">
         {historyItems.map((item) => (
           <article
             key={`${item.date}-${item.title}`}
-            className="relative rounded-md border border-slate-100 bg-slate-50/90 px-3 py-2"
+            className="rounded-md border border-slate-100 bg-slate-50/90 px-3 py-2"
           >
-            <span className="absolute -left-[1.66rem] top-3.5 size-3 rounded-full border-4 border-lime-300 bg-white" />
             <h4 className="text-base font-bold text-[#102947]">{item.date}</h4>
             <p className="mt-1 text-xs font-medium leading-4 text-[#536985]">{item.title}</p>
             {item.body ? (
