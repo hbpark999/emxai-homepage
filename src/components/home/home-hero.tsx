@@ -21,24 +21,17 @@ export function HomeHero() {
             </p>
           </div>
           <div className="relative mx-auto w-full">
+            {/* 이미지에 문구가 포함되어 있어 별도 텍스트 오버레이를 두지 않는다.
+                이전 이미지(1809x748)용 좌표 오버레이는 비율이 달라 제거했다. */}
             <Image
-              src="/이엠엑스아이_AI도입효과1_v5.png"
-              alt="AI 기반 EMI/SI Engineering 업무 전환 전후 요약"
-              width={1809}
-              height={748}
+              src="/images/20260927EMxAI_DRC_Day3_v3_4.png"
+              alt="AI 기반 EMI/SI Engineering 업무 전환 요약"
+              width={2933}
+              height={1650}
               className="h-auto w-full"
               priority
               sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
             />
-            <span className="absolute left-[50.5%] top-[40.4%] -translate-x-1/2 -translate-y-1/2 text-[clamp(0.75rem,1.65vw,1.875rem)] font-black leading-none text-violet-700">
-              AI-Connected
-            </span>
-            <span className="absolute left-0 top-[62.8%] flex h-[7.8%] w-[9.8%] items-center bg-white pl-[1.1%] text-[clamp(0.65rem,1.33vw,1.625rem)] font-black leading-none text-zinc-500">
-              Before
-            </span>
-            <span className="absolute left-0 top-[82.1%] flex h-[7.8%] w-[9.8%] items-center bg-white pl-[1.1%] text-[clamp(0.65rem,1.33vw,1.625rem)] font-black leading-none text-zinc-500">
-              After
-            </span>
           </div>
         </div>
       </div>
