@@ -30,6 +30,7 @@ import {
   crossCheckPads,
   readPadsFromGeometryJson,
   readPadsFromKicadPcb,
+  readSegmentsFromKicadPcb,
 } from "@/lib/kicad/fix/pads";
 import { backupFileName, fixedFileName, timestampTag } from "@/lib/kicad/fix/edit";
 import {
@@ -110,6 +111,12 @@ const zDirective = z.object({
   params: z
     .object({
       margin_mm: z.number().min(0).max(2).optional().describe("패드 크기에 사방으로 더할 여유 [mm]. 기본 0 = 패드와 같은 크기"),
+      long_axis: z
+        .enum(["trace", "x", "y", "pad"])
+        .optional()
+        .describe(
+          "void의 긴 변 방향. 기본 trace = 패드에 연결된 배선 진행 방향에 맞춘다. x/y로 강제하거나 pad로 패드 방향을 쓸 수 있다"
+        ),
       layers: z.array(z.string()).optional().describe("참고용. 실제 층은 targets[].layer를 쓴다"),
       name_prefix: z.string().optional().describe("zone 이름 접두어"),
     })
@@ -259,6 +266,7 @@ export function registerKicadDrcTools(server: ToolServer) {
         file_name: a.file_name,
         directive: a.directive,
         pads: pads.pads,
+        segments: readSegmentsFromKicadPcb(a.kicad_pcb),
       });
       if (!built.ok) return asText({ error: built.error, missing: built.missing });
 
@@ -288,6 +296,7 @@ export function registerKicadDrcTools(server: ToolServer) {
           object: `${c.target.ref}.${c.target.pin}`,
           before: c.before,
           after: c.after,
+          orientation: c.zone.orientation,
           provider: built.plan.directive.provider,
         })),
         rationale: built.plan.directive.rationale ?? null,

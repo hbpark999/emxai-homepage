@@ -186,3 +186,80 @@ export function crossCheckPads(a: PadGeom[], b: PadGeom[], tol_mm = 0.01) {
   }
   return { compared, mismatches: diffs, match: diffs.length === 0 };
 }
+
+// ---- trace 방향 ------------------------------------------------------------
+
+export type TraceSeg = { net: string; layer: string; width: number; a: { x: number; y: number }; b: { x: number; y: number } };
+
+/** .kicad_pcb의 segment를 KiCad 좌표 그대로 읽는다. void 방향을 정하는 데 쓴다. */
+export function readSegmentsFromKicadPcb(text: string): TraceSeg[] {
+  const parsed = parseSExpr(text);
+  if (!parsed.ok || !Array.isArray(parsed.value)) return [];
+  const root = parsed.value;
+
+  const netNameByCode = new Map<number, string>();
+  for (const n of nodes(root, "net")) {
+    const code = numAt(n, 1);
+    const name = atom(n, 2);
+    if (code !== undefined) netNameByCode.set(code, name ?? "");
+  }
+
+  const out: TraceSeg[] = [];
+  for (const seg of nodes(root, "segment")) {
+    const start = first(seg, "start");
+    const end = first(seg, "end");
+    const ax = numAt(start, 1);
+    const ay = numAt(start, 2);
+    const bx = numAt(end, 1);
+    const by = numAt(end, 2);
+    if (ax === undefined || ay === undefined || bx === undefined || by === undefined) continue;
+    out.push({
+      net: netNameByCode.get(numAt(first(seg, "net")) ?? -1) ?? "",
+      layer: atom(first(seg, "layer")) ?? "",
+      width: numAt(first(seg, "width")) ?? 0,
+      a: { x: ax, y: ay },
+      b: { x: bx, y: by },
+    });
+  }
+  return out;
+}
+
+export type TraceAxis = { axis: "x" | "y"; source: "trace" | "pad_fallback"; note: string };
+
+/**
+ * 패드에 붙은 trace의 진행 방향을 축(x/y)으로 돌려준다.
+ * 같은 net의 segment 중 끝점이 패드 중심에 가장 가까운 것을 쓰고, 그 방향을
+ * 가까운 축으로 스냅한다. trace를 찾지 못하면 패드 자체 방향으로 물러선다.
+ */
+export function traceAxisAtPad(pad: PadGeom, segments: TraceSeg[], searchRadiusMm = 1.0): TraceAxis {
+  const candidates = segments
+    .filter((s) => !pad.net || s.net === pad.net)
+    .map((s) => {
+      const da = Math.hypot(s.a.x - pad.pos.x, s.a.y - pad.pos.y);
+      const db = Math.hypot(s.b.x - pad.pos.x, s.b.y - pad.pos.y);
+      const near = Math.min(da, db);
+      return { seg: s, near };
+    })
+    .filter((c) => c.near <= searchRadiusMm)
+    .sort((a, b) => a.near - b.near);
+
+  if (!candidates.length) {
+    const rot = ((pad.rot_deg % 360) + 360) % 360;
+    const swapped = Math.abs(rot - 90) < 0.01 || Math.abs(rot - 270) < 0.01;
+    const longAlongY = swapped ? pad.size.w > pad.size.h : pad.size.h > pad.size.w;
+    return {
+      axis: longAlongY ? "y" : "x",
+      source: "pad_fallback",
+      note: `${pad.ref}.${pad.pin}에 붙은 같은 net(${pad.net || "?"}) trace를 ${searchRadiusMm} mm 안에서 찾지 못해 패드 방향을 그대로 썼다.`,
+    };
+  }
+
+  const s = candidates[0].seg;
+  const dx = Math.abs(s.b.x - s.a.x);
+  const dy = Math.abs(s.b.y - s.a.y);
+  return {
+    axis: dy >= dx ? "y" : "x",
+    source: "trace",
+    note: `${pad.ref}.${pad.pin}: net ${s.net}의 trace 방향(${dy >= dx ? "세로" : "가로"})을 void 긴 변으로 삼았다.`,
+  };
+}

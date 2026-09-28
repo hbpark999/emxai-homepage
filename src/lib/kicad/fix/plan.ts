@@ -12,7 +12,7 @@
 
 import { randomUUID } from "node:crypto";
 import { DISCLAIMER } from "../drc/schema";
-import { findPad, type PadGeom } from "./pads";
+import { findPad, traceAxisAtPad, type PadGeom, type TraceAxis, type TraceSeg } from "./pads";
 import {
   TEMPLATE_DEFAULTS,
   runTemplate,
@@ -56,7 +56,12 @@ export type ChangePlan = {
   created_at: string;
   source: { file_name?: string; sha256: string };
   directive: FixDirective;
-  applied_params: { margin_mm: number; name_prefix: string; used_template_defaults: boolean };
+  applied_params: {
+    margin_mm: number;
+    name_prefix: string;
+    long_axis: "trace" | "x" | "y" | "pad";
+    used_template_defaults: boolean;
+  };
   changes: PlanChange[];
   disclaimer: string;
 };
@@ -66,6 +71,8 @@ export type BuildPlanInput = {
   file_name?: string;
   directive: FixDirective;
   pads: PadGeom[];
+  /** void의 긴 변 방향을 정하는 데 쓰는 배선 */
+  segments?: TraceSeg[];
 };
 
 export function buildPlan(
@@ -80,7 +87,7 @@ export function buildPlan(
     return { ok: false, error: "directive.targets가 비어 있다.", missing: ["targets"] };
   }
 
-  const resolved: Array<{ target: { ref: string; pin: string; layer: string }; pad: PadGeom }> = [];
+  const resolved: Array<{ target: { ref: string; pin: string; layer: string }; pad: PadGeom; axis: TraceAxis }> = [];
   const notFound: string[] = [];
   for (const t of directive.targets) {
     const pad = findPad(pads, t.ref, t.pin);
@@ -88,7 +95,11 @@ export function buildPlan(
       notFound.push(`${t.ref}.${t.pin}`);
       continue;
     }
-    resolved.push({ target: { ref: t.ref, pin: t.pin, layer: t.layer }, pad });
+    resolved.push({
+      target: { ref: t.ref, pin: t.pin, layer: t.layer },
+      pad,
+      axis: traceAxisAtPad(pad, input.segments ?? []),
+    });
   }
   if (notFound.length) {
     return { ok: false, error: `보드에서 찾지 못한 패드: ${notFound.join(", ")}`, missing: notFound };
@@ -99,10 +110,13 @@ export function buildPlan(
 
   const defaults = TEMPLATE_DEFAULTS[directive.template_id];
   const usedDefaults =
-    directive.params?.margin_mm === undefined || directive.params?.name_prefix === undefined;
+    directive.params?.margin_mm === undefined ||
+    directive.params?.name_prefix === undefined ||
+    directive.params?.long_axis === undefined;
   if (usedDefaults) {
     warnings.push(
-      `파라미터 일부가 없어 템플릿 기본값을 썼다(margin_mm=${defaults.margin_mm}, name_prefix="${defaults.name_prefix}").`
+      `파라미터 일부가 없어 템플릿 기본값을 썼다(margin_mm=${defaults.margin_mm}, ` +
+        `long_axis=${defaults.long_axis}, name_prefix="${defaults.name_prefix}").`
     );
   }
   if (directive.out_of_range) {
@@ -114,6 +128,10 @@ export function buildPlan(
     warnings.push(`같은 이름의 zone이 원본에 이미 있다: ${duplicated.join(", ")}. 중복 적용일 수 있다.`);
   }
 
+  for (const zone of result.zones) {
+    if (zone.orientation.source === "pad_fallback") warnings.push(zone.orientation.note);
+  }
+
   const changes: PlanChange[] = result.zones.map((zone, i) => {
     const t = resolved[i].target;
     return {
@@ -122,7 +140,9 @@ export function buildPlan(
       drc_item_id: directive.targets[i]?.drc_item_id,
       target: t,
       before: `${t.layer}에 이 패드용 keepout 없음`,
-      after: `keepout(copperpour not_allowed) ${zone.size_mm.w} x ${zone.size_mm.h} mm @ (${zone.center.x}, ${zone.center.y})`,
+      after:
+        `keepout(copperpour not_allowed) ${zone.size_mm.w} x ${zone.size_mm.h} mm @ ` +
+        `(${zone.center.x}, ${zone.center.y}), 긴 변 ${zone.orientation.axis === "y" ? "세로" : "가로"}`,
       zone,
     };
   });
