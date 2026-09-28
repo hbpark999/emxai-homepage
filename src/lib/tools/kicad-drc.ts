@@ -4,11 +4,15 @@
  * 지시를 검증해 수정 전/후를 보여준 뒤, 사람이 승인하면 .kicad_pcb 수정본을
  * 만들어 주는 도구 6종.
  *
- * 이 파일의 도구는 판정도 판단도 하지 않는다.
+ * 이 파일의 도구는 판정도 판단도 진행도 하지 않는다.
  *  - 판정(Pass/Fail): 외부 DRC 결과를 그대로 전달
  *  - 판단(무엇을 어떻게 고칠지): 외부 MCP가 directive로 지정
- *  - 승인: 사람이 fix_apply에 approved=true와 save_mode를 준다
- *  - 이 서버: 좌표·형상 생성, 안전 검사, 수정본 텍스트 생성
+ *  - 진행(무엇을 묻고 어떤 순서로 부를지): Skill "kicad-drc-fix"가 담당
+ *  - 이 서버: 좌표·형상 생성, 범위 검증, 승인 조건 강제, 수정본 텍스트 생성
+ *
+ * 그래서 응답에는 사람이 읽는 안내문이나 질문 문구를 넣지 않는다. 대신 기계가
+ * 읽는 상태(gate.requires, save_modes, suggested_file_names)만 돌려주고, 그것을
+ * 사람에게 어떻게 묻는지는 Skill이 정한다.
  * 서버는 파일을 읽거나 쓰지 않는다. 텍스트를 받고 텍스트를 돌려준다.
  */
 
@@ -19,7 +23,7 @@ import { plotBoardSvg } from "@/lib/kicad/plot";
 import { adapt, type DrcFormat } from "@/lib/kicad/drc/adapters";
 import { locateFails, type LocatedTarget } from "@/lib/kicad/drc/locate";
 import {
-  DISCLAIMER,
+  NOTICE,
   isFail,
   sha256,
   summarize,
@@ -165,7 +169,7 @@ export function registerKicadDrcTools(server: ToolServer) {
           verdict_unchanged: true,
           note: "status·measured·evidence는 입력값을 그대로 옮겼다. verdict_sha256은 그 필드들만 모아 해시한 값이다.",
         },
-        disclaimer: DISCLAIMER,
+        notice: NOTICE,
       });
     }
   );
@@ -205,7 +209,7 @@ export function registerKicadDrcTools(server: ToolServer) {
         located,
         unmapped,
         summary: { located: located.length, unmapped: unmapped.length },
-        disclaimer: DISCLAIMER,
+        notice: NOTICE,
       });
     }
   );
@@ -226,7 +230,7 @@ export function registerKicadDrcTools(server: ToolServer) {
           defaults: TEMPLATE_DEFAULTS[id as keyof typeof TEMPLATE_DEFAULTS],
         })),
         note: "형상은 템플릿만 만든다. 자유 폴리곤 좌표는 받지 않는다.",
-        disclaimer: DISCLAIMER,
+        notice: NOTICE,
       })
   );
 
@@ -236,9 +240,8 @@ export function registerKicadDrcTools(server: ToolServer) {
     {
       title: "수정 전/후 미리보기 (파일 수정 없음)",
       description:
-        "외부 MCP가 정한 수정 지시(directive)를 검증해 실제 좌표를 만들고, 수정 전/후를 함께 보여준다. " +
-        "파일은 수정하지 않는다. 결과에 change plan이 들어 있으며, 승인 후 fix_apply에 그대로 넘기면 된다. " +
-        "서버는 plan을 저장하지 않는다.",
+        "외부 MCP가 정한 수정 지시(directive)를 검증해 실제 좌표를 만들고, 수정 전/후 비교표와 SVG를 돌려준다. " +
+        "파일은 수정하지 않으며 서버는 plan을 저장하지 않는다. 응답의 gate에 적용에 필요한 조건이 들어 있다.",
       inputSchema: z.object({
         kicad_pcb: z.string().describe(".kicad_pcb 전체 텍스트"),
         directive: zDirective.describe("외부 DRC·Surrogate MCP가 정한 수정 지시"),
@@ -310,12 +313,17 @@ export function registerKicadDrcTools(server: ToolServer) {
         svg_after,
         svg_notes: svgNotes,
         plan: built.plan,
-        questions: [
-          "① 이 수정안을 적용할까요? (승인 / 수정 요청 / 취소)",
-          `② 저장 방식을 선택해 주세요: A) 기존 파일은 그대로 두고 새 파일로 저장 (권장, ${fixedFileName(originalName, tag)}) / B) 기존 파일을 수정 (적용 직전 ${backupFileName(originalName, tag)} 백업 생성)`,
-        ],
-        next: "승인되면 fix_apply에 plan, kicad_pcb, approved=true, save_mode를 넘긴다.",
-        disclaimer: DISCLAIMER,
+        gate: {
+          requires: ["approved", "save_mode"],
+          save_modes: ["new_file", "overwrite"],
+          default_save_mode: "new_file",
+          suggested_file_names: {
+            new_file: fixedFileName(originalName, tag),
+            backup: backupFileName(originalName, tag),
+          },
+          applied: false,
+        },
+        notice: NOTICE,
       });
     }
   );
@@ -327,9 +335,8 @@ export function registerKicadDrcTools(server: ToolServer) {
       title: "승인된 수정 적용 (수정본 텍스트 반환)",
       description:
         "승인된 change plan을 .kicad_pcb에 적용해 수정본 텍스트를 돌려준다. " +
-        "approved=true, save_mode, preview 때와 같은 원본 세 가지가 모두 맞아야 적용한다. " +
-        "이 서버는 파일을 쓰지 않는다. new_file이면 수정본과 새 파일명을, overwrite면 백업본과 수정본을 함께 돌려주므로 " +
-        "실제 저장은 호출한 쪽에서 한다.",
+        "approved=true, save_mode, preview 때와 같은 원본 세 가지가 모두 맞아야 적용하며, 하나라도 어긋나면 " +
+        "applied=false와 사유를 돌려준다. 이 서버는 파일을 쓰지 않는다. write[]의 내용을 저장하는 것은 호출한 쪽이다.",
       inputSchema: z.object({
         plan: z.object({}).passthrough().describe("fix_preview가 돌려준 change plan 전체"),
         kicad_pcb: z.string().describe("preview 때와 같은 .kicad_pcb 전체 텍스트"),
@@ -382,57 +389,48 @@ export function registerKicadDrcTools(server: ToolServer) {
         applied: true,
         inserted_zones: applied.inserted,
         change_log: changeLog,
-        next_step:
-          "KiCad에서 파일 열기 → Zone Refill(B) → 저장 → 외부 DRC 다시 실행 → 결과를 drc_import로 전달 (fix_verify_request 참고)",
-        disclaimer: DISCLAIMER,
+        requires_zone_refill: true,
+        notice: NOTICE,
       };
 
       if (a.save_mode === "new_file") {
         return asText({
           ...common,
           save_mode: "new_file",
-          write: [{ file_name: newName, content: applied.text }],
-          note: `원본 ${originalName}은 바꾸지 않았다. 위 content를 ${newName}으로 저장하면 된다.`,
+          original_unchanged: true,
+          write: [{ file_name: newName, content: applied.text, purpose: "수정본" }],
         });
       }
 
       return asText({
         ...common,
         save_mode: "overwrite",
+        write_order: [bakName, originalName],
         write: [
           { file_name: bakName, content: a.kicad_pcb, purpose: "적용 직전 백업" },
           { file_name: originalName, content: applied.text, purpose: "수정본" },
         ],
-        note: `먼저 ${bakName}으로 백업을 저장한 뒤 ${originalName}을 수정본으로 덮어쓴다.`,
       });
     }
   );
 
   registerLimited(
     server,
-    "fix_verify_request",
+    "fix_verify_compare",
     {
-      title: "수정 후 재검증 안내와 전/후 비교",
+      title: "수정 전/후 DRC 결과 비교",
       description:
-        "이 서버는 재판정하지 않는다. KiCad에서 Zone Refill 후 외부 DRC를 다시 돌리는 절차를 안내하고, " +
-        "새 DRC 결과를 주면 수정 전/후 비교표를 만든다. 판정값은 양쪽 모두 외부 결과 그대로다.",
+        "수정 전과 후의 외부 DRC 결과를 id로 맞춰 비교표를 만든다. 이 서버는 재판정하지 않으며 " +
+        "양쪽 판정값을 그대로 옮긴다. 재검증을 어떤 순서로 진행할지는 Skill이 안내한다.",
       inputSchema: z.object({
-        before: z.array(z.object({}).passthrough()).optional().describe("수정 전 drc_import 결과의 items"),
-        after: z.array(z.object({}).passthrough()).optional().describe("수정 후 drc_import 결과의 items"),
+        before: z.array(z.object({}).passthrough()).describe("수정 전 drc_import 결과의 items"),
+        after: z.array(z.object({}).passthrough()).describe("수정 후 drc_import 결과의 items"),
       }),
     },
     async (args) => {
       const a = args as { before?: DrcItem[]; after?: DrcItem[] };
-      const steps = [
-        "1. KiCad에서 수정본 .kicad_pcb를 연다.",
-        "2. 보드 편집기에서 Zone Refill을 실행한다(단축키 B). keepout이 실제 pour에 반영된다.",
-        "3. 파일을 저장한다.",
-        "4. 외부 DRC를 다시 실행한다(예: run_cap_drc.mjs 또는 KiCad DRC 리포트 내보내기).",
-        "5. 새 결과를 drc_import로 읽고, 이 도구에 before/after로 넘기면 비교표를 만든다.",
-      ];
-
       if (!a.before?.length || !a.after?.length) {
-        return asText({ steps, comparison: null, note: "before와 after를 모두 주면 비교표를 만든다.", disclaimer: DISCLAIMER });
+        return asText({ error: "before와 after 모두 필요하다.", missing: ["before", "after"], notice: NOTICE });
       }
 
       const afterById = new Map(a.after.map((i) => [i.id, i]));
@@ -444,21 +442,16 @@ export function registerKicadDrcTools(server: ToolServer) {
           before: { status: b.status, measured: b.measured },
           after: af ? { status: af.status, measured: af.measured } : null,
           changed: af ? String(af.status) !== String(b.status) : null,
-          note: af ? undefined : "수정 후 결과에 같은 id가 없다.",
+          missing_after: af ? undefined : true,
         };
       });
-      const onlyAfter = a.after.filter((i) => !a.before?.some((b) => b.id === i.id));
 
       return asText({
-        steps,
         comparison: rows,
-        new_items_after: onlyAfter,
-        summary: {
-          before: summarize(a.before),
-          after: summarize(a.after),
-        },
-        note: "판정값은 외부 DRC 결과를 그대로 옮긴 것이다. 이 도구는 다시 판정하지 않는다.",
-        disclaimer: DISCLAIMER,
+        new_items_after: a.after.filter((i) => !a.before?.some((b) => b.id === i.id)),
+        summary: { before: summarize(a.before), after: summarize(a.after) },
+        verdict_source: "external_drc",
+        notice: NOTICE,
       });
     }
   );

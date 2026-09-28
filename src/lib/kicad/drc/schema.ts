@@ -40,12 +40,14 @@ export type ImportedDrc = {
     verdict_unchanged: boolean;
     note: string;
   };
-  disclaimer: string;
+  notice: string;
 };
 
-export const DISCLAIMER =
-  "교육용 도구다. 실제 KiCad DRC, 제조 검증, SI/EM 해석을 대체하지 않는다. " +
-  "Pass/Fail 판정은 외부 DRC 결과를 그대로 전달할 뿐 이 도구가 다시 판정하지 않는다.";
+/**
+ * 응답에 붙는 한 줄 고지. 절차 안내와 대화 문구는 Skill이 담당하고, 여기에는
+ * 데이터가 다른 도구로 흘러가도 사라지면 안 되는 성격 표시만 남긴다.
+ */
+export const NOTICE = "educational; not a substitute for KiCad DRC, 제조 검증, SI/EM 해석";
 
 export function sha256(text: string): string {
   return createHash("sha256").update(text, "utf8").digest("hex");

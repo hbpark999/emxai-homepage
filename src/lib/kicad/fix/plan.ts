@@ -11,7 +11,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { DISCLAIMER } from "../drc/schema";
+import { NOTICE } from "../drc/schema";
 import { findPad, traceAxisAtPad, type PadGeom, type TraceAxis, type TraceSeg } from "./pads";
 import {
   TEMPLATE_DEFAULTS,
@@ -63,7 +63,7 @@ export type ChangePlan = {
     used_template_defaults: boolean;
   };
   changes: PlanChange[];
-  disclaimer: string;
+  notice: string;
 };
 
 export type BuildPlanInput = {
@@ -158,7 +158,7 @@ export function buildPlan(
       directive,
       applied_params: { ...result.applied_params, used_template_defaults: usedDefaults },
       changes,
-      disclaimer: DISCLAIMER,
+      notice: NOTICE,
     },
   };
 }
