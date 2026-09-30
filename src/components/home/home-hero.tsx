@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { HomeStepVideos } from "@/components/home/home-step-videos";
+
 export function HomeHero() {
   return (
     <section className="overflow-hidden border-b border-slate-200 bg-[#f6f9fc]">
@@ -10,10 +12,6 @@ export function HomeHero() {
           <h1 className="text-center text-xl font-extrabold leading-snug tracking-tight text-[#002060] sm:text-2xl lg:text-4xl xl:text-5xl">
             Agentic AI 기반 전자파 설계 · 분석과 EMxAI 업무 영역
           </h1>
-          {/* Biz Area 줄. 색 #0063cf와 제목 대비 0.58배 크기는 첨부 시안에서 실측했다. */}
-          <p className="mt-4 text-center text-sm font-bold italic leading-snug text-[#0063cf] sm:mt-5 sm:text-base lg:mt-7 lg:text-xl xl:mt-10 xl:text-[1.75rem]">
-            Biz Area: PCB EMI/SI, Filter Design, Antenna/RF Design
-          </p>
           {/* 이전 h1에 있던 영문 키워드는 검색엔진용으로만 남긴다. */}
           <p className="sr-only">
             EMI/SI Problem Solving Services — AI-Connected EMI/SI Engineering Enablement
@@ -29,6 +27,8 @@ export function HomeHero() {
               sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
             />
           </div>
+          {/* 흐름도의 STEP 박스 열에 맞춰 시연 영상 카드를 깐다. */}
+          <HomeStepVideos />
         </div>
       </div>
     </section>
