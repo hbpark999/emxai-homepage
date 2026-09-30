@@ -5,19 +5,21 @@ export function HomeHero() {
     <section className="overflow-hidden border-b border-slate-200 bg-[#f6f9fc]">
       <div className="mx-auto py-6 lg:py-8">
         <div className="mx-auto w-full max-w-[94vw] px-6 sm:px-8 lg:max-w-[76vw] xl:max-w-[70vw]">
-          {/* 같은 문구가 hero 이미지 안에 들어 있어 화면 표시는 생략한다.
-              검색엔진과 스크린리더를 위해 h1만 시각적으로 숨겨 남긴다. */}
-          <h1 className="sr-only">
-            EMI/SI Problem Solving Services — AI-Connected EMI/SI Engineering Enablement
+          {/* 제목은 hero 이미지(v3_42)에서 빠져 있어 텍스트로 얹는다.
+              색 #002060과 크기는 이전 이미지(v3_4)에서 실측한 값(폭 대비 3.83%)의 1.3배다. */}
+          <h1 className="text-center text-xl font-extrabold leading-snug tracking-tight text-[#002060] sm:text-2xl lg:text-4xl xl:text-5xl">
+            Agentic AI 기반 전자파 설계 · 분석과 EMxAI 업무 영역
           </h1>
-          <div className="relative mx-auto w-full">
-            {/* 이미지에 문구가 포함되어 있어 별도 텍스트 오버레이를 두지 않는다.
-                이전 이미지(1809x748)용 좌표 오버레이는 비율이 달라 제거했다. */}
+          {/* 이전 h1에 있던 영문 키워드는 검색엔진용으로만 남긴다. */}
+          <p className="sr-only">
+            EMI/SI Problem Solving Services — AI-Connected EMI/SI Engineering Enablement
+          </p>
+          <div className="relative mx-auto mt-5 w-full lg:mt-7">
             <Image
-              src="/images/20260927EMxAI_DRC_Day3_v3_4.png"
-              alt="AI 기반 EMI/SI Engineering 업무 전환 요약"
-              width={2933}
-              height={1650}
+              src="/images/20260927EMxAI_DRC_Day3_v3_42.png"
+              alt="STEP 1 Design부터 STEP 6 AI Report까지 이어지는 AI 기반 EMI/SI 업무 흐름도"
+              width={3591}
+              height={1104}
               className="h-auto w-full"
               priority
               sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"

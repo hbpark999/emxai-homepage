@@ -51,9 +51,9 @@ export const metadata: Metadata = {
     description: defaultDescription,
     images: [
       {
-        url: "/images/20260927EMxAI_DRC_Day3_v3_4.png",
-        width: 2933,
-        height: 1650,
+        url: "/images/20260927EMxAI_DRC_Day3_v3_42.png",
+        width: 3591,
+        height: 1104,
         alt: "EMxAI - AI 기반 EMI/SI Engineering 업무 전환 요약",
       },
     ],
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: defaultTitle,
     description: defaultDescription,
-    images: ["/images/20260927EMxAI_DRC_Day3_v3_4.png"],
+    images: ["/images/20260927EMxAI_DRC_Day3_v3_42.png"],
   },
   icons: {
     icon: "/favicon.ico",
