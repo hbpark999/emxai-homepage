@@ -37,6 +37,12 @@ export const siteRoutes: SiteRoute[] = [
     description: "Insights, technical notes, and curated research material.",
   },
   {
+    title: "Workflow",
+    href: "/workflow",
+    label: "Workflow",
+    description: "Agentic AI 기반 EMI/SI 설계·검증 Workflow 시연 영상 (공유용 페이지).",
+  },
+  {
     title: "Web Tools",
     href: "/web-tools",
     label: "Web Tools",

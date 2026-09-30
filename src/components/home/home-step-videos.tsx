@@ -16,81 +16,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
-type StepVideo = {
-  step: number;
-  title: string;
-  file: string;
-  /** 흐름도 이미지 폭 대비 STEP 박스의 왼쪽 위치(%) */
-  left: string;
-  /** 흐름도 이미지 폭 대비 STEP 박스의 폭(%) */
-  width: string;
-  /**
-   * 카드에 대표 화면으로 띄울 시점(초). 0초는 제목 슬라이드라 내용이 보이지 않아
-   * 영상 길이의 약 35% 지점을 기본값으로 잡았다. 더 나은 장면이 있으면 이 숫자만 바꾸면 된다.
-   */
-  posterTime: number;
-};
-
-const STEP_VIDEOS: StepVideo[] = [
-  {
-    step: 1,
-    title: "Design",
-    file: "Step1. AI Agent Workflow_given Design.mp4",
-    left: "1.87%",
-    width: "12.79%",
-    posterTime: 7,
-  },
-  {
-    step: 2,
-    title: "Guide → AI DRC",
-    file: "Step2. Guide_Guide Parsing and Design Guide.mp4",
-    left: "16.21%",
-    width: "14.56%",
-    posterTime: 15,
-  },
-  {
-    step: 3,
-    title: "Fast Local Evaluation & Optimization",
-    file: "step3. AI Agent Workflow SG Model Optimize.mp4",
-    left: "32.23%",
-    width: "16.10%",
-    posterTime: 10,
-  },
-  {
-    step: 4,
-    title: "PCB Update",
-    file: "step4. AI Agent Workflow_updated Design.mp4",
-    left: "49.82%",
-    width: "14.56%",
-    posterTime: 19,
-  },
-  {
-    step: 5,
-    title: "Simulation-based EMI/SI Verification",
-    file: "step5. AI Agent Workflow_HFSS1.mp4",
-    left: "66.25%",
-    width: "16.65%",
-    posterTime: 14,
-  },
-  {
-    step: 6,
-    title: "AI Report",
-    file: "step6. AI Agent Workflow_정리.mp4",
-    left: "84.53%",
-    width: "12.77%",
-    posterTime: 7,
-  },
-];
-
-/** 파일명에 공백과 한글이 있어 그대로 쓰면 깨진다. */
-function srcOf(file: string) {
-  return encodeURI("/images/" + file);
-}
-
-/** 카드용 주소. #t=<초>로 그 시점 화면을 대표 화면처럼 띄운다. */
-function posterSrcOf(item: StepVideo) {
-  return srcOf(item.file) + "#t=" + item.posterTime;
-}
+import { stepVideoPosterSrc, stepVideoSrc, stepVideos } from "@/data/step-videos";
 
 type BgmTrack = {
   title: string;
@@ -256,7 +182,7 @@ export function HomeStepVideos() {
       if (!video) return;
       video.pause();
       video.muted = true;
-      video.currentTime = STEP_VIDEOS[index].posterTime;
+      video.currentTime = stepVideos[index].posterTime;
       if (document.pictureInPictureElement === video) {
         void document.exitPictureInPicture().catch(() => {});
       }
@@ -346,7 +272,7 @@ export function HomeStepVideos() {
     <div className="mt-2 lg:mt-3">
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:relative lg:block lg:aspect-[10] lg:gap-0">
-        {STEP_VIDEOS.map((item, index) => (
+        {stepVideos.map((item, index) => (
           <button
             key={item.step}
             type="button"
@@ -359,7 +285,7 @@ export function HomeStepVideos() {
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              src={posterSrcOf(item)}
+              src={stepVideoPosterSrc(item)}
               preload="metadata"
               muted
               playsInline
@@ -454,7 +380,7 @@ function StepVideoModal({
   onSelect: (index: number) => void;
   onClose: () => void;
 }) {
-  const active = STEP_VIDEOS[index];
+  const active = stepVideos[index];
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -503,7 +429,7 @@ function StepVideoModal({
         {/* key로 STEP마다 <video>를 새로 만든다. 음악은 부모에 있어 이 교체에 영향을 받지 않는다. */}
         <video
           key={active.file}
-          src={srcOf(active.file)}
+          src={stepVideoSrc(active.file)}
           controls
           autoPlay
           muted={muted}
@@ -512,7 +438,7 @@ function StepVideoModal({
         />
 
         <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
-          {STEP_VIDEOS.map((item, itemIndex) => (
+          {stepVideos.map((item, itemIndex) => (
             <button
               key={item.step}
               type="button"
