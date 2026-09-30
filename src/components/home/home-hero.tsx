@@ -33,19 +33,26 @@ export function HomeHero() {
             />
           </div>
 
-          {/* -steps는 v3_43에서 맨 위 "Biz Area" 줄과 보라색 주석 줄을 잘라낸 것이다(3627x442).
+          {/* 위 사업 개요 그림과 붙어 보이지 않게 간격을 벌리고, 아래 흐름도에 제목을 얹는다.
+              글자 크기는 각 구간에서 위 h1의 0.75배다(20→15, 24→18, 36→27, 48→36px).
+              -steps는 v3_43에서 맨 위 "Biz Area" 줄과 보라색 주석 줄을 잘라낸 것이다(3627x442).
               가로 폭은 그대로라 아래 영상 카드의 left/width(%) 실측값을 그대로 쓸 수 있다.
               LCP는 위 사업 개요 이미지가 가져가므로 여기서는 priority를 뺀다.
               화면 안에 있으면 어차피 바로 받아 오고, 둘 다 priority면 서로 대역폭을 뺏는다. */}
-          <div className="relative mx-auto mt-6 w-full lg:mt-8">
-            <Image
-              src="/images/emxai-workflow-steps.png"
-              alt="STEP 1 Design부터 STEP 6 AI Report까지 이어지는 AI 기반 EMI/SI 업무 흐름도"
-              width={3627}
-              height={442}
-              className="h-auto w-full"
-              sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
-            />
+          <div className="mt-12 lg:mt-16">
+            <h2 className="text-center text-[0.9375rem] font-extrabold leading-snug tracking-tight text-[#002060] sm:text-lg lg:text-[1.6875rem] xl:text-4xl">
+              Agentic AI기반 EMI/SI 설계·검증 Workflow 예시
+            </h2>
+            <div className="relative mx-auto mt-4 w-full lg:mt-6">
+              <Image
+                src="/images/emxai-workflow-steps.png"
+                alt="STEP 1 Design부터 STEP 6 AI Report까지 이어지는 AI 기반 EMI/SI 업무 흐름도"
+                width={3627}
+                height={442}
+                className="h-auto w-full"
+                sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
+              />
+            </div>
           </div>
           {/* 흐름도의 STEP 박스 열에 맞춰 시연 영상 카드를 깐다. */}
           <HomeStepVideos />
