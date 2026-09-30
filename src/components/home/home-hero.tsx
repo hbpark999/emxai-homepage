@@ -11,7 +11,7 @@ export function HomeHero() {
           {/* 제목은 hero 이미지(v3_43)에서 빠져 있어 텍스트로 얹는다.
               색 #002060과 크기는 이전 이미지(v3_4)에서 실측한 값(폭 대비 3.83%)의 1.3배다. */}
           <h1 className="text-center text-xl font-extrabold leading-snug tracking-tight text-[#002060] sm:text-2xl lg:text-4xl xl:text-5xl">
-            Agentic AI 기반 전자파 설계 · 분석과 EMxAI 업무 영역
+            Agentic AI 기반 전자파 설계 · 분석
           </h1>
           {/* 이전 h1에 있던 영문 키워드는 검색엔진용으로만 남긴다. */}
           <p className="sr-only">
@@ -20,8 +20,8 @@ export function HomeHero() {
 
           {/* 사업 개요를 먼저 보여 "무엇을 하는 회사인가"에 답하고, 아래 흐름도가 "어떻게 하는가"를 잇는다.
               -panel은 -revised에서 오른쪽 사업 3종 박스를 잘라낸 것이다(2168x1025).
-              같은 내용을 바로 아래에 글자로 적으므로 그림에 두 번 둘 이유가 없다. */}
-          <div className="relative mx-auto mt-5 w-full max-w-[64rem]">
+              같은 내용을 hero 끝에서 글자로 적으므로 그림에 두 번 둘 이유가 없다. */}
+          <div className="relative mx-auto mt-5 w-full max-w-[83rem]">
             <Image
               src="/images/emxai-business-summary-panel.png"
               alt="EMxAI 사업 개요 — 수동·반복 전자파 설계·분석(DX)을 Agentic Workflow(AX)로 전환한다"
@@ -29,27 +29,9 @@ export function HomeHero() {
               height={1025}
               className="h-auto w-full"
               priority
-              sizes="(min-width: 1024px) 1024px, 100vw"
+              sizes="(min-width: 1328px) 1328px, 100vw"
             />
           </div>
-
-          {/* 이미지 오른쪽 파란 박스 3개를 글자로 한 번 더 적는다.
-              PNG 안에만 있으면 검색엔진이 못 읽고, 폰 폭에서는 글자가 뭉개져 안 읽힌다. */}
-          <ul className="mx-auto mt-4 grid w-full max-w-[64rem] gap-2 sm:grid-cols-3 sm:gap-3">
-            {dxAxDiagram.services.map((service, index) => (
-              <li
-                key={service.title}
-                className="rounded-md border border-slate-200 border-l-2 border-l-[#1f6e8c] bg-white px-3 py-2.5"
-              >
-                <p className="text-sm font-bold text-[#002060]">
-                  {index + 1}. {service.title}
-                </p>
-                <p className="mt-1 text-xs leading-snug text-slate-600 [word-break:keep-all]">
-                  {service.detail}
-                </p>
-              </li>
-            ))}
-          </ul>
 
           {/* -steps는 v3_43에서 맨 위 "Biz Area" 줄과 보라색 주석 줄을 잘라낸 것이다(3627x442).
               가로 폭은 그대로라 아래 영상 카드의 left/width(%) 실측값을 그대로 쓸 수 있다.
@@ -67,6 +49,25 @@ export function HomeHero() {
           </div>
           {/* 흐름도의 STEP 박스 열에 맞춰 시연 영상 카드를 깐다. */}
           <HomeStepVideos />
+
+          {/* 잘라낸 사업 개요 이미지의 오른쪽 박스 3개를 글자로 적는다. 흐름도와 영상을 다 본 뒤
+              "그래서 EMxAI가 무엇을 하는가"로 hero를 닫는다. PNG 안에만 두면 검색엔진이 못 읽고
+              폰 폭에서는 글자가 뭉개진다. */}
+          <ul className="mt-6 grid w-full gap-4 sm:grid-cols-3 lg:mt-8 lg:gap-5">
+            {dxAxDiagram.services.map((service, index) => (
+              <li
+                key={service.title}
+                className="rounded-lg border border-slate-200 border-l-4 border-l-[#1f6e8c] bg-white px-6 py-5"
+              >
+                <p className="text-xl font-bold text-[#002060] lg:text-2xl">
+                  {index + 1}. {service.title}
+                </p>
+                <p className="mt-2 text-sm leading-snug text-slate-600 [word-break:keep-all] lg:text-base">
+                  {service.detail}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
