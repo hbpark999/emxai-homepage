@@ -245,9 +245,28 @@ type MaybeWebkitVideo = HTMLVideoElement & {
 export function HomeStepVideos() {
   const cardRefs = useRef<Array<HTMLVideoElement | null>>([]);
   const [modalIndex, setModalIndex] = useState<number | null>(null);
+  // 지금 PiP로 돌고 있는 카드. 같은 카드를 다시 누르면 멈추게 하려고 들고 있는다.
+  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const bgm = useStepBgm();
 
-  /** 클릭한 카드를 PiP로 띄운다. 지원하지 않으면 모달 재생으로 넘긴다. */
+  /** 재생을 멈추고 카드를 대표 화면으로 되돌린다. */
+  const stopCard = useCallback(
+    (index: number) => {
+      const video = cardRefs.current[index];
+      if (!video) return;
+      video.pause();
+      video.muted = true;
+      video.currentTime = STEP_VIDEOS[index].posterTime;
+      if (document.pictureInPictureElement === video) {
+        void document.exitPictureInPicture().catch(() => {});
+      }
+      setPlayingIndex(null);
+      bgm.pause();
+    },
+    [bgm],
+  );
+
+  /** 클릭한 카드를 PiP로 띄운다. 이미 돌고 있으면 멈춘다. */
   const playInPip = useCallback(
     async (index: number) => {
       const video = cardRefs.current[index] as MaybeWebkitVideo | null;
@@ -256,46 +275,57 @@ export function HomeStepVideos() {
         return;
       }
 
+      // 같은 카드를 다시 누르면 정지, 다른 카드가 돌고 있으면 그것부터 정리한다.
+      if (playingIndex === index) {
+        stopCard(index);
+        return;
+      }
+      if (playingIndex !== null) {
+        stopCard(playingIndex);
+      }
+
+      // 음악은 기다리지 않고 건다. 여기서 await로 붙잡으면 "사용자가 방금 눌렀다"는
+      // 권한(transient activation)이 풀려서 아래 requestPictureInPicture()가 거부된다.
+      void bgm.resume().then((musicPlaying) => {
+        video.muted = musicPlaying;
+      });
+
       try {
         video.currentTime = 0;
-        // 자동재생 차단을 피하려고 늘 무음으로 시작한다.
+        // 자동재생 차단을 피하려고 늘 무음으로 시작한다. 음악 여부는 위 then에서 정해 준다.
         video.muted = true;
-        await video.play();
-        // 클릭이라는 사용자 동작 안에서 부르므로 음악도 재생이 허용된다.
-        // 음악이 실제로 흐를 때만 영상을 무음으로 두고, 음악이 없으면 영상 소리를 살린다.
-        const musicPlaying = await bgm.resume();
-        video.muted = musicPlaying;
 
-        if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+        const canPip =
+          document.pictureInPictureEnabled &&
+          !video.disablePictureInPicture &&
+          video.readyState >= HTMLMediaElement.HAVE_METADATA;
+
+        if (canPip) {
+          // play()보다 먼저 부른다. 클릭과 이 호출 사이에 await가 끼면 브라우저가 거부한다.
           await video.requestPictureInPicture();
           // PiP 창을 닫으면 카드가 소리를 낸 채 계속 돌지 않도록 되돌린다.
-          video.addEventListener(
-            "leavepictureinpicture",
-            () => {
-              video.pause();
-              video.currentTime = 0;
-              video.muted = true;
-              bgm.pause();
-            },
-            { once: true },
-          );
+          video.addEventListener("leavepictureinpicture", () => stopCard(index), { once: true });
+          setPlayingIndex(index);
+          await video.play();
           return;
         }
         if (video.webkitSupportsPresentationMode?.("picture-in-picture")) {
           video.webkitSetPresentationMode?.("picture-in-picture");
+          setPlayingIndex(index);
+          await video.play();
           return;
         }
-        // PiP를 지원하지 않으면 모달로 돌린다.
-        video.pause();
+        // PiP를 지원하지 않거나 아직 메타데이터를 못 읽었으면 모달로 돌린다.
         video.muted = true;
         setModalIndex(index);
       } catch {
         video.pause();
         video.muted = true;
+        setPlayingIndex(null);
         setModalIndex(index);
       }
     },
-    [bgm],
+    [bgm, playingIndex, stopCard],
   );
 
   /** 모달을 열 때도 음악을 이어 붙인다. */
@@ -333,6 +363,16 @@ export function HomeStepVideos() {
               preload="metadata"
               muted
               playsInline
+              onLoadedMetadata={(event) => {
+                // src의 #t=<초>만으로는 그 시점 화면을 그려 주지 않는 브라우저가 많다.
+                // (preload="metadata"는 길이·크기만 읽고 프레임을 디코딩하지 않는다.)
+                // 메타데이터를 읽은 뒤 직접 그 지점으로 이동시켜야 카드에 대표 화면이 뜬다.
+                const el = event.currentTarget;
+                const target = Math.min(item.posterTime, Math.max(0, el.duration - 0.1));
+                if (Number.isFinite(target) && Math.abs(el.currentTime - target) > 0.5) {
+                  el.currentTime = target;
+                }
+              }}
               // 카드가 흐름도 박스 폭에 묶여 있어 16:9가 아니다. contain으로 화면을 잘리지 않게 담는다.
               className="h-full w-full object-contain opacity-85 transition group-hover:opacity-100"
             />
