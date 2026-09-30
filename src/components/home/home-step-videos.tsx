@@ -20,6 +20,11 @@ type StepVideo = {
   left: string;
   /** 흐름도 이미지 폭 대비 STEP 박스의 폭(%) */
   width: string;
+  /**
+   * 카드에 대표 화면으로 띄울 시점(초). 0초는 제목 슬라이드라 내용이 보이지 않아
+   * 영상 길이의 약 35% 지점을 기본값으로 잡았다. 더 나은 장면이 있으면 이 숫자만 바꾸면 된다.
+   */
+  posterTime: number;
 };
 
 const STEP_VIDEOS: StepVideo[] = [
@@ -29,6 +34,7 @@ const STEP_VIDEOS: StepVideo[] = [
     file: "Step1. AI Agent Workflow_given Design.mp4",
     left: "1.87%",
     width: "12.79%",
+    posterTime: 7,
   },
   {
     step: 2,
@@ -36,6 +42,7 @@ const STEP_VIDEOS: StepVideo[] = [
     file: "Step2. Guide_Guide Parsing and Design Guide.mp4",
     left: "16.21%",
     width: "14.56%",
+    posterTime: 15,
   },
   {
     step: 3,
@@ -43,6 +50,7 @@ const STEP_VIDEOS: StepVideo[] = [
     file: "step3. AI Agent Workflow SG Model Optimize.mp4",
     left: "32.23%",
     width: "16.10%",
+    posterTime: 10,
   },
   {
     step: 4,
@@ -50,6 +58,7 @@ const STEP_VIDEOS: StepVideo[] = [
     file: "step4. AI Agent Workflow_updated Design.mp4",
     left: "49.82%",
     width: "14.56%",
+    posterTime: 19,
   },
   {
     step: 5,
@@ -57,6 +66,7 @@ const STEP_VIDEOS: StepVideo[] = [
     file: "step5. AI Agent Workflow_HFSS1.mp4",
     left: "66.25%",
     width: "16.65%",
+    posterTime: 14,
   },
   {
     step: 6,
@@ -64,12 +74,18 @@ const STEP_VIDEOS: StepVideo[] = [
     file: "step6. AI Agent Workflow_정리.mp4",
     left: "84.53%",
     width: "12.77%",
+    posterTime: 7,
   },
 ];
 
-/** 파일명에 공백과 한글이 있어 그대로 쓰면 깨진다. #t=0.1은 첫 프레임을 썸네일로 띄우기 위한 것이다. */
+/** 파일명에 공백과 한글이 있어 그대로 쓰면 깨진다. */
 function srcOf(file: string) {
-  return encodeURI("/images/" + file) + "#t=0.1";
+  return encodeURI("/images/" + file);
+}
+
+/** 카드용 주소. #t=<초>로 그 시점 화면을 대표 화면처럼 띄운다. */
+function posterSrcOf(item: StepVideo) {
+  return srcOf(item.file) + "#t=" + item.posterTime;
 }
 
 /** Safari는 표준 PiP API 대신 webkit 전용 API를 쓴다. */
@@ -153,11 +169,12 @@ export function HomeStepVideos() {
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              src={srcOf(item.file)}
+              src={posterSrcOf(item)}
               preload="metadata"
               muted
               playsInline
-              className="h-full w-full object-cover opacity-80 transition group-hover:opacity-100"
+              // 카드가 흐름도 박스 폭에 묶여 있어 16:9가 아니다. contain으로 화면을 잘리지 않게 담는다.
+              className="h-full w-full object-contain opacity-85 transition group-hover:opacity-100"
             />
             <span className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-slate-950/35 transition group-hover:bg-slate-950/20">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 lg:h-8 lg:w-8">
