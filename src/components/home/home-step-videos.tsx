@@ -313,39 +313,7 @@ export function HomeStepVideos() {
   }, [bgm]);
 
   return (
-    <div className="mt-4 lg:mt-6">
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 lg:mb-3 lg:gap-3">
-        <p className="text-xs font-semibold tracking-wide text-slate-500 sm:text-sm">
-          STEP별 시연 영상 — 카드를 누르면 PiP 창으로 재생됩니다
-        </p>
-        <div className="flex shrink-0 items-center gap-2">
-          {!bgm.unavailable && (
-            <button
-              type="button"
-              onClick={bgm.toggle}
-              aria-pressed={bgm.enabled}
-              className={
-                bgm.enabled
-                  ? "flex max-w-[15rem] items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-sky-400 hover:text-sky-600"
-                  : "flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition hover:border-sky-400 hover:text-sky-600"
-              }
-              title={bgm.enabled ? "배경 음악 끄기" : "배경 음악 켜기"}
-            >
-              <span aria-hidden="true">{bgm.enabled ? "♪" : "✕"}</span>
-              <span className="truncate">
-                {bgm.enabled ? (bgm.nowPlaying ?? "배경 음악 켜짐") : "배경 음악 꺼짐"}
-              </span>
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => openModal(0)}
-            className="shrink-0 rounded-md border border-sky-500 px-3 py-1.5 text-xs font-semibold text-sky-600 transition hover:bg-sky-500 hover:text-white sm:text-sm"
-          >
-            전체보기
-          </button>
-        </div>
-      </div>
+    <div className="mt-2 lg:mt-3">
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:relative lg:block lg:aspect-[10] lg:gap-0">
         {STEP_VIDEOS.map((item, index) => (
@@ -379,9 +347,47 @@ export function HomeStepVideos() {
                 </svg>
               </span>
               <span className="text-[10px] font-bold text-white lg:text-xs">STEP {item.step}</span>
+              {/* lg 이상에서는 카드 바로 위 흐름도 박스가 제목을 달고 있어 중복이다.
+                  그 아래 화면에서는 카드가 흐름도에서 떨어져 나와 제목이 사라지므로 여기에 적는다. */}
+              <span className="max-w-full px-1.5 text-center text-[10px] font-semibold leading-tight text-white/85 sm:text-xs lg:hidden">
+                {item.title}
+              </span>
             </span>
           </button>
         ))}
+      </div>
+
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 lg:mt-3">
+        <p className="text-sm font-semibold text-slate-700 sm:text-base">
+          화면을 누르면 PIP 재생~~
+        </p>
+        <div className="flex shrink-0 items-center gap-2">
+          {!bgm.unavailable && (
+            <button
+              type="button"
+              onClick={bgm.toggle}
+              aria-pressed={bgm.enabled}
+              className={
+                bgm.enabled
+                  ? "flex max-w-[15rem] items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-sky-400 hover:text-sky-600"
+                  : "flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition hover:border-sky-400 hover:text-sky-600"
+              }
+              title={bgm.enabled ? "배경 음악 끄기" : "배경 음악 켜기"}
+            >
+              <span aria-hidden="true">{bgm.enabled ? "♪" : "✕"}</span>
+              <span className="truncate">
+                {bgm.enabled ? (bgm.nowPlaying ?? "배경 음악 켜짐") : "배경 음악 꺼짐"}
+              </span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => openModal(0)}
+            className="shrink-0 rounded-md border border-sky-500 bg-sky-50 px-4 py-1.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-500 hover:text-white"
+          >
+            전체 재생
+          </button>
+        </div>
       </div>
 
       {modalIndex !== null && (
