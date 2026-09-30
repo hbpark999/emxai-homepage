@@ -359,7 +359,7 @@ export function HomeStepVideos() {
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 lg:mt-3">
         <p className="text-sm font-semibold text-slate-700 sm:text-base">
-          화면을 누르면 PIP 재생~~
+          화면을 누르면 PIP 재생됩니다.
         </p>
         <div className="flex shrink-0 items-center gap-2">
           {!bgm.unavailable && (

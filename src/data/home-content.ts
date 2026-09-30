@@ -18,8 +18,8 @@ export const dxAxDiagram = {
   aiTools: ["상용 LLM", "자체 LLM", "Local LLM"],
   services: [
     { title: "생성형 AI 활용 교육", detail: "생성형 AI의 EMI/SI 설계·분석 적용 방법" },
-    { title: "AX를 위한 EM Solution", detail: "Embedding Solution" },
-    { title: "기반 기술 개발, sLLM 학습", detail: "산학 협력 Center" },
+    { title: "AX를 위한 EM Solution", detail: "Embedding Solution 개발" },
+    { title: "기반 기술 개발, sLLM 학습", detail: "산학 협력 Center 연계 진행" },
   ],
 };
 

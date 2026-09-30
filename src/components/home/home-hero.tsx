@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { HomeStepVideos } from "@/components/home/home-step-videos";
+import { dxAxDiagram } from "@/data/home-content";
 
 export function HomeHero() {
   return (
@@ -16,14 +17,50 @@ export function HomeHero() {
           <p className="sr-only">
             EMI/SI Problem Solving Services — AI-Connected EMI/SI Engineering Enablement
           </p>
-          <div className="relative mx-auto mt-5 w-full lg:mt-7">
+
+          {/* 사업 개요를 먼저 보여 "무엇을 하는 회사인가"에 답하고, 아래 흐름도가 "어떻게 하는가"를 잇는다.
+              폭을 본문보다 좁게 묶어 높이를 눌러야 아래 STEP 영상 카드가 첫 화면에 남는다.
+              제목이 이미지에 구워져 있지 않은 -revised 쪽을 쓴다. 구운 제목은 위 h1과 중복되고
+              검색엔진이 읽지도 못한다. */}
+          <div className="relative mx-auto mt-5 w-full max-w-[52rem]">
+            <Image
+              src="/images/emxai-business-summary-revised.png"
+              alt="EMxAI 사업 개요 — 수동·반복 전자파 설계·분석(DX)을 Agentic Workflow(AX)로 전환한다"
+              width={3289}
+              height={1025}
+              className="h-auto w-full"
+              priority
+              sizes="(min-width: 832px) 832px, 100vw"
+            />
+          </div>
+
+          {/* 이미지 오른쪽 파란 박스 3개를 글자로 한 번 더 적는다.
+              PNG 안에만 있으면 검색엔진이 못 읽고, 폰 폭에서는 글자가 뭉개져 안 읽힌다. */}
+          <ul className="mx-auto mt-4 grid w-full max-w-[52rem] gap-2 sm:grid-cols-3 sm:gap-3">
+            {dxAxDiagram.services.map((service, index) => (
+              <li
+                key={service.title}
+                className="rounded-md border border-slate-200 border-l-2 border-l-[#1f6e8c] bg-white px-3 py-2.5"
+              >
+                <p className="text-sm font-bold text-[#002060]">
+                  {index + 1}. {service.title}
+                </p>
+                <p className="mt-1 text-xs leading-snug text-slate-600 [word-break:keep-all]">
+                  {service.detail}
+                </p>
+              </li>
+            ))}
+          </ul>
+
+          {/* LCP는 위 사업 개요 이미지가 가져가므로 여기서는 priority를 뺀다.
+              화면 안에 있으면 어차피 바로 받아 오고, 둘 다 priority면 서로 대역폭을 뺏는다. */}
+          <div className="relative mx-auto mt-6 w-full lg:mt-8">
             <Image
               src="/images/20260927EMxAI_DRC_Day3_v3_43.png"
               alt="STEP 1 Design부터 STEP 6 AI Report까지 이어지는 AI 기반 EMI/SI 업무 흐름도"
               width={3627}
               height={800}
               className="h-auto w-full"
-              priority
               sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
             />
           </div>
