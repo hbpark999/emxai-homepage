@@ -19,24 +19,23 @@ export function HomeHero() {
           </p>
 
           {/* 사업 개요를 먼저 보여 "무엇을 하는 회사인가"에 답하고, 아래 흐름도가 "어떻게 하는가"를 잇는다.
-              폭을 본문보다 좁게 묶어 높이를 눌러야 아래 STEP 영상 카드가 첫 화면에 남는다.
-              제목이 이미지에 구워져 있지 않은 -revised 쪽을 쓴다. 구운 제목은 위 h1과 중복되고
-              검색엔진이 읽지도 못한다. */}
-          <div className="relative mx-auto mt-5 w-full max-w-[52rem]">
+              -panel은 -revised에서 오른쪽 사업 3종 박스를 잘라낸 것이다(2168x1025).
+              같은 내용을 바로 아래에 글자로 적으므로 그림에 두 번 둘 이유가 없다. */}
+          <div className="relative mx-auto mt-5 w-full max-w-[64rem]">
             <Image
-              src="/images/emxai-business-summary-revised.png"
+              src="/images/emxai-business-summary-panel.png"
               alt="EMxAI 사업 개요 — 수동·반복 전자파 설계·분석(DX)을 Agentic Workflow(AX)로 전환한다"
-              width={3289}
+              width={2168}
               height={1025}
               className="h-auto w-full"
               priority
-              sizes="(min-width: 832px) 832px, 100vw"
+              sizes="(min-width: 1024px) 1024px, 100vw"
             />
           </div>
 
           {/* 이미지 오른쪽 파란 박스 3개를 글자로 한 번 더 적는다.
               PNG 안에만 있으면 검색엔진이 못 읽고, 폰 폭에서는 글자가 뭉개져 안 읽힌다. */}
-          <ul className="mx-auto mt-4 grid w-full max-w-[52rem] gap-2 sm:grid-cols-3 sm:gap-3">
+          <ul className="mx-auto mt-4 grid w-full max-w-[64rem] gap-2 sm:grid-cols-3 sm:gap-3">
             {dxAxDiagram.services.map((service, index) => (
               <li
                 key={service.title}
@@ -52,14 +51,16 @@ export function HomeHero() {
             ))}
           </ul>
 
-          {/* LCP는 위 사업 개요 이미지가 가져가므로 여기서는 priority를 뺀다.
+          {/* -steps는 v3_43에서 맨 위 "Biz Area" 줄과 보라색 주석 줄을 잘라낸 것이다(3627x442).
+              가로 폭은 그대로라 아래 영상 카드의 left/width(%) 실측값을 그대로 쓸 수 있다.
+              LCP는 위 사업 개요 이미지가 가져가므로 여기서는 priority를 뺀다.
               화면 안에 있으면 어차피 바로 받아 오고, 둘 다 priority면 서로 대역폭을 뺏는다. */}
           <div className="relative mx-auto mt-6 w-full lg:mt-8">
             <Image
-              src="/images/20260927EMxAI_DRC_Day3_v3_43.png"
+              src="/images/emxai-workflow-steps.png"
               alt="STEP 1 Design부터 STEP 6 AI Report까지 이어지는 AI 기반 EMI/SI 업무 흐름도"
               width={3627}
-              height={800}
+              height={442}
               className="h-auto w-full"
               sizes="(min-width: 1280px) 70vw, (min-width: 1024px) 76vw, 94vw"
             />
