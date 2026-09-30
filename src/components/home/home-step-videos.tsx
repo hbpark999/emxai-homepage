@@ -7,6 +7,10 @@
  * 카드의 left/width(%)는 흐름도 PNG에서 STEP 박스의 가로 위치를 실측한 값이다.
  * lg 이상에서는 절대 배치로 박스와 열을 맞추고, 그 아래 화면에서는 일반 그리드로 흐른다.
  * PiP를 지원하지 않는 브라우저(Firefox, iPhone Safari)는 모달 재생으로 넘긴다.
+ *
+ * 배경 음악은 이 컴포넌트에 하나만 두고 STEP 전환과 무관하게 계속 흐른다.
+ * 모달 안 <video>는 STEP을 바꾸면 교체(remount)되지만 음악 객체는 여기 남아 있어
+ * STEP 1에서 6까지 넘겨 봐도 노래가 처음으로 되감기지 않는다.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -88,6 +92,150 @@ function posterSrcOf(item: StepVideo) {
   return srcOf(item.file) + "#t=" + item.posterTime;
 }
 
+type BgmTrack = {
+  title: string;
+  /** public/audio/ 아래 파일명. 파일이 없으면 음악만 조용히 빠지고 영상은 그대로 나온다. */
+  file: string;
+};
+
+/**
+ * 배경 음악 목록. 접속할 때마다 순서를 섞어 첫 곡이 달라지고,
+ * 한 곡이 끝나면 섞인 순서의 다음 곡으로 끊김 없이 이어진다.
+ * 곡을 바꾸려면 이 배열과 public/audio/ 파일만 손대면 된다.
+ */
+const BGM_TRACKS: BgmTrack[] = [
+  { title: "Top of the World", file: "top-of-the-world.mp3" },
+  { title: "Take Me Home, Country Roads", file: "take-me-home-country-roads.mp3" },
+  { title: "Andante, Andante", file: "andante-andante.mp3" },
+];
+
+/** 영상 소리를 덮지 않을 정도의 배경 음량. */
+const BGM_VOLUME = 0.35;
+
+function bgmSrcOf(file: string) {
+  return encodeURI("/audio/" + file);
+}
+
+/** 재생 순서를 섞는다. last를 주면 직전에 나온 곡이 연달아 걸리지 않게 한 칸 밀어 준다. */
+function shuffledOrder(length: number, last?: number) {
+  const order = Array.from({ length }, (_, i) => i);
+  for (let i = length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  if (length > 1 && order[0] === last) {
+    order.push(order.shift() as number);
+  }
+  return order;
+}
+
+/**
+ * STEP 영상과 함께 흐르는 배경 음악.
+ *
+ * - resume(): 영상이 시작될 때 부른다. 이미 흐르는 중이면 건드리지 않아 STEP을 넘겨도 끊기지 않는다.
+ * - pause(): 재생을 멈출 때 부른다. currentTime은 남겨 두어 다음 STEP에서 이어 듣는다.
+ * - 오디오 객체는 첫 사용자 클릭 시점에 만든다. 브라우저 자동재생 차단에 걸리지 않고,
+ *   섞기도 이때 하므로 서버 렌더 결과와 어긋날 일이 없다.
+ */
+function useStepBgm() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const orderRef = useRef<number[]>([]);
+  const cursorRef = useRef(0);
+  const enabledRef = useRef(true);
+  const [enabled, setEnabledState] = useState(true);
+  const [nowPlaying, setNowPlaying] = useState<string | null>(null);
+  // 음악 파일을 아직 올리지 않았거나 불러오지 못하면 음악 UI를 감춘다.
+  const [unavailable, setUnavailable] = useState(false);
+
+  /** 현재 순서의 곡을 처음부터 재생한다. 실제로 소리가 나기 시작했으면 true. */
+  const playCursor = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio) return false;
+    const track = BGM_TRACKS[orderRef.current[cursorRef.current]];
+    audio.src = bgmSrcOf(track.file);
+    try {
+      await audio.play();
+      setNowPlaying(track.title);
+      return true;
+    } catch {
+      setNowPlaying(null);
+      return false;
+    }
+  }, []);
+
+  const ensureAudio = useCallback(() => {
+    const existing = audioRef.current;
+    if (existing) return existing;
+
+    const audio = new Audio();
+    audio.volume = BGM_VOLUME;
+    audio.preload = "none";
+    audio.addEventListener("ended", () => {
+      const finished = orderRef.current[cursorRef.current];
+      cursorRef.current += 1;
+      // 목록을 한 바퀴 돌면 다시 섞어 같은 순서가 반복되지 않게 한다.
+      if (cursorRef.current >= orderRef.current.length) {
+        orderRef.current = shuffledOrder(BGM_TRACKS.length, finished);
+        cursorRef.current = 0;
+      }
+      void playCursor();
+    });
+    // 파일이 없거나 형식을 못 읽으면 음악을 접고 영상 소리로 되돌린다.
+    audio.addEventListener("error", () => {
+      setNowPlaying(null);
+      setUnavailable(true);
+      enabledRef.current = false;
+      setEnabledState(false);
+    });
+
+    audioRef.current = audio;
+    orderRef.current = shuffledOrder(BGM_TRACKS.length);
+    cursorRef.current = 0;
+    return audio;
+  }, [playCursor]);
+
+  const resume = useCallback(async () => {
+    if (!enabledRef.current) return false;
+    const audio = ensureAudio();
+    if (!audio.paused) return true; // 이미 흐르는 중 — STEP을 넘겨도 그대로 이어 간다
+    if (!audio.src) return playCursor();
+    try {
+      await audio.play();
+      return true;
+    } catch {
+      setNowPlaying(null);
+      return false;
+    }
+  }, [ensureAudio, playCursor]);
+
+  const pause = useCallback(() => {
+    audioRef.current?.pause();
+  }, []);
+
+  const toggle = useCallback(() => {
+    const next = !enabledRef.current;
+    enabledRef.current = next;
+    setEnabledState(next);
+    if (next) {
+      void resume();
+    } else {
+      audioRef.current?.pause();
+      setNowPlaying(null);
+    }
+  }, [resume]);
+
+  // 페이지를 떠날 때 소리를 남기지 않는다.
+  useEffect(
+    () => () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    },
+    [],
+  );
+
+  return { enabled, nowPlaying, unavailable, resume, pause, toggle };
+}
+
 /** Safari는 표준 PiP API 대신 webkit 전용 API를 쓴다. */
 type MaybeWebkitVideo = HTMLVideoElement & {
   webkitSupportsPresentationMode?: (mode: string) => boolean;
@@ -97,62 +245,106 @@ type MaybeWebkitVideo = HTMLVideoElement & {
 export function HomeStepVideos() {
   const cardRefs = useRef<Array<HTMLVideoElement | null>>([]);
   const [modalIndex, setModalIndex] = useState<number | null>(null);
+  const bgm = useStepBgm();
 
   /** 클릭한 카드를 PiP로 띄운다. 지원하지 않으면 모달 재생으로 넘긴다. */
-  const playInPip = useCallback(async (index: number) => {
-    const video = cardRefs.current[index] as MaybeWebkitVideo | null;
-    if (!video) {
-      setModalIndex(index);
-      return;
-    }
-
-    try {
-      video.currentTime = 0;
-      video.muted = false;
-      await video.play();
-
-      if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
-        await video.requestPictureInPicture();
-        // PiP 창을 닫으면 카드가 소리를 낸 채 계속 돌지 않도록 되돌린다.
-        video.addEventListener(
-          "leavepictureinpicture",
-          () => {
-            video.pause();
-            video.currentTime = 0;
-            video.muted = true;
-          },
-          { once: true },
-        );
+  const playInPip = useCallback(
+    async (index: number) => {
+      const video = cardRefs.current[index] as MaybeWebkitVideo | null;
+      if (!video) {
+        setModalIndex(index);
         return;
       }
-      if (video.webkitSupportsPresentationMode?.("picture-in-picture")) {
-        video.webkitSetPresentationMode?.("picture-in-picture");
-        return;
+
+      try {
+        video.currentTime = 0;
+        // 자동재생 차단을 피하려고 늘 무음으로 시작한다.
+        video.muted = true;
+        await video.play();
+        // 클릭이라는 사용자 동작 안에서 부르므로 음악도 재생이 허용된다.
+        // 음악이 실제로 흐를 때만 영상을 무음으로 두고, 음악이 없으면 영상 소리를 살린다.
+        const musicPlaying = await bgm.resume();
+        video.muted = musicPlaying;
+
+        if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+          await video.requestPictureInPicture();
+          // PiP 창을 닫으면 카드가 소리를 낸 채 계속 돌지 않도록 되돌린다.
+          video.addEventListener(
+            "leavepictureinpicture",
+            () => {
+              video.pause();
+              video.currentTime = 0;
+              video.muted = true;
+              bgm.pause();
+            },
+            { once: true },
+          );
+          return;
+        }
+        if (video.webkitSupportsPresentationMode?.("picture-in-picture")) {
+          video.webkitSetPresentationMode?.("picture-in-picture");
+          return;
+        }
+        // PiP를 지원하지 않으면 모달로 돌린다.
+        video.pause();
+        video.muted = true;
+        setModalIndex(index);
+      } catch {
+        video.pause();
+        video.muted = true;
+        setModalIndex(index);
       }
-      // PiP를 지원하지 않으면 모달로 돌린다.
-      video.pause();
-      video.muted = true;
+    },
+    [bgm],
+  );
+
+  /** 모달을 열 때도 음악을 이어 붙인다. */
+  const openModal = useCallback(
+    (index: number) => {
       setModalIndex(index);
-    } catch {
-      video.pause();
-      video.muted = true;
-      setModalIndex(index);
-    }
-  }, []);
+      void bgm.resume();
+    },
+    [bgm],
+  );
+
+  const closeModal = useCallback(() => {
+    setModalIndex(null);
+    bgm.pause();
+  }, [bgm]);
 
   return (
     <div className="mt-4 lg:mt-6">
-      <div className="mb-2 flex items-center justify-between gap-3 lg:mb-3">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 lg:mb-3 lg:gap-3">
         <p className="text-xs font-semibold tracking-wide text-slate-500 sm:text-sm">
           STEP별 시연 영상 — 카드를 누르면 PiP 창으로 재생됩니다
         </p>
-        <button
-          type="button"
-          onClick={() => setModalIndex(0)}
-          className="shrink-0 rounded-md border border-sky-500 px-3 py-1.5 text-xs font-semibold text-sky-600 transition hover:bg-sky-500 hover:text-white sm:text-sm"
-        >
-          전체보기
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          {!bgm.unavailable && (
+            <button
+              type="button"
+              onClick={bgm.toggle}
+              aria-pressed={bgm.enabled}
+              className={
+                bgm.enabled
+                  ? "flex max-w-[15rem] items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-sky-400 hover:text-sky-600"
+                  : "flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition hover:border-sky-400 hover:text-sky-600"
+              }
+              title={bgm.enabled ? "배경 음악 끄기" : "배경 음악 켜기"}
+            >
+              <span aria-hidden="true">{bgm.enabled ? "♪" : "✕"}</span>
+              <span className="truncate">
+                {bgm.enabled ? (bgm.nowPlaying ?? "배경 음악 켜짐") : "배경 음악 꺼짐"}
+              </span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => openModal(0)}
+            className="shrink-0 rounded-md border border-sky-500 px-3 py-1.5 text-xs font-semibold text-sky-600 transition hover:bg-sky-500 hover:text-white sm:text-sm"
+          >
+            전체보기
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:relative lg:block lg:aspect-[10] lg:gap-0">
@@ -195,8 +387,9 @@ export function HomeStepVideos() {
       {modalIndex !== null && (
         <StepVideoModal
           index={modalIndex}
+          muted={bgm.enabled}
           onSelect={setModalIndex}
-          onClose={() => setModalIndex(null)}
+          onClose={closeModal}
         />
       )}
     </div>
@@ -205,10 +398,13 @@ export function HomeStepVideos() {
 
 function StepVideoModal({
   index,
+  muted,
   onSelect,
   onClose,
 }: {
   index: number;
+  /** 배경 음악이 흐르는 동안에는 영상을 무음으로 재생한다. */
+  muted: boolean;
   onSelect: (index: number) => void;
   onClose: () => void;
 }) {
@@ -258,11 +454,13 @@ function StepVideoModal({
           </button>
         </div>
 
+        {/* key로 STEP마다 <video>를 새로 만든다. 음악은 부모에 있어 이 교체에 영향을 받지 않는다. */}
         <video
           key={active.file}
           src={srcOf(active.file)}
           controls
           autoPlay
+          muted={muted}
           playsInline
           className="aspect-video w-full rounded-lg bg-slate-950"
         />
