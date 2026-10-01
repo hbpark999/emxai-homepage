@@ -74,7 +74,7 @@ export const studentCourses = [
     boardCourseNames: ["7기", "생성형 AI의 EMI/SI 분석 활용", "동양미래대학교 특강"],
     passwordEnv: "EDU_PASS_UNIV_STUDENT_EM_DESIGN_PRACTICE",
     pdfFile: "동양미래대 2차 특강-NPP기반 202610102Ver1.0(2일차만_강의).pdf",
-    pdfPageCount: 87,
+    pdfPageCount: 95,
     pdfEnabled: true,
   },
   {
